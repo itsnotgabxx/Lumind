@@ -6,232 +6,10 @@
     <title>Lumind - Protótipo Interativo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .screen {
-            min-height: 100vh;
-            padding: 1rem; 
-        }
-        @media (min-width: 640px) { 
-            .screen {
-                padding: 2rem;
-            }
-        }
-        .active-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        :root {
-            --lumind-purple: #8B5CF6; 
-            --lumind-purple-light: #A78BFA; 
-            --lumind-purple-dark: #6D28D9; 
-            --lumind-blue: #3B82F6;   
-            --lumind-blue-light: #60A5FA; 
-            --lumind-white: #FFFFFF;
-            --lumind-bg-main: #F9FAFB; 
-            --lumind-bg-card: #FFFFFF; 
-            --lumind-border: #E5E7EB; 
-            --lumind-text-dark: #1F2937;  
-            --lumind-text-medium: #4B5563; 
-            --lumind-text-light: #6B7280; 
-            --lumind-accent-gold-soft: #FBBF24; 
-            --lumind-accent-teal-soft: #2DD4BF; 
-            --lumind-success: #10B981; 
-            --lumind-error: #EF4444; 
-            --lumind-warning: #F59E0B; 
-            --lumind-info: #3B82F6; 
-        }
-
-        body {
-            background-color: var(--lumind-bg-main); 
-            color: var(--lumind-text-dark);
-        }
-        .btn-primary {
-            background-color: var(--lumind-purple);
-            color: var(--lumind-white);
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-        .btn-primary:hover {
-            background-color: var(--lumind-purple-dark);
-            box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3);
-        }
-        .btn-secondary {
-            background-color: var(--lumind-blue);
-            color: var(--lumind-white);
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-        .btn-secondary:hover {
-            background-color: #2563EB; 
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-        }
-        .btn-subtle {
-            background-color: var(--lumind-bg-card);
-            color: var(--lumind-purple);
-            padding: 0.6rem 1.2rem; 
-            border-radius: 0.5rem;
-            font-weight: 500;
-            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-            cursor: pointer;
-            border: 1px solid var(--lumind-purple-light);
-        }
-        .btn-subtle:hover {
-            background-color: #F5F3FF; 
-            border-color: var(--lumind-purple);
-            color: var(--lumind-purple-dark);
-        }
-
-        .link {
-            color: var(--lumind-blue);
-            text-decoration: none;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        .link:hover {
-            color: var(--lumind-purple);
-            text-decoration: underline;
-        }
-        .card {
-            background-color: var(--lumind-bg-card); 
-            border-radius: 0.75rem;
-            padding: 1rem; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-            border: 1px solid var(--lumind-border);
-        }
-         @media (min-width: 640px) { 
-            .card {
-                padding: 1.5rem;
-            }
-        }
-        .input-field {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--lumind-border);
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background-color: var(--lumind-bg-main); 
-        }
-        .input-field:focus {
-            border-color: var(--lumind-purple);
-            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15); 
-            outline: none;
-            background-color: var(--lumind-white);
-        }
-        .lumind-brand-header { 
-            font-size: 2.25rem; 
-            font-weight: bold;
-            color: var(--lumind-purple);
-            margin-bottom: 0.25rem;
-            text-align: center;
-        }
-        @media (min-width: 640px) {
-            .lumind-brand-header {
-                 font-size: 2.5rem;
-            }
-        }
-         .lumind-logo-placeholder { 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--lumind-white);
-            background-color: var(--lumind-purple); 
-            width: 60px; 
-            height: 60px;
-            border-radius: 0.5rem; 
-            margin: 0 auto 1rem auto;
-            box-shadow: none; 
-        }
-        .lumind-subheader {
-            font-size: 1rem; 
-            color: var(--lumind-text-medium);
-            margin-bottom: 1.5rem; 
-            text-align: center;
-        }
-         @media (min-width: 640px) {
-            .lumind-subheader {
-                 font-size: 1.05rem;
-            }
-        }
-        .screen-title { 
-            font-size: 1.5rem; 
-            font-weight: 600; 
-            color: var(--lumind-text-dark); 
-            margin-bottom: 0.5rem;
-            line-height: 1.3;
-        }
-        @media (min-width: 640px) {
-            .screen-title {
-                 font-size: 1.8rem;
-            }
-        }
-        .screen-subtitle { 
-            font-size: 0.9rem; 
-            color: var(--lumind-text-light);
-            margin-bottom: 1.5rem;
-        }
-        @media (min-width: 640px) {
-            .screen-subtitle {
-                 font-size: 1rem;
-            }
-        }
-        .choice-label i {
-            color: var(--lumind-text-medium); 
-            transition: color 0.2s;
-        }
-        .choice-label input:checked + i {
-            color: var(--lumind-purple); 
-        }
-        .choice-label:hover i {
-            color: var(--lumind-purple-light);
-        }
-
-        .content-tag {
-            background-color: var(--lumind-bg-main);
-            color: var(--lumind-text-medium);
-            border: 1px solid var(--lumind-border);
-            font-size: 0.75rem;
-            font-weight: 500;
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.375rem; 
-        }
-        .content-tag i {
-            color: var(--lumind-text-light); 
-        }
-        .progress-bar-fill {
-            background-color: var(--lumind-blue); 
-        }
-        .preference-tag {
-            font-weight: normal;
-            color: var(--lumind-text-medium);
-            background-color: var(--lumind-bg-main);
-            border: 1px solid var(--lumind-border);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            display: inline-block; 
-            margin-top: 0.25rem;
-        }
-
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <!-- Screen: Cadastro (Sign Up) -->
     <div id="cadastro" class="screen justify-center">
         <div class="w-full max-w-md card">
             <div class="lumind-logo-placeholder">L</div>
@@ -274,7 +52,6 @@
         </div>
     </div>
 
-    <!-- Screen: Login -->
     <div id="login" class="screen justify-center">
         <div class="w-full max-w-md card">
             <div class="lumind-logo-placeholder">L</div>
@@ -300,7 +77,6 @@
         </div>
     </div>
 
-    <!-- Screen: Questionário Inicial -->
     <div id="questionario" class="screen items-start pt-10 md:pt-16">
         <div class="w-full max-w-2xl card mx-auto">
             <div class="text-center mb-6">
@@ -353,7 +129,6 @@
         </div>
     </div>
 
-    <!-- Screen: Recomendação de Conteúdos -->
     <div id="recomendacao" class="screen items-start pt-8">
         <div class="container mx-auto px-4 w-full"> 
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
@@ -406,7 +181,6 @@
         </div>
     </div>
 
-    <!-- Screen: Acesso ao Conteúdo -->
     <div id="acessoConteudo" class="screen items-start pt-8">
         <div class="container mx-auto px-4 w-full">
             <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
@@ -448,7 +222,6 @@
         </div>
     </div>
 
-    <!-- Screen: Painel de Progresso -->
     <div id="progressoUsuario" class="screen items-start pt-8">
         <div class="container mx-auto px-4 w-full">
              <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
@@ -510,7 +283,6 @@
         </div>
     </div>
 
-    <!-- Screen: Acompanhamento para o Responsável -->
     <div id="acompanhamentoResponsavel" class="screen items-start pt-8">
         <div class="container mx-auto px-4 w-full">
             <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
@@ -577,7 +349,6 @@
         </div>
     </div>
 
-    <!-- Screen: Perfil do Usuário -->
     <div id="perfilUsuario" class="screen items-start pt-8">
         <div class="container mx-auto px-4 max-w-2xl w-full"> 
             <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-8 gap-3">
@@ -651,7 +422,6 @@
         </div>
     </div>
 
-    <!-- NOVA TELA: Esqueci a Senha -->
     <div id="esqueciSenha" class="screen justify-center">
         <div class="w-full max-w-md card">
             <div class="text-center mb-6">
@@ -672,7 +442,6 @@
         </div>
     </div>
 
-    <!-- NOVA TELA: Histórico Completo -->
     <div id="historicoCompleto" class="screen items-start pt-8">
         <div class="container mx-auto px-4 w-full">
             <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
@@ -683,7 +452,6 @@
             
             <div class="card">
                 <div class="space-y-4">
-                    <!-- Item de Histórico Exemplo 1 -->
                     <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <div class="flex justify-between items-center mb-1">
                             <h3 class="font-semibold text-gray-700">Aventuras no Espaço Sideral</h3>
@@ -692,7 +460,6 @@
                         <p class="text-xs text-gray-500">Tipo: Vídeo | Data: 31/05/2025</p>
                         <p class="text-sm text-gray-600 mt-2">Explorou os planetas e assistiu ao vídeo completo.</p>
                     </div>
-                    <!-- Item de Histórico Exemplo 2 -->
                     <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <div class="flex justify-between items-center mb-1">
                             <h3 class="font-semibold text-gray-700">Dominando o Xadrez</h3>
@@ -701,8 +468,7 @@
                         <p class="text-xs text-gray-500">Tipo: Leitura | Progresso: 25%</p>
                         <p class="text-sm text-gray-600 mt-2">Iniciou a leitura sobre os fundamentos do xadrez.</p>
                     </div>
-                    <!-- Item de Histórico Exemplo 3 -->
-                     <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <div class="flex justify-between items-center mb-1">
                             <h3 class="font-semibold text-gray-700">Mistérios do Oceano</h3>
                             <span class="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded-full font-medium">Concluído</span>
@@ -710,8 +476,7 @@
                         <p class="text-xs text-gray-500">Tipo: Jogo Interativo | Data: 25/05/2025</p>
                         <p class="text-sm text-gray-600 mt-2">Completou todos os níveis do jogo sobre vida marinha.</p>
                     </div>
-                     <!-- Item de Histórico Exemplo 4 (Não iniciado) -->
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                     <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <div class="flex justify-between items-center mb-1">
                             <h3 class="font-semibold text-gray-700">Desafio dos Números</h3>
                              <span class="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full font-medium">Não Iniciado</span>
@@ -720,7 +485,6 @@
                         <p class="text-sm text-gray-600 mt-2">Ainda não explorou este desafio matemático.</p>
                     </div>
                 </div>
-                <!-- Paginação Simples (Exemplo) -->
                 <div class="mt-8 flex justify-center items-center space-x-2">
                     <button class="btn-subtle text-xs p-2 leading-none"><i class="fas fa-chevron-left"></i></button>
                     <span class="text-sm text-gray-600">Página 1 de 3</span>
@@ -730,7 +494,6 @@
         </div>
     </div>
 
-    <!-- NOVA TELA: Enviar Incentivo -->
     <div id="enviarIncentivo" class="screen items-start pt-8">
         <div class="container mx-auto px-4 max-w-lg w-full">
              <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
@@ -760,7 +523,6 @@
         </div>
     </div>
     
-    <!-- NOVA TELA: Falar com Especialista -->
     <div id="falarComEspecialista" class="screen items-start pt-8">
         <div class="container mx-auto px-4 max-w-lg w-full">
             <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
@@ -805,446 +567,7 @@
     </div>
 
 
-    <script>
-        let currentUserName = "Sky"; 
-        let currentUserEmail = "sky@exemplo.com"; 
-        let currentContentTitle = "Conteúdo Interativo"; 
-        let currentContentData = { 
-            "Aventuras no Espaço Sideral": {
-                type: "video",
-                source: "https://www.youtube.com/embed/zR3Igc3Rhfg?autoplay=1&mute=1", 
-                description: "Explore os planetas e maravilhas do nosso sistema solar neste vídeo animado!"
-            },
-            "Dominando o Xadrez": {
-                type: "text",
-                title: "Fundamentos do Xadrez",
-                paragraphs: [
-                    "O xadrez é um jogo de estratégia entre dois jogadores. Cada jogador começa com 16 peças: um rei, uma rainha, duas torres, dois bispos, dois cavalos e oito peões.",
-                    "O objetivo do jogo é dar xeque-mate no rei adversário, o que significa colocá-lo sob ataque de forma que não haja movimento legal para escapar.",
-                    "Cada peça se move de uma maneira diferente. Aprender os movimentos e o valor relativo das peças é o primeiro passo para se tornar um bom jogador.",
-                    "Vamos explorar os movimentos básicos e algumas táticas iniciais!"
-                ],
-                image: "image_6245de.png" 
-            },
-            "Desafio dos Números": {
-                type: "interactive_game",
-                description: "Prepare-se para um desafio matemático divertido! (Simulação de Jogo)",
-                gameElement: `<div class="text-center p-8"><i class="fas fa-gamepad text-5xl text-amber-500 mb-4"></i><p class="text-lg">Jogo de Números Carregado!</p><button class="btn-secondary mt-4 text-sm">Começar Jogo</button></div>`
-            }
-        };
-
-        const customAlertOverlay = document.getElementById('custom-alert-overlay');
-        const customAlertTitle = document.getElementById('custom-alert-title');
-        const customAlertMessage = document.getElementById('custom-alert-message');
-        const customAlertCloseButton = document.getElementById('custom-alert-close');
-        const customAlertIcon = document.getElementById('custom-alert-icon');
-
-        function showCustomAlert(message, title = "Alerta", type = "info") {
-            customAlertTitle.textContent = title;
-            customAlertMessage.textContent = message;
-            
-            let iconHtml = '';
-            let buttonClass = 'btn-primary w-full text-sm ';
-            switch(type) {
-                case 'success':
-                    iconHtml = `<i class="fas fa-check-circle text-4xl text-green-500"></i>`;
-                    buttonClass += 'bg-green-500 hover:bg-green-600';
-                    break;
-                case 'error':
-                    iconHtml = `<i class="fas fa-times-circle text-4xl text-red-500"></i>`;
-                    buttonClass += 'bg-red-500 hover:bg-red-600';
-                    break;
-                case 'warning':
-                    iconHtml = `<i class="fas fa-exclamation-triangle text-4xl text-yellow-500"></i>`;
-                    buttonClass += 'bg-yellow-500 hover:bg-yellow-600 text-gray-800';
-                    break;
-                default: 
-                    iconHtml = `<i class="fas fa-info-circle text-4xl text-blue-500"></i>`;
-            }
-            customAlertIcon.innerHTML = iconHtml;
-            customAlertCloseButton.className = buttonClass;
-            customAlertOverlay.style.display = 'flex';
-        }
-
-        if (customAlertCloseButton) {
-            customAlertCloseButton.addEventListener('click', () => {
-                customAlertOverlay.style.display = 'none';
-            });
-        }
-        
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active-screen');
-                screen.style.display = 'none'; 
-            });
-            const activeScreen = document.getElementById(screenId);
-            if (activeScreen) {
-                activeScreen.classList.add('active-screen');
-                activeScreen.style.display = 'flex'; 
-                window.scrollTo(0, 0); 
-            }
-            updateDynamicContent(); 
-        }
-
-        function updateDynamicContent() {
-            const questionarioHeader = document.getElementById('questionario-header');
-            if (questionarioHeader) questionarioHeader.innerHTML = `Olá, ${currentUserName}!`;
-
-            const recomendacaoHeader = document.getElementById('recomendacao-header');
-            if (recomendacaoHeader) recomendacaoHeader.innerHTML = `Olá, ${currentUserName}!`;
-            
-            const progressoHeader = document.getElementById('progresso-header');
-            if (progressoHeader) progressoHeader.innerHTML = `Seu Progresso, ${currentUserName}!`;
-
-            const perfilNomeInput = document.getElementById('perfil-nome');
-            if (perfilNomeInput) perfilNomeInput.value = currentUserName;
-            const perfilEmailInput = document.getElementById('perfil-email');
-            if (perfilEmailInput) perfilEmailInput.value = currentUserEmail;
-            const perfilFoto = document.querySelector('#perfilUsuario img');
-            if (perfilFoto) perfilFoto.src = `https://placehold.co/80x80/A78BFA/FFFFFF?text=${currentUserName.substring(0,1).toUpperCase()}`;
-
-
-            const acompanhamentoIntro = document.getElementById('acompanhamento-responsavel-intro');
-            if (acompanhamentoIntro) acompanhamentoIntro.innerHTML = `Acompanhe o progresso de ${currentUserName}.`;
-            
-            document.querySelectorAll('.student-specific-text').forEach(el => {
-                if (el.dataset.originalText) { 
-                     el.innerHTML = el.dataset.originalText.replace(/\[Nome do Estudante\]/g, currentUserName);
-                } else { 
-                    el.dataset.originalText = el.innerHTML;
-                    el.innerHTML = el.innerHTML.replace(/\[Nome do Estudante\]/g, currentUserName);
-                }
-            });
-            const enviarIncentivoIntro = document.getElementById('enviar-incentivo-intro');
-            if(enviarIncentivoIntro) enviarIncentivoIntro.innerHTML = `Envie uma mensagem positiva para ${currentUserName}!`;
-
-
-            const acessoConteudoHeader = document.getElementById('acesso-conteudo-header');
-            if (acessoConteudoHeader) acessoConteudoHeader.textContent = currentContentTitle;
-            
-            const conteudoWrapper = document.getElementById('conteudo-wrapper');
-            const placeholderText = document.getElementById('acesso-conteudo-placeholder');
-            if (conteudoWrapper && placeholderText) {
-                const contentData = currentContentData[currentContentTitle];
-                if (contentData) {
-                    placeholderText.style.display = 'none'; 
-                    conteudoWrapper.innerHTML = ''; 
-                    conteudoWrapper.className = 'bg-gray-50 min-h-[25rem] rounded-md flex flex-col items-center justify-center p-4 text-base'; 
-
-                    if (contentData.type === "video") {
-                        const iframe = document.createElement('iframe');
-                        iframe.src = contentData.source;
-                        iframe.width = "100%";
-                        iframe.height = "400"; 
-                        iframe.frameBorder = "0";
-                        iframe.allow = "autoplay; encrypted-media";
-                        iframe.allowFullscreen = true;
-                        iframe.className = "rounded-md w-full max-w-2xl"; 
-                        conteudoWrapper.appendChild(iframe);
-                        const desc = document.createElement('p');
-                        desc.className = 'text-center text-gray-600 mt-3 text-sm';
-                        desc.textContent = contentData.description;
-                        conteudoWrapper.appendChild(desc);
-                    } else if (contentData.type === "text") {
-                        conteudoWrapper.classList.remove('items-center', 'justify-center'); 
-                        conteudoWrapper.classList.add('items-start'); 
-                        const titleEl = document.createElement('h2');
-                        titleEl.className = 'text-xl font-semibold mb-3 text-purple-700 self-start';
-                        titleEl.textContent = contentData.title;
-                        conteudoWrapper.appendChild(titleEl);
-                        if(contentData.image) {
-                            const imgEl = document.createElement('img');
-                            imgEl.src = contentData.image; 
-                            imgEl.alt = `Ilustração para ${contentData.title}`;
-                            imgEl.className = 'rounded-md mb-3 w-full max-w-sm mx-auto h-auto object-cover';
-                            conteudoWrapper.appendChild(imgEl);
-                        }
-                        contentData.paragraphs.forEach(pText => {
-                            const pEl = document.createElement('p');
-                            pEl.className = 'text-gray-700 mb-2 leading-relaxed text-sm md:text-base';
-                            pEl.textContent = pText;
-                            conteudoWrapper.appendChild(pEl);
-                        });
-                    } else if (contentData.type === "interactive_game") {
-                        conteudoWrapper.innerHTML = contentData.gameElement;
-                        const desc = document.createElement('p');
-                        desc.className = 'text-center text-gray-600 mt-2 text-sm';
-                        desc.textContent = contentData.description;
-                        conteudoWrapper.appendChild(desc);
-                    }
-                } else {
-                    placeholderText.textContent = `Conteúdo sobre "${currentContentTitle}" não encontrado.`;
-                    placeholderText.style.display = 'block';
-                }
-            }
-
-
-            const questionarioForm = document.getElementById('form-questionario');
-            if (questionarioForm) {
-                const aprenderPrefsElements = Array.from(questionarioForm.querySelectorAll('input[name="aprender_pref"]:checked'));
-                let aprenderPrefsText = "Não definido";
-                if (aprenderPrefsElements.length > 0) {
-                     aprenderPrefsText = aprenderPrefsElements.map(cb => {
-                        let labelText = cb.parentElement.textContent.trim();
-                        const iconElement = cb.parentElement.querySelector('i');
-                        if (iconElement) {
-                            labelText = labelText.replace(iconElement.textContent, '').trim();
-                        }
-                        return labelText.split('\n')[0].trim().replace(/\s+/g, ' ');
-                    }).join(', ');
-                }
-
-                const interessesVal = document.getElementById('interesses').value;
-                
-                const perfilEstilos = document.getElementById('perfil-estilos');
-                if(perfilEstilos) perfilEstilos.textContent = aprenderPrefsText;
-                
-                const perfilInteresses = document.getElementById('perfil-interesses');
-                if(perfilInteresses) perfilInteresses.textContent = interessesVal || "Não definido";
- 
-                const interessesInputQuestionario = document.getElementById('interesses');
-                if (interessesInputQuestionario && interessesInputQuestionario.value.toLowerCase().includes("dinossauros")) {
-                    interessesInputQuestionario.value = interessesInputQuestionario.value.replace(/dinossauros/gi, "Xadrez").replace(/, \s*,/, ",").trim().replace(/^,|,$/g, '');
-                }
-                if (interessesInputQuestionario && !interessesInputQuestionario.value.toLowerCase().includes("xadrez") && interessesInputQuestionario.value) { 
-                    interessesInputQuestionario.value = ("Xadrez, " + interessesInputQuestionario.value).replace(/, \s*,/, ",").trim().replace(/^,|,$/g, '');
-                } else if (interessesInputQuestionario && !interessesInputQuestionario.value) {
-                     interessesInputQuestionario.value = "Xadrez";
-                }
-
-
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            showScreen('login'); 
-
-            // Formulário Esqueci Senha
-            const formEsqueciSenha = document.getElementById('form-esqueci-senha');
-            if(formEsqueciSenha) {
-                formEsqueciSenha.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    const emailRecuperacao = document.getElementById('email-recuperacao').value;
-                    if(emailRecuperacao) {
-                        showCustomAlert(`Instruções de recuperação de senha enviadas para ${emailRecuperacao} (simulado).`, "Verifique seu Email", "success");
-                        // aqui você pode limpar o campo ou redirecionar
-                        document.getElementById('email-recuperacao').value = ''; 
-                        showScreen('login');
-                    } else {
-                        showCustomAlert("Por favor, insira seu email.", "Campo Obrigatório", "warning");
-                    }
-                });
-            }
-            
-            // Formulário Enviar Incentivo
-            const formEnviarIncentivo = document.getElementById('form-enviar-incentivo');
-            if(formEnviarIncentivo){
-                formEnviarIncentivo.addEventListener('submit', function(event){
-                    event.preventDefault();
-                    const mensagemIncentivo = document.getElementById('mensagem-incentivo').value;
-                    if(mensagemIncentivo.trim()){
-                         showCustomAlert(`Mensagem de incentivo enviada para ${currentUserName}! (simulado)`, "Mensagem Enviada!", "success");
-                         document.getElementById('mensagem-incentivo').value = '';
-                         showScreen('acompanhamentoResponsavel');
-                    } else {
-                        showCustomAlert("Por favor, escreva uma mensagem.", "Campo Obrigatório", "warning");
-                    }
-                });
-            }
-
-            // Formulário Falar com Especialista
-            const formFalarEspecialista = document.getElementById('form-falar-especialista');
-            if(formFalarEspecialista){
-                formFalarEspecialista.addEventListener('submit', function(event){
-                    event.preventDefault();
-                    const nomeContato = document.getElementById('nome-contato-especialista').value;
-                    const emailContato = document.getElementById('email-contato-especialista').value;
-                    const assuntoContato = document.getElementById('assunto-especialista').value;
-                    const mensagemContato = document.getElementById('mensagem-especialista').value;
-
-                    if(nomeContato.trim() && emailContato.trim() && assuntoContato.trim() && mensagemContato.trim()){
-                        showCustomAlert("Sua solicitação foi enviada. Entraremos em contato em breve! (simulado)", "Solicitação Enviada!", "success");
-                        // Limpar campos
-                        document.getElementById('nome-contato-especialista').value = `Responsável por ${currentUserName}`;
-                        document.getElementById('email-contato-especialista').value = '';
-                        document.getElementById('assunto-especialista').value = '';
-                        document.getElementById('mensagem-especialista').value = '';
-                        showScreen('acompanhamentoResponsavel');
-                    } else {
-                         showCustomAlert("Por favor, preencha todos os campos obrigatórios.", "Campos Incompletos", "warning");
-                    }
-                });
-            }
-
-
-            const formCadastro = document.getElementById('form-cadastro');
-            if (formCadastro) {
-                formCadastro.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    const nomeCompletoInput = document.getElementById('nome-completo');
-                    const emailCadastroInput = document.getElementById('email-cadastro');
-                    const senha = document.getElementById('senha-cadastro').value;
-                    const confirmarSenha = document.getElementById('confirmar-senha').value;
-
-                    if (senha !== confirmarSenha) {
-                        showCustomAlert("As senhas não coincidem. Tente novamente.", "Erro de Cadastro", "error");
-                        return;
-                    }
-                    if (nomeCompletoInput && nomeCompletoInput.value.trim() !== "") {
-                        currentUserName = nomeCompletoInput.value.trim();
-                    } else {
-                        currentUserName = "Usuário"; 
-                    }
-                    currentUserEmail = emailCadastroInput.value.trim() || "usuario@exemplo.com";
-                    showCustomAlert(`Cadastro realizado para ${currentUserName}! Preencha o questionário.`, "Bem-vindo(a)!", "success");
-                    showScreen('questionario');
-                });
-            }
-
-            const formLogin = document.getElementById('form-login');
-            if (formLogin) {
-                formLogin.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    const emailLoginInput = document.getElementById('email-login');
-                    if (emailLoginInput && emailLoginInput.value.toLowerCase() === "sky@exemplo.com") {
-                        currentUserName = "Sky";
-                        currentUserEmail = "sky@exemplo.com";
-                    } else if (emailLoginInput && emailLoginInput.value.includes('@')) {
-                        currentUserName = emailLoginInput.value.split('@')[0];
-                        currentUserEmail = emailLoginInput.value;
-                    } else {
-                        currentUserName = "Usuário Logado";
-                        currentUserEmail = "logado@exemplo.com";
-                    }
-                    // Atualiza o nome do responsável no formulário de contato com especialista
-                    const nomeContatoEspecialista = document.getElementById('nome-contato-especialista');
-                    if (nomeContatoEspecialista) {
-                        nomeContatoEspecialista.value = `Responsável por ${currentUserName}`;
-                    }
-                    showScreen('recomendacao');
-                });
-            }
-
-            const formQuestionario = document.getElementById('form-questionario');
-            if (formQuestionario) {
-                formQuestionario.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    showCustomAlert("Preferências salvas! Preparando suas recomendações.", "Obrigado!", "success");
-                    showScreen('recomendacao');
-                });
-            }
-            
-            const formPerfilInfo = document.getElementById('form-perfil-info');
-            if(formPerfilInfo) {
-                formPerfilInfo.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    const perfilNomeInput = document.getElementById('perfil-nome');
-                    currentUserName = perfilNomeInput.value.trim() || currentUserName;
-                    showCustomAlert('Informações pessoais salvas!', 'Sucesso', 'success');
-                    updateDynamicContent();
-                });
-            }
-
-            const formPerfilAcessibilidade = document.getElementById('form-perfil-acessibilidade');
-            if(formPerfilAcessibilidade) {
-                formPerfilAcessibilidade.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    showCustomAlert('Opções de acessibilidade salvas!', 'Sucesso', 'success');
-                });
-            }
-
-            document.querySelectorAll('.btn-explorar-conteudo').forEach(button => {
-                button.addEventListener('click', function() {
-                    currentContentTitle = this.dataset.contentTitle || "Conteúdo Interativo";
-                    showScreen('acessoConteudo');
-                });
-            });
-
-            const btnFecharConteudo = document.getElementById('btn-fechar-conteudo');
-            if (btnFecharConteudo) {
-                btnFecharConteudo.addEventListener('click', function() {
-                    const conteudoWrapper = document.getElementById('conteudo-wrapper');
-                    if (conteudoWrapper) conteudoWrapper.innerHTML = ''; 
-                    const placeholderText = document.getElementById('acesso-conteudo-placeholder');
-                    if (placeholderText) {
-                         placeholderText.textContent = 'Carregando...'; 
-                         placeholderText.style.display = 'block';
-                    }
-                    showScreen('recomendacao');
-                });
-            }
-            
-            const fontSizeSelect = document.getElementById('font-size-content');
-            if(fontSizeSelect) {
-                fontSizeSelect.addEventListener('change', function() {
-                    const conteudoWrapper = document.getElementById('conteudo-wrapper');
-                    conteudoWrapper.classList.remove('text-sm', 'text-base', 'text-lg', 'text-xl'); 
-                    let newSizeClass = 'text-base'; 
-                    if (this.value === 'medio') {
-                        newSizeClass = 'text-lg'; 
-                    } else if (this.value === 'grande') {
-                        newSizeClass = 'text-xl'; 
-                    }
-                    conteudoWrapper.classList.add(newSizeClass);
-                    
-                    if (currentContentData[currentContentTitle] && currentContentData[currentContentTitle].type === "text") {
-                        conteudoWrapper.querySelectorAll('p').forEach(pEl => {
-                            pEl.className = `text-gray-700 mb-2 leading-relaxed ${newSizeClass}`;
-                        });
-                         conteudoWrapper.querySelectorAll('h2').forEach(hEl => {
-                            hEl.className = `font-semibold mb-3 text-purple-700 ${newSizeClass === 'text-xl' ? 'text-2xl' : (newSizeClass === 'text-lg' ? 'text-xl' : 'text-lg') }`; 
-                        });
-                    }
-                });
-            }
-
-
-            const btnMarcarConcluido = document.getElementById('btn-marcar-concluido');
-            if (btnMarcarConcluido) {
-                btnMarcarConcluido.addEventListener('click', function() {
-                    showCustomAlert(`"${currentContentTitle}" marcado como concluído!`, 'Progresso Atualizado', 'success');
-                    const conteudoWrapper = document.getElementById('conteudo-wrapper');
-                    if (conteudoWrapper) conteudoWrapper.innerHTML = ''; 
-                    const placeholderText = document.getElementById('acesso-conteudo-placeholder');
-                     if (placeholderText) {
-                         placeholderText.textContent = 'Carregando...';
-                         placeholderText.style.display = 'block';
-                    }
-                    showScreen('progressoUsuario'); 
-                });
-            }
-            
-            const btnAjustarPreferenciasPerfil = document.getElementById('btn-ajustar-preferencias-perfil');
-            if(btnAjustarPreferenciasPerfil) {
-                btnAjustarPreferenciasPerfil.addEventListener('click', function(event) {
-                     event.preventDefault();
-                     showScreen('questionario');
-                });
-            }
-
-            const btnSairContaPerfil = document.getElementById('btn-sair-conta-perfil');
-            if(btnSairContaPerfil) {
-                btnSairContaPerfil.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    currentUserName = "Sky"; 
-                    currentUserEmail = "sky@exemplo.com";
-                    
-                    const formLoginEmail = document.getElementById('email-login');
-                    if(formLoginEmail) formLoginEmail.value = 'sky@exemplo.com'; 
-                    const formLoginPass = document.getElementById('senha-login');
-                    if(formLoginPass) formLoginPass.value = 'senha123'; 
-                    
-                    const formCadastroNome = document.getElementById('nome-completo');
-                    if(formCadastroNome) formCadastroNome.value = '';
-                    const formCadastroEmail = document.getElementById('email-cadastro');
-                    if(formCadastroEmail) formCadastroEmail.value = '';
-                    
-                    showScreen('login');
-                });
-            }
-            updateDynamicContent(); 
-        });
-    </script>
+    <script src="js/script.js"></script>
 
 </body>
 </html>
