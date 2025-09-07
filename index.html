@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumind - Protótipo Interativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .screen {
+            min-height: 100vh;
+            padding: 1rem; 
+        }
+        @media (min-width: 640px) { 
+            .screen {
+                padding: 2rem;
+            }
+        }
+        .active-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        :root {
+            --lumind-purple: #8B5CF6; 
+            --lumind-purple-light: #A78BFA; 
+            --lumind-purple-dark: #6D28D9; 
+            --lumind-blue: #3B82F6;   
+            --lumind-blue-light: #60A5FA; 
+            --lumind-white: #FFFFFF;
+            --lumind-bg-main: #F9FAFB; 
+            --lumind-bg-card: #FFFFFF; 
+            --lumind-border: #E5E7EB; 
+            --lumind-text-dark: #1F2937;  
+            --lumind-text-medium: #4B5563; 
+            --lumind-text-light: #6B7280; 
+            --lumind-accent-gold-soft: #FBBF24; 
+            --lumind-accent-teal-soft: #2DD4BF; 
+            --lumind-success: #10B981; 
+            --lumind-error: #EF4444; 
+            --lumind-warning: #F59E0B; 
+            --lumind-info: #3B82F6; 
+        }
+
+        body {
+            background-color: var(--lumind-bg-main); 
+            color: var(--lumind-text-dark);
+        }
+        .btn-primary {
+            background-color: var(--lumind-purple);
+            color: var(--lumind-white);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .btn-primary:hover {
+            background-color: var(--lumind-purple-dark);
+            box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3);
+        }
+        .btn-secondary {
+            background-color: var(--lumind-blue);
+            color: var(--lumind-white);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .btn-secondary:hover {
+            background-color: #2563EB; 
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+        .btn-subtle {
+            background-color: var(--lumind-bg-card);
+            color: var(--lumind-purple);
+            padding: 0.6rem 1.2rem; 
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+            cursor: pointer;
+            border: 1px solid var(--lumind-purple-light);
+        }
+        .btn-subtle:hover {
+            background-color: #F5F3FF; 
+            border-color: var(--lumind-purple);
+            color: var(--lumind-purple-dark);
+        }
+
+        .link {
+            color: var(--lumind-blue);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .link:hover {
+            color: var(--lumind-purple);
+            text-decoration: underline;
+        }
+        .card {
+            background-color: var(--lumind-bg-card); 
+            border-radius: 0.75rem;
+            padding: 1rem; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            border: 1px solid var(--lumind-border);
+        }
+         @media (min-width: 640px) { 
+            .card {
+                padding: 1.5rem;
+            }
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--lumind-border);
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background-color: var(--lumind-bg-main); 
+        }
+        .input-field:focus {
+            border-color: var(--lumind-purple);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15); 
+            outline: none;
+            background-color: var(--lumind-white);
+        }
+        .lumind-brand-header { 
+            font-size: 2.25rem; 
+            font-weight: bold;
+            color: var(--lumind-purple);
+            margin-bottom: 0.25rem;
+            text-align: center;
+        }
+        @media (min-width: 640px) {
+            .lumind-brand-header {
+                 font-size: 2.5rem;
+            }
+        }
+         .lumind-logo-placeholder { 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--lumind-white);
+            background-color: var(--lumind-purple); 
+            width: 60px; 
+            height: 60px;
+            border-radius: 0.5rem; 
+            margin: 0 auto 1rem auto;
+            box-shadow: none; 
+        }
+        .lumind-subheader {
+            font-size: 1rem; 
+            color: var(--lumind-text-medium);
+            margin-bottom: 1.5rem; 
+            text-align: center;
+        }
+         @media (min-width: 640px) {
+            .lumind-subheader {
+                 font-size: 1.05rem;
+            }
+        }
+        .screen-title { 
+            font-size: 1.5rem; 
+            font-weight: 600; 
+            color: var(--lumind-text-dark); 
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        @media (min-width: 640px) {
+            .screen-title {
+                 font-size: 1.8rem;
+            }
+        }
+        .screen-subtitle { 
+            font-size: 0.9rem; 
+            color: var(--lumind-text-light);
+            margin-bottom: 1.5rem;
+        }
+        @media (min-width: 640px) {
+            .screen-subtitle {
+                 font-size: 1rem;
+            }
+        }
+        .choice-label i {
+            color: var(--lumind-text-medium); 
+            transition: color 0.2s;
+        }
+        .choice-label input:checked + i {
+            color: var(--lumind-purple); 
+        }
+        .choice-label:hover i {
+            color: var(--lumind-purple-light);
+        }
+
+        .content-tag {
+            background-color: var(--lumind-bg-main);
+            color: var(--lumind-text-medium);
+            border: 1px solid var(--lumind-border);
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem; 
+        }
+        .content-tag i {
+            color: var(--lumind-text-light); 
+        }
+        .progress-bar-fill {
+            background-color: var(--lumind-blue); 
+        }
+        .preference-tag {
+            font-weight: normal;
+            color: var(--lumind-text-medium);
+            background-color: var(--lumind-bg-main);
+            border: 1px solid var(--lumind-border);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            display: inline-block; 
+            margin-top: 0.25rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Screen: Cadastro (Sign Up) -->
+    <div id="cadastro" class="screen justify-center">
+        <div class="w-full max-w-md card">
+            <div class="lumind-logo-placeholder">L</div>
+            <h1 class="lumind-brand-header">Lumind</h1>
+            <p class="lumind-subheader">Crie sua conta para começar a aprender!</p>
+            <form id="form-cadastro" action="#" method="POST" class="space-y-4">
+                <div>
+                    <label for="nome-completo" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                    <input type="text" id="nome-completo" name="nome-completo" required class="input-field">
+                </div>
+                <div>
+                    <label for="email-cadastro" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email-cadastro" name="email-cadastro" required class="input-field">
+                </div>
+                <div>
+                    <label for="senha-cadastro" class="block text-sm font-medium text-gray-700">Senha</label>
+                    <input type="password" id="senha-cadastro" name="senha-cadastro" required class="input-field">
+                </div>
+                <div>
+                    <label for="confirmar-senha" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
+                    <input type="password" id="confirmar-senha" name="confirmar-senha" required class="input-field">
+                </div>
+                 <div>
+                    <label for="data-nascimento" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+                    <input type="date" id="data-nascimento" name="data-nascimento" required class="input-field">
+                </div>
+                <div>
+                    <label for="nome-responsavel" class="block text-sm font-medium text-gray-700">Nome do Responsável (Opcional)</label>
+                    <input type="text" id="nome-responsavel" name="nome-responsavel" class="input-field">
+                </div>
+                 <div>
+                    <label for="email-responsavel" class="block text-sm font-medium text-gray-700">Email do Responsável (Opcional)</label>
+                    <input type="email" id="email-responsavel" name="email-responsavel" class="input-field">
+                </div>
+                <button type="submit" class="w-full btn-primary"><i class="fas fa-user-plus mr-2"></i>Cadastrar</button>
+            </form>
+            <p class="mt-6 text-center text-sm">
+                Já tem uma conta? <span onclick="showScreen('login'); return false;" class="link">Entrar</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Screen: Login -->
+    <div id="login" class="screen justify-center">
+        <div class="w-full max-w-md card">
+            <div class="lumind-logo-placeholder">L</div>
+            <h1 class="lumind-brand-header">Lumind</h1>
+            <p class="lumind-subheader">Bem-vindo(a) de volta!</p>
+            <form id="form-login" action="#" method="POST" class="space-y-4">
+                <div>
+                    <label for="email-login" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email-login" name="email-login" required class="input-field" value="sky@exemplo.com">
+                </div>
+                <div>
+                    <label for="senha-login" class="block text-sm font-medium text-gray-700">Senha</label>
+                    <input type="password" id="senha-login" name="senha-login" required class="input-field" value="senha123">
+                </div>
+                <button type="submit" class="w-full btn-primary"><i class="fas fa-sign-in-alt mr-2"></i>Entrar</button>
+            </form>
+            <div class="mt-6 text-center text-sm">
+                <p><span onclick="showScreen('esqueciSenha'); return false;" class="link">Esqueci minha senha</span></p>
+                <p class="mt-2">
+                    Não tem uma conta? <span onclick="showScreen('cadastro'); return false;" class="link">Cadastre-se</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen: Questionário Inicial -->
+    <div id="questionario" class="screen items-start pt-10 md:pt-16">
+        <div class="w-full max-w-2xl card mx-auto">
+            <div class="text-center mb-6">
+                <i class="fas fa-tasks text-4xl mb-3 text-purple-500"></i>
+                <h1 id="questionario-header" class="screen-title">Olá, Sky!</h1>
+                <p class="screen-subtitle">Como você prefere aprender?</p>
+            </div>
+            
+            <form id="form-questionario" action="#" method="POST" class="space-y-6">
+                <div>
+                    <p class="font-semibold text-gray-700 mb-2 text-md">1. Como você aprende melhor?</p>
+                    <div class="space-y-3">
+                        <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-all duration-200 choice-label">
+                            <input type="checkbox" name="aprender_pref" value="leitura" class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 mr-3">
+                            <i class="fas fa-book-open w-6 text-center mr-2"></i> Lendo textos e artigos
+                        </label>
+                        <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-all duration-200 choice-label">
+                            <input type="checkbox" name="aprender_pref" value="imagem" class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 mr-3">
+                            <i class="fas fa-image w-6 text-center mr-2"></i> Vendo imagens e ilustrações
+                        </label>
+                        <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-all duration-200 choice-label">
+                            <input type="checkbox" name="aprender_pref" value="video" class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 mr-3" checked>
+                            <i class="fas fa-video w-6 text-center mr-2"></i> Assistindo a vídeos
+                        </label>
+                        <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-all duration-200 choice-label">
+                            <input type="checkbox" name="aprender_pref" value="audio" class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 mr-3">
+                            <i class="fas fa-headphones w-6 text-center mr-2"></i> Ouvindo áudios e podcasts
+                        </label>
+                        <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-all duration-200 choice-label">
+                            <input type="checkbox" name="aprender_pref" value="interativo" class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 mr-3" checked>
+                            <i class="fas fa-puzzle-piece w-6 text-center mr-2"></i> Com atividades interativas e jogos
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="interesses" class="font-semibold text-gray-700 mb-2 block text-md">2. Quais são seus principais interesses?</label>
+                    <input type="text" id="interesses" name="interesses" placeholder="Ex: Xadrez, Espaço, Música" class="input-field text-base" value="Xadrez, Espaço">
+                    <p class="text-xs text-gray-500 mt-1">Você pode listar vários, separados por vírgula.</p>
+                </div>
+
+                <div>
+                    <label for="distracoes" class="font-semibold text-gray-700 mb-2 block text-md">3. Algo que te incomoda ou distrai?</label>
+                    <textarea id="distracoes" name="distracoes" rows="3" placeholder="Ex: Sons altos, cores vibrantes..." class="input-field text-base">Textos muito longos sem imagens.</textarea>
+                    <p class="text-xs text-gray-500 mt-1">Isso nos ajudará a criar um ambiente mais confortável.</p>
+                </div>
+                
+                <button type="submit" class="w-full btn-primary mt-8 text-md"><i class="fas fa-check-circle mr-2"></i>Salvar e Começar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Screen: Recomendação de Conteúdos -->
+    <div id="recomendacao" class="screen items-start pt-8">
+        <div class="container mx-auto px-4 w-full"> 
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+                <div class="w-full sm:w-auto text-center sm:text-left">
+                    <h1 id="recomendacao-header" class="screen-title">Olá, Sky!</h1>
+                    <p class="screen-subtitle">Sugestões para você explorar:</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <button onclick="showScreen('perfilUsuario')" class="btn-subtle text-sm w-full sm:w-auto"><i class="fas fa-user-circle mr-2"></i> Meu Perfil</button>
+                    <button onclick="showScreen('acompanhamentoResponsavel')" class="btn-subtle w-full sm:w-auto text-sm border-teal-300 text-teal-600 hover:bg-teal-50 hover:border-teal-500"><i class="fas fa-user-shield mr-2"></i> Responsável</button>
+                </div>
+            </div>
+            
+            <div class="mb-10">
+                <h2 class="text-xl font-semibold mb-4 flex items-center text-gray-700"><i class="fas fa-star mr-2 text-amber-400"></i>Para Você</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card transform hover:shadow-lg transition-shadow duration-300 flex flex-col">
+                        <img src="images/espaco.jpeg" alt="Astronauta flutuando no espaço com o planeta Terra ao fundo" class="rounded-md mb-4 w-full h-48 object-cover">
+                        <h3 class="text-lg font-semibold mb-2 text-gray-800">Aventuras no Espaço Sideral</h3>
+                        <p class="text-gray-600 text-sm mb-3 flex-grow">Vídeo animado sobre os planetas do nosso sistema solar.</p>
+                        <span class="content-tag self-start mb-4"><i class="fas fa-video mr-1"></i> Vídeo</span>
+                        <button class="mt-auto w-full btn-secondary text-sm btn-explorar-conteudo" data-content-title="Aventuras no Espaço Sideral"><i class="fas fa-play-circle mr-2"></i>Explorar</button>
+                    </div>
+                    <div class="card transform hover:shadow-lg transition-shadow duration-300 flex flex-col">
+                        <img src="images/xadrez.jpg" alt="Mão movendo uma peça de rei branca num tabuleiro de xadrez" class="rounded-md mb-4 w-full h-48 object-cover">
+                        <h3 class="text-lg font-semibold mb-2 text-gray-800">Dominando o Xadrez</h3>
+                        <p class="text-gray-600 text-sm mb-3 flex-grow">Aprenda as regras e estratégias básicas do xadrez.</p>
+                        <span class="content-tag self-start mb-4"><i class="fas fa-book-open mr-1"></i> Leitura</span>
+                         <button class="mt-auto w-full btn-secondary text-sm btn-explorar-conteudo" data-content-title="Dominando o Xadrez"><i class="fas fa-play-circle mr-2"></i>Explorar</button>
+                    </div>
+                    <div class="card transform hover:shadow-lg transition-shadow duration-300 flex flex-col">
+                        <img src="images/math.png" alt="Quadro-negro com diversas fórmulas e símbolos matemáticos desenhados a giz" class="rounded-md mb-4 w-full h-48 object-cover">
+                        <h3 class="text-lg font-semibold mb-2 text-gray-800">Desafio dos Números</h3>
+                        <p class="text-gray-600 text-sm mb-3 flex-grow">Jogo divertido para praticar matemática de forma lúdica.</p>
+                        <span class="content-tag self-start mb-4"><i class="fas fa-puzzle-piece mr-1"></i> Jogo</span>
+                         <button class="mt-auto w-full btn-secondary text-sm btn-explorar-conteudo" data-content-title="Desafio dos Números"><i class="fas fa-play-circle mr-2"></i>Explorar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-4 flex items-center text-gray-700"><i class="fas fa-lightbulb mr-2 text-teal-400"></i>Novidades</h2>
+                 <div class="card bg-gray-50">
+                    <p class="text-gray-600"><i class="fas fa-info-circle mr-2 text-blue-500"></i>Mais conteúdos e temas incríveis chegando em breve!</p>
+                 </div>
+            </div>
+            <div class="text-right mt-10">
+                <button onclick="showScreen('progressoUsuario')" class="btn-primary"><i class="fas fa-chart-line mr-2"></i> Ver Meu Progresso</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen: Acesso ao Conteúdo -->
+    <div id="acessoConteudo" class="screen items-start pt-8">
+        <div class="container mx-auto px-4 w-full">
+            <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
+                <h1 id="acesso-conteudo-header" class="screen-title sm:text-left order-2 sm:order-1 flex-grow">[Título do Conteúdo]</h1>
+                <button id="btn-fechar-conteudo" class="btn-subtle text-sm order-1 sm:order-2 w-full sm:w-auto"><i class="fas fa-arrow-left mr-2"></i> Voltar</button>
+            </div>
+
+            <div class="card mb-6">
+                <div id="conteudo-wrapper" class="bg-gray-50 min-h-[25rem] rounded-md flex items-center justify-center p-4 text-base">
+                    <p id="acesso-conteudo-placeholder" class="text-gray-500 text-lg">Carregando...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4 flex items-center text-gray-700"><i class="fas fa-universal-access mr-2 text-blue-500"></i>Acessibilidade</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="font-size-content" class="block text-sm font-medium text-gray-700">Tamanho da Fonte:</label>
+                        <select id="font-size-content" name="font-size-content" class="input-field mt-1">
+                            <option value="padrão">Padrão</option>
+                            <option value="medio">Médio (1.125rem)</option>
+                            <option value="grande">Grande (1.25rem)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="contrast-content" class="block text-sm font-medium text-gray-700">Contraste:</label>
+                        <select id="contrast-content" name="contrast-content" class="input-field mt-1">
+                            <option>Padrão</option>
+                            <option>Alto Contraste</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center md:col-span-2">
+                        <input id="text-to-speech" name="text-to-speech" type="checkbox" class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                        <label for="text-to-speech" class="ml-2 block text-sm text-gray-900">Ativar Leitor de Tela</label>
+                    </div>
+                </div>
+                <button id="btn-marcar-concluido" class="btn-secondary mt-6"><i class="fas fa-check-circle mr-2"></i> Marcar Concluído</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen: Painel de Progresso -->
+    <div id="progressoUsuario" class="screen items-start pt-8">
+        <div class="container mx-auto px-4 w-full">
+             <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
+                <h1 id="progresso-header" class="screen-title sm:text-left order-2 sm:order-1 flex-grow">Seu Progresso, Sky!</h1>
+                <button onclick="showScreen('recomendacao')" class="btn-subtle text-sm order-1 sm:order-2 w-full sm:w-auto"><i class="fas fa-arrow-left mr-2"></i> Voltar</button>
+            </div>
+            <p class="screen-subtitle mb-8 text-center sm:text-left">Veja o quanto você já aprendeu.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-700"><i class="fas fa-flag-checkered mr-2 text-green-500"></i>Resumo Geral</h2>
+                    <p class="text-3xl font-bold text-green-600">75%</p>
+                    <p class="text-gray-600">do seu plano concluído!</p>
+                    <div class="w-full bg-gray-200 rounded-full h-3 mt-4">
+                        <div class="progress-bar-fill h-3 rounded-full" style="width: 75%"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-700"><i class="fas fa-trophy mr-2 text-amber-400"></i>Conquistas</h2>
+                    <div class="flex flex-wrap gap-4 mt-4">
+                        <span class="text-3xl transform hover:scale-125 transition-transform text-amber-500" title="Explorador Curioso">🌍</span>
+                        <span class="text-3xl transform hover:scale-125 transition-transform text-amber-500" title="Mestre dos Vídeos">🎬</span>
+                        <span class="text-3xl transform hover:scale-125 transition-transform text-amber-500" title="Leitor Voraz">📚</span>
+                        <span class="text-3xl text-gray-300" title="Ainda não desbloqueado">❓</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3">3 de 10 conquistas!</p>
+                </div>
+            </div>
+
+            <div class="card mb-8">
+                <h2 class="text-lg font-semibold mb-4 flex items-center text-gray-700"><i class="fas fa-history mr-2 text-blue-500"></i>Atividades Recentes</h2>
+                <ul class="space-y-3">
+                    <li class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+                        <div>
+                            <p class="font-medium text-gray-700">Aventuras no Espaço Sideral</p>
+                            <p class="text-sm text-gray-500">Concluído</p>
+                        </div>
+                        <span class="text-green-500 font-semibold"><i class="fas fa-check-circle mr-1"></i></span>
+                    </li>
+                    <li class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+                        <div>
+                            <p class="font-medium text-gray-700">Dominando o Xadrez</p>
+                            <p class="text-sm text-gray-500">Em andamento - 25%</p>
+                        </div>
+                        <span class="text-blue-500 font-semibold"><i class="fas fa-spinner fa-spin mr-1"></i></span>
+                    </li>
+                     <li class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+                        <div>
+                            <p class="font-medium text-gray-700">Desafio dos Números</p>
+                            <p class="text-sm text-gray-500">Não iniciado</p>
+                        </div>
+                        <span class="text-gray-400 font-semibold"><i class="far fa-circle mr-1"></i></span>
+                    </li>
+                </ul>
+            </div>
+             <div class="text-right">
+                <button onclick="showScreen('historicoCompleto')" class="btn-subtle"><i class="fas fa-list-alt mr-2"></i>Ver Histórico Completo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen: Acompanhamento para o Responsável -->
+    <div id="acompanhamentoResponsavel" class="screen items-start pt-8">
+        <div class="container mx-auto px-4 w-full">
+            <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
+                <h1 class="screen-title sm:text-left order-2 sm:order-1 flex-grow"><i class="fas fa-user-shield mr-2 text-teal-500"></i>Painel do Responsável</h1>
+                <button onclick="showScreen('recomendacao')" class="btn-subtle text-sm order-1 sm:order-2 w-full sm:w-auto"><i class="fas fa-arrow-left mr-2"></i> Voltar</button>
+            </div>
+            <p id="acompanhamento-responsavel-intro" class="screen-subtitle mb-8 text-center sm:text-left">Acompanhe o progresso de Sky.</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="card">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center text-gray-700"><i class="fas fa-chart-pie mr-2 text-blue-500"></i>Visão Geral</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <p class="text-sm text-gray-600">Tempo na plataforma:</p>
+                                <p class="text-xl font-semibold text-gray-800">15 horas</p>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <p class="text-sm text-gray-600">Atividades concluídas:</p>
+                                <p class="text-xl font-semibold text-gray-800">12</p>
+                            </div>
+                            <div class="sm:col-span-2 p-3 bg-gray-50 rounded-lg">
+                                <p class="text-sm text-gray-600">Progresso geral:</p>
+                                <div class="w-full bg-gray-200 rounded-full h-3 mt-2 mb-1">
+                                    <div class="progress-bar-fill h-3 rounded-full" style="width: 60%"></div>
+                                </div>
+                                <p class="text-sm text-right text-gray-500">60%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center text-orange-600"><i class="fas fa-bell mr-2"></i> Alertas e Observações</h2>
+                        <ul class="space-y-3">
+                            <li class="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                                <p class="font-medium text-yellow-700"><i class="fas fa-exclamation-triangle mr-2"></i> Dificuldade em Tópico X</p>
+                                <p class="text-sm text-yellow-600 student-specific-text mt-1">Sky parece dedicar mais tempo ao módulo "Frações".</p>
+                            </li>
+                            <li class="p-3 bg-green-50 border border-green-200 rounded-md">
+                                <p class="font-medium text-green-700"><i class="fas fa-star mr-2"></i> Conquista Notável!</p>
+                                <p class="text-sm text-green-600 student-specific-text mt-1">Sky completou as atividades sobre Sistema Solar!</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="card">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center text-gray-700"><i class="fas fa-hands-helping mr-2 text-teal-500"></i>Recomendações</h2>
+                        <ul class="space-y-2 list-disc list-inside text-sm text-gray-600">
+                            <li class="student-specific-text">Explore "Animais Marinhos" com Sky.</li>
+                            <li>Pratique jogos de memória.</li>
+                            <li>Converse sobre o vídeo "Aventuras no Espaço Sideral".</li>
+                        </ul>
+                        <button class="btn-subtle w-full mt-4 text-sm"><i class="fas fa-search-plus mr-2"></i>Mais sugestões</button>
+                    </div>
+                    <div class="card">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center text-gray-700"><i class="fas fa-bolt mr-2 text-purple-500"></i>Ações Rápidas</h2>
+                        <button onclick="showScreen('enviarIncentivo')" class="btn-primary w-full mb-3 text-sm"><i class="fas fa-comments mr-2"></i> Enviar Incentivo</button>
+                        <button onclick="showScreen('falarComEspecialista')" class="btn-secondary w-full text-sm"><i class="fas fa-headset mr-2"></i> Falar com Especialista</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen: Perfil do Usuário -->
+    <div id="perfilUsuario" class="screen items-start pt-8">
+        <div class="container mx-auto px-4 max-w-2xl w-full"> 
+            <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-8 gap-3">
+                <h1 class="screen-title sm:text-left order-2 sm:order-1 flex-grow"><i class="fas fa-user-cog mr-2 text-purple-500"></i>Meu Perfil</h1>
+                <button onclick="showScreen('recomendacao')" class="btn-subtle text-sm order-1 sm:order-2 w-full sm:w-auto"><i class="fas fa-arrow-left mr-2"></i> Voltar</button>
+            </div>
+            
+            <div class="card mb-6">
+                <h2 class="text-lg font-semibold mb-4 text-gray-700">Informações Pessoais</h2>
+                <form id="form-perfil-info" action="#" method="POST" class="space-y-4">
+                    <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+                        <img src="https://placehold.co/80x80/A78BFA/FFFFFF?text=S" alt="Foto de perfil de Sky" class="w-20 h-20 rounded-full object-cover border-2 border-purple-200">
+                        <div class="w-full sm:w-auto flex-grow">
+                            <label for="perfil-nome" class="block text-sm font-medium text-gray-700">Nome</label>
+                            <input type="text" id="perfil-nome" name="perfil-nome" value="Sky" class="input-field mb-0">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="perfil-email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="perfil-email" name="perfil-email" value="sky@exemplo.com" class="input-field" readonly> 
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button type="submit" class="btn-primary w-full sm:w-auto"><i class="fas fa-save mr-2"></i>SalvarEnviar Mensagem</button>
+                        <span class="link self-center">Alterar Senha</span>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card mb-6">
+                <h2 class="text-lg font-semibold mb-4 text-gray-700">Preferências e Interesses</h2>
+                <p class="text-sm text-gray-600 mb-3">Ajuste como o Lumind funciona para você.</p>
+                <button id="btn-ajustar-preferencias-perfil" class="btn-secondary"><i class="fas fa-edit mr-2"></i> Ajustar Preferências</button>
+                <div class="mt-4 space-y-2 text-sm">
+                    <p class="text-gray-700">Estilos preferidos: <span id="perfil-estilos" class="preference-tag">Vídeos, Jogos</span></p>
+                    <p class="text-gray-700">Interesses: <span id="perfil-interesses" class="preference-tag">Xadrez, Espaço</span></p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="text-lg font-semibold mb-4 text-gray-700">Opções de Acessibilidade</h2>
+                 <form id="form-perfil-acessibilidade" action="#" method="POST" class="space-y-4">
+                    <div>
+                        <label for="acess-font-size" class="block text-sm font-medium text-gray-700">Tamanho da Fonte Global</label>
+                        <select id="acess-font-size" name="acess-font-size" class="input-field">
+                            <option>Padrão</option>
+                            <option>Médio</option>
+                            <option>Grande</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="acess-contrast" class="block text-sm font-medium text-gray-700">Esquema de Cores</label>
+                        <select id="acess-contrast" name="acess-contrast" class="input-field">
+                            <option>Padrão Lumind</option>
+                            <option>Alto Contraste</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="acess-animations" name="acess-animations" type="checkbox" class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                        <label for="acess-animations" class="ml-2 block text-sm text-gray-900">Reduzir Animações</label>
+                    </div>
+                     <div class="flex items-center">
+                        <input id="acess-tts-global" name="acess-tts-global" type="checkbox" class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                        <label for="acess-tts-global" class="ml-2 block text-sm text-gray-900">Suporte a Leitor de Tela</label>
+                    </div>
+                    <button type="submit" class="btn-primary mt-2"><i class="fas fa-save mr-2"></i>Salvar Acessibilidade</button>
+                </form>
+            </div>
+            <div class="text-center mt-8">
+                 <button id="btn-sair-conta-perfil" class="text-red-500 hover:text-red-700 font-medium"><i class="fas fa-sign-out-alt mr-2"></i> Sair da Conta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOVA TELA: Esqueci a Senha -->
+    <div id="esqueciSenha" class="screen justify-center">
+        <div class="w-full max-w-md card">
+            <div class="text-center mb-6">
+                <i class="fas fa-key text-4xl mb-3 text-purple-500"></i>
+                <h1 class="screen-title">Recuperar Senha</h1>
+                <p class="screen-subtitle">Digite seu e-mail para enviarmos instruções de recuperação.</p>
+            </div>
+            <form id="form-esqueci-senha" action="#" method="POST" class="space-y-4">
+                <div>
+                    <label for="email-recuperacao" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email-recuperacao" name="email-recuperacao" required class="input-field" placeholder="seuemail@exemplo.com">
+                </div>
+                <button type="submit" class="w-full btn-primary"><i class="fas fa-paper-plane mr-2"></i>Enviar Instruções</button>
+            </form>
+            <p class="mt-6 text-center text-sm">
+                Lembrou a senha? <span onclick="showScreen('login'); return false;" class="link">Voltar para Login</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- NOVA TELA: Histórico Completo -->
+    <div id="historicoCompleto" class="screen items-start pt-8">
+        <div class="container mx-auto px-4 w-full">
+            <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
+                <h1 class="screen-title sm:text-left order-2 sm:order-1 flex-grow"><i class="fas fa-book-reader mr-2 text-purple-500"></i>Histórico de Atividades</h1>
+                <button onclick="showScreen('progressoUsuario')" class="btn-subtle text-sm order-1 sm:order-2 w-full sm:w-auto"><i class="fas fa-arrow-left mr-2"></i> Voltar</button>
+            </div>
+            <p class="screen-subtitle mb-8 text-center sm:text-left">Veja todas as atividades que você já explorou.</p>
+            
+            <div class="card">
+                <div class="space-y-4">
+                    <!-- Item de Histórico Exemplo 1 -->
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="font-semibold text-gray-700">Aventuras no Espaço Sideral</h3>
+                            <span class="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded-full font-medium">Concluído</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Tipo: Vídeo | Data: 31/05/2025</p>
+                        <p class="text-sm text-gray-600 mt-2">Explorou os planetas e assistiu ao vídeo completo.</p>
+                    </div>
+                    <!-- Item de Histórico Exemplo 2 -->
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="font-semibold text-gray-700">Dominando o Xadrez</h3>
+                            <span class="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full font-medium">Em Andamento</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Tipo: Leitura | Progresso: 25%</p>
+                        <p class="text-sm text-gray-600 mt-2">Iniciou a leitura sobre os fundamentos do xadrez.</p>
+                    </div>
+                    <!-- Item de Histórico Exemplo 3 -->
+                     <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="font-semibold text-gray-700">Mistérios do Oceano</h3>
+                            <span class="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded-full font-medium">Concluído</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Tipo: Jogo Interativo | Data: 25/05/2025</p>
+                        <p class="text-sm text-gray-600 mt-2">Completou todos os níveis do jogo sobre vida marinha.</p>
+                    </div>
+                     <!-- Item de Histórico Exemplo 4 (Não iniciado) -->
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="font-semibold text-gray-700">Desafio dos Números</h3>
+                             <span class="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full font-medium">Não Iniciado</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Tipo: Jogo </p>
+                        <p class="text-sm text-gray-600 mt-2">Ainda não explorou este desafio matemático.</p>
+                    </div>
+                </div>
+                <!-- Paginação Simples (Exemplo) -->
+                <div class="mt-8 flex justify-center items-center space-x-2">
+                    <button class="btn-subtle text-xs p-2 leading-none"><i class="fas fa-chevron-left"></i></button>
+                    <span class="text-sm text-gray-600">Página 1 de 3</span>
+                    <button class="btn-subtle text-xs p-2 leading-none"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOVA TELA: Enviar Incentivo -->
+    <div id="enviarIncentivo" class="screen items-start pt-8">
+        <div class="container mx-auto px-4 max-w-lg w-full">
+             <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
+                <h1 class="screen-title sm:text-left order-2 sm:order-1 flex-grow"><i class="fas fa-gift mr-2 text-purple-500"></i>Enviar Incentivo</h1>
+                <button onclick="showScreen('acompanhamentoResponsavel')" class="btn-subtle text-sm order-1 sm:order-2 w-full sm:w-auto"><i class="fas fa-arrow-left mr-2"></i> Voltar</button>
+            </div>
+            <p id="enviar-incentivo-intro" class="screen-subtitle mb-8 text-center sm:text-left">Envie uma mensagem positiva para Sky!</p>
+
+            <div class="card">
+                <form id="form-enviar-incentivo" action="#" method="POST" class="space-y-4">
+                    <div>
+                        <label for="mensagem-incentivo" class="block text-sm font-medium text-gray-700">Sua mensagem:</label>
+                        <textarea id="mensagem-incentivo" name="mensagem-incentivo" rows="4" class="input-field mt-1" placeholder="Ex: Parabéns pelo seu esforço, Sky! Continue assim!"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Envie um sticker:</label>
+                        <div class="mt-2 flex space-x-3 flex-wrap gap-2">
+                            <button type="button" class="text-3xl p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400" title="Estrela"><i class="fas fa-star text-yellow-400"></i></button>
+                            <button type="button" class="text-3xl p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400" title="Troféu"><i class="fas fa-trophy text-amber-500"></i></button>
+                            <button type="button" class="text-3xl p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400" title="Coração"><i class="fas fa-heart text-red-500"></i></button>
+                            <button type="button" class="text-3xl p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400" title="Polegar para cima"><i class="fas fa-thumbs-up text-blue-500"></i></button>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full btn-primary mt-6"><i class="fas fa-paper-plane mr-2"></i>Enviar Mensagem</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- NOVA TELA: Falar com Especialista -->
+    <div id="falarComEspecialista" class="screen items-start pt-8">
+        <div class="container mx-auto px-4 max-w-lg w-full">
+            <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
+                <h1 class="screen-title sm:text-left order-2 sm:order-1 flex-grow"><i class="fas fa-headset mr-2 text-purple-500"></i>Falar com Especialista</h1>
+                <button onclick="showScreen('acompanhamentoResponsavel')" class="btn-subtle text-sm order-1 sm:order-2 w-full sm:w-auto"><i class="fas fa-arrow-left mr-2"></i> Voltar</button>
+            </div>
+            <p class="screen-subtitle mb-8 text-center sm:text-left">Entre em contato com nossa equipe de especialistas para suporte.</p>
+
+            <div class="card">
+                <form id="form-falar-especialista" action="#" method="POST" class="space-y-4">
+                    <div>
+                        <label for="nome-contato-especialista" class="block text-sm font-medium text-gray-700">Seu Nome:</label>
+                        <input type="text" id="nome-contato-especialista" name="nome-contato-especialista" required class="input-field mt-1" value="Responsável por Sky">
+                    </div>
+                     <div>
+                        <label for="email-contato-especialista" class="block text-sm font-medium text-gray-700">Seu Email:</label>
+                        <input type="email" id="email-contato-especialista" name="email-contato-especialista" required class="input-field mt-1" placeholder="seuemail@exemplo.com">
+                    </div>
+                    <div>
+                        <label for="assunto-especialista" class="block text-sm font-medium text-gray-700">Assunto:</label>
+                        <input type="text" id="assunto-especialista" name="assunto-especialista" required class="input-field mt-1" placeholder="Ex: Dúvida sobre progresso, Suporte técnico">
+                    </div>
+                    <div>
+                        <label for="mensagem-especialista" class="block text-sm font-medium text-gray-700">Sua Mensagem:</label>
+                        <textarea id="mensagem-especialista" name="mensagem-especialista" rows="5" class="input-field mt-1" placeholder="Descreva sua dúvida ou o motivo do contato..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full btn-primary mt-6"><i class="fas fa-paper-plane mr-2"></i>Enviar Solicitação</button>
+                </form>
+                 <p class="text-xs text-gray-500 mt-6 text-center">Nossa equipe responderá em até 24 horas úteis. Você também pode nos contatar pelo telefone (XX) XXXX-XXXX.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="custom-alert-overlay" class="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4" style="display: none; z-index: 2000;">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-xs w-full text-center"> 
+            <div id="custom-alert-icon" class="mb-3"></div>
+            <h3 id="custom-alert-title" class="text-lg font-semibold mb-2 text-gray-800">Alerta</h3>
+            <p id="custom-alert-message" class="text-gray-600 mb-4 text-sm">Mensagem do alerta.</p>
+            <button id="custom-alert-close" class="btn-primary w-full text-sm">OK</button>
+        </div>
+    </div>
+
+
+    <script>
+        let currentUserName = "Sky"; 
+        let currentUserEmail = "sky@exemplo.com"; 
+        let currentContentTitle = "Conteúdo Interativo"; 
+        let currentContentData = { 
+            "Aventuras no Espaço Sideral": {
+                type: "video",
+                source: "https://www.youtube.com/embed/zR3Igc3Rhfg?autoplay=1&mute=1", 
+                description: "Explore os planetas e maravilhas do nosso sistema solar neste vídeo animado!"
+            },
+            "Dominando o Xadrez": {
+                type: "text",
+                title: "Fundamentos do Xadrez",
+                paragraphs: [
+                    "O xadrez é um jogo de estratégia entre dois jogadores. Cada jogador começa com 16 peças: um rei, uma rainha, duas torres, dois bispos, dois cavalos e oito peões.",
+                    "O objetivo do jogo é dar xeque-mate no rei adversário, o que significa colocá-lo sob ataque de forma que não haja movimento legal para escapar.",
+                    "Cada peça se move de uma maneira diferente. Aprender os movimentos e o valor relativo das peças é o primeiro passo para se tornar um bom jogador.",
+                    "Vamos explorar os movimentos básicos e algumas táticas iniciais!"
+                ],
+                image: "image_6245de.png" 
+            },
+            "Desafio dos Números": {
+                type: "interactive_game",
+                description: "Prepare-se para um desafio matemático divertido! (Simulação de Jogo)",
+                gameElement: `<div class="text-center p-8"><i class="fas fa-gamepad text-5xl text-amber-500 mb-4"></i><p class="text-lg">Jogo de Números Carregado!</p><button class="btn-secondary mt-4 text-sm">Começar Jogo</button></div>`
+            }
+        };
+
+        const customAlertOverlay = document.getElementById('custom-alert-overlay');
+        const customAlertTitle = document.getElementById('custom-alert-title');
+        const customAlertMessage = document.getElementById('custom-alert-message');
+        const customAlertCloseButton = document.getElementById('custom-alert-close');
+        const customAlertIcon = document.getElementById('custom-alert-icon');
+
+        function showCustomAlert(message, title = "Alerta", type = "info") {
+            customAlertTitle.textContent = title;
+            customAlertMessage.textContent = message;
+            
+            let iconHtml = '';
+            let buttonClass = 'btn-primary w-full text-sm ';
+            switch(type) {
+                case 'success':
+                    iconHtml = `<i class="fas fa-check-circle text-4xl text-green-500"></i>`;
+                    buttonClass += 'bg-green-500 hover:bg-green-600';
+                    break;
+                case 'error':
+                    iconHtml = `<i class="fas fa-times-circle text-4xl text-red-500"></i>`;
+                    buttonClass += 'bg-red-500 hover:bg-red-600';
+                    break;
+                case 'warning':
+                    iconHtml = `<i class="fas fa-exclamation-triangle text-4xl text-yellow-500"></i>`;
+                    buttonClass += 'bg-yellow-500 hover:bg-yellow-600 text-gray-800';
+                    break;
+                default: 
+                    iconHtml = `<i class="fas fa-info-circle text-4xl text-blue-500"></i>`;
+            }
+            customAlertIcon.innerHTML = iconHtml;
+            customAlertCloseButton.className = buttonClass;
+            customAlertOverlay.style.display = 'flex';
+        }
+
+        if (customAlertCloseButton) {
+            customAlertCloseButton.addEventListener('click', () => {
+                customAlertOverlay.style.display = 'none';
+            });
+        }
+        
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active-screen');
+                screen.style.display = 'none'; 
+            });
+            const activeScreen = document.getElementById(screenId);
+            if (activeScreen) {
+                activeScreen.classList.add('active-screen');
+                activeScreen.style.display = 'flex'; 
+                window.scrollTo(0, 0); 
+            }
+            updateDynamicContent(); 
+        }
+
+        function updateDynamicContent() {
+            const questionarioHeader = document.getElementById('questionario-header');
+            if (questionarioHeader) questionarioHeader.innerHTML = `Olá, ${currentUserName}!`;
+
+            const recomendacaoHeader = document.getElementById('recomendacao-header');
+            if (recomendacaoHeader) recomendacaoHeader.innerHTML = `Olá, ${currentUserName}!`;
+            
+            const progressoHeader = document.getElementById('progresso-header');
+            if (progressoHeader) progressoHeader.innerHTML = `Seu Progresso, ${currentUserName}!`;
+
+            const perfilNomeInput = document.getElementById('perfil-nome');
+            if (perfilNomeInput) perfilNomeInput.value = currentUserName;
+            const perfilEmailInput = document.getElementById('perfil-email');
+            if (perfilEmailInput) perfilEmailInput.value = currentUserEmail;
+            const perfilFoto = document.querySelector('#perfilUsuario img');
+            if (perfilFoto) perfilFoto.src = `https://placehold.co/80x80/A78BFA/FFFFFF?text=${currentUserName.substring(0,1).toUpperCase()}`;
+
+
+            const acompanhamentoIntro = document.getElementById('acompanhamento-responsavel-intro');
+            if (acompanhamentoIntro) acompanhamentoIntro.innerHTML = `Acompanhe o progresso de ${currentUserName}.`;
+            
+            document.querySelectorAll('.student-specific-text').forEach(el => {
+                if (el.dataset.originalText) { 
+                     el.innerHTML = el.dataset.originalText.replace(/\[Nome do Estudante\]/g, currentUserName);
+                } else { 
+                    el.dataset.originalText = el.innerHTML;
+                    el.innerHTML = el.innerHTML.replace(/\[Nome do Estudante\]/g, currentUserName);
+                }
+            });
+            const enviarIncentivoIntro = document.getElementById('enviar-incentivo-intro');
+            if(enviarIncentivoIntro) enviarIncentivoIntro.innerHTML = `Envie uma mensagem positiva para ${currentUserName}!`;
+
+
+            const acessoConteudoHeader = document.getElementById('acesso-conteudo-header');
+            if (acessoConteudoHeader) acessoConteudoHeader.textContent = currentContentTitle;
+            
+            const conteudoWrapper = document.getElementById('conteudo-wrapper');
+            const placeholderText = document.getElementById('acesso-conteudo-placeholder');
+            if (conteudoWrapper && placeholderText) {
+                const contentData = currentContentData[currentContentTitle];
+                if (contentData) {
+                    placeholderText.style.display = 'none'; 
+                    conteudoWrapper.innerHTML = ''; 
+                    conteudoWrapper.className = 'bg-gray-50 min-h-[25rem] rounded-md flex flex-col items-center justify-center p-4 text-base'; 
+
+                    if (contentData.type === "video") {
+                        const iframe = document.createElement('iframe');
+                        iframe.src = contentData.source;
+                        iframe.width = "100%";
+                        iframe.height = "400"; 
+                        iframe.frameBorder = "0";
+                        iframe.allow = "autoplay; encrypted-media";
+                        iframe.allowFullscreen = true;
+                        iframe.className = "rounded-md w-full max-w-2xl"; 
+                        conteudoWrapper.appendChild(iframe);
+                        const desc = document.createElement('p');
+                        desc.className = 'text-center text-gray-600 mt-3 text-sm';
+                        desc.textContent = contentData.description;
+                        conteudoWrapper.appendChild(desc);
+                    } else if (contentData.type === "text") {
+                        conteudoWrapper.classList.remove('items-center', 'justify-center'); 
+                        conteudoWrapper.classList.add('items-start'); 
+                        const titleEl = document.createElement('h2');
+                        titleEl.className = 'text-xl font-semibold mb-3 text-purple-700 self-start';
+                        titleEl.textContent = contentData.title;
+                        conteudoWrapper.appendChild(titleEl);
+                        if(contentData.image) {
+                            const imgEl = document.createElement('img');
+                            imgEl.src = contentData.image; 
+                            imgEl.alt = `Ilustração para ${contentData.title}`;
+                            imgEl.className = 'rounded-md mb-3 w-full max-w-sm mx-auto h-auto object-cover';
+                            conteudoWrapper.appendChild(imgEl);
+                        }
+                        contentData.paragraphs.forEach(pText => {
+                            const pEl = document.createElement('p');
+                            pEl.className = 'text-gray-700 mb-2 leading-relaxed text-sm md:text-base';
+                            pEl.textContent = pText;
+                            conteudoWrapper.appendChild(pEl);
+                        });
+                    } else if (contentData.type === "interactive_game") {
+                        conteudoWrapper.innerHTML = contentData.gameElement;
+                        const desc = document.createElement('p');
+                        desc.className = 'text-center text-gray-600 mt-2 text-sm';
+                        desc.textContent = contentData.description;
+                        conteudoWrapper.appendChild(desc);
+                    }
+                } else {
+                    placeholderText.textContent = `Conteúdo sobre "${currentContentTitle}" não encontrado.`;
+                    placeholderText.style.display = 'block';
+                }
+            }
+
+
+            const questionarioForm = document.getElementById('form-questionario');
+            if (questionarioForm) {
+                const aprenderPrefsElements = Array.from(questionarioForm.querySelectorAll('input[name="aprender_pref"]:checked'));
+                let aprenderPrefsText = "Não definido";
+                if (aprenderPrefsElements.length > 0) {
+                     aprenderPrefsText = aprenderPrefsElements.map(cb => {
+                        let labelText = cb.parentElement.textContent.trim();
+                        const iconElement = cb.parentElement.querySelector('i');
+                        if (iconElement) {
+                            labelText = labelText.replace(iconElement.textContent, '').trim();
+                        }
+                        return labelText.split('\n')[0].trim().replace(/\s+/g, ' ');
+                    }).join(', ');
+                }
+
+                const interessesVal = document.getElementById('interesses').value;
+                
+                const perfilEstilos = document.getElementById('perfil-estilos');
+                if(perfilEstilos) perfilEstilos.textContent = aprenderPrefsText;
+                
+                const perfilInteresses = document.getElementById('perfil-interesses');
+                if(perfilInteresses) perfilInteresses.textContent = interessesVal || "Não definido";
+ 
+                const interessesInputQuestionario = document.getElementById('interesses');
+                if (interessesInputQuestionario && interessesInputQuestionario.value.toLowerCase().includes("dinossauros")) {
+                    interessesInputQuestionario.value = interessesInputQuestionario.value.replace(/dinossauros/gi, "Xadrez").replace(/, \s*,/, ",").trim().replace(/^,|,$/g, '');
+                }
+                if (interessesInputQuestionario && !interessesInputQuestionario.value.toLowerCase().includes("xadrez") && interessesInputQuestionario.value) { 
+                    interessesInputQuestionario.value = ("Xadrez, " + interessesInputQuestionario.value).replace(/, \s*,/, ",").trim().replace(/^,|,$/g, '');
+                } else if (interessesInputQuestionario && !interessesInputQuestionario.value) {
+                     interessesInputQuestionario.value = "Xadrez";
+                }
+
+
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showScreen('login'); 
+
+            // Formulário Esqueci Senha
+            const formEsqueciSenha = document.getElementById('form-esqueci-senha');
+            if(formEsqueciSenha) {
+                formEsqueciSenha.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const emailRecuperacao = document.getElementById('email-recuperacao').value;
+                    if(emailRecuperacao) {
+                        showCustomAlert(`Instruções de recuperação de senha enviadas para ${emailRecuperacao} (simulado).`, "Verifique seu Email", "success");
+                        // aqui você pode limpar o campo ou redirecionar
+                        document.getElementById('email-recuperacao').value = ''; 
+                        showScreen('login');
+                    } else {
+                        showCustomAlert("Por favor, insira seu email.", "Campo Obrigatório", "warning");
+                    }
+                });
+            }
+            
+            // Formulário Enviar Incentivo
+            const formEnviarIncentivo = document.getElementById('form-enviar-incentivo');
+            if(formEnviarIncentivo){
+                formEnviarIncentivo.addEventListener('submit', function(event){
+                    event.preventDefault();
+                    const mensagemIncentivo = document.getElementById('mensagem-incentivo').value;
+                    if(mensagemIncentivo.trim()){
+                         showCustomAlert(`Mensagem de incentivo enviada para ${currentUserName}! (simulado)`, "Mensagem Enviada!", "success");
+                         document.getElementById('mensagem-incentivo').value = '';
+                         showScreen('acompanhamentoResponsavel');
+                    } else {
+                        showCustomAlert("Por favor, escreva uma mensagem.", "Campo Obrigatório", "warning");
+                    }
+                });
+            }
+
+            // Formulário Falar com Especialista
+            const formFalarEspecialista = document.getElementById('form-falar-especialista');
+            if(formFalarEspecialista){
+                formFalarEspecialista.addEventListener('submit', function(event){
+                    event.preventDefault();
+                    const nomeContato = document.getElementById('nome-contato-especialista').value;
+                    const emailContato = document.getElementById('email-contato-especialista').value;
+                    const assuntoContato = document.getElementById('assunto-especialista').value;
+                    const mensagemContato = document.getElementById('mensagem-especialista').value;
+
+                    if(nomeContato.trim() && emailContato.trim() && assuntoContato.trim() && mensagemContato.trim()){
+                        showCustomAlert("Sua solicitação foi enviada. Entraremos em contato em breve! (simulado)", "Solicitação Enviada!", "success");
+                        // Limpar campos
+                        document.getElementById('nome-contato-especialista').value = `Responsável por ${currentUserName}`;
+                        document.getElementById('email-contato-especialista').value = '';
+                        document.getElementById('assunto-especialista').value = '';
+                        document.getElementById('mensagem-especialista').value = '';
+                        showScreen('acompanhamentoResponsavel');
+                    } else {
+                         showCustomAlert("Por favor, preencha todos os campos obrigatórios.", "Campos Incompletos", "warning");
+                    }
+                });
+            }
+
+
+            const formCadastro = document.getElementById('form-cadastro');
+            if (formCadastro) {
+                formCadastro.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const nomeCompletoInput = document.getElementById('nome-completo');
+                    const emailCadastroInput = document.getElementById('email-cadastro');
+                    const senha = document.getElementById('senha-cadastro').value;
+                    const confirmarSenha = document.getElementById('confirmar-senha').value;
+
+                    if (senha !== confirmarSenha) {
+                        showCustomAlert("As senhas não coincidem. Tente novamente.", "Erro de Cadastro", "error");
+                        return;
+                    }
+                    if (nomeCompletoInput && nomeCompletoInput.value.trim() !== "") {
+                        currentUserName = nomeCompletoInput.value.trim();
+                    } else {
+                        currentUserName = "Usuário"; 
+                    }
+                    currentUserEmail = emailCadastroInput.value.trim() || "usuario@exemplo.com";
+                    showCustomAlert(`Cadastro realizado para ${currentUserName}! Preencha o questionário.`, "Bem-vindo(a)!", "success");
+                    showScreen('questionario');
+                });
+            }
+
+            const formLogin = document.getElementById('form-login');
+            if (formLogin) {
+                formLogin.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const emailLoginInput = document.getElementById('email-login');
+                    if (emailLoginInput && emailLoginInput.value.toLowerCase() === "sky@exemplo.com") {
+                        currentUserName = "Sky";
+                        currentUserEmail = "sky@exemplo.com";
+                    } else if (emailLoginInput && emailLoginInput.value.includes('@')) {
+                        currentUserName = emailLoginInput.value.split('@')[0];
+                        currentUserEmail = emailLoginInput.value;
+                    } else {
+                        currentUserName = "Usuário Logado";
+                        currentUserEmail = "logado@exemplo.com";
+                    }
+                    // Atualiza o nome do responsável no formulário de contato com especialista
+                    const nomeContatoEspecialista = document.getElementById('nome-contato-especialista');
+                    if (nomeContatoEspecialista) {
+                        nomeContatoEspecialista.value = `Responsável por ${currentUserName}`;
+                    }
+                    showScreen('recomendacao');
+                });
+            }
+
+            const formQuestionario = document.getElementById('form-questionario');
+            if (formQuestionario) {
+                formQuestionario.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    showCustomAlert("Preferências salvas! Preparando suas recomendações.", "Obrigado!", "success");
+                    showScreen('recomendacao');
+                });
+            }
+            
+            const formPerfilInfo = document.getElementById('form-perfil-info');
+            if(formPerfilInfo) {
+                formPerfilInfo.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const perfilNomeInput = document.getElementById('perfil-nome');
+                    currentUserName = perfilNomeInput.value.trim() || currentUserName;
+                    showCustomAlert('Informações pessoais salvas!', 'Sucesso', 'success');
+                    updateDynamicContent();
+                });
+            }
+
+            const formPerfilAcessibilidade = document.getElementById('form-perfil-acessibilidade');
+            if(formPerfilAcessibilidade) {
+                formPerfilAcessibilidade.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    showCustomAlert('Opções de acessibilidade salvas!', 'Sucesso', 'success');
+                });
+            }
+
+            document.querySelectorAll('.btn-explorar-conteudo').forEach(button => {
+                button.addEventListener('click', function() {
+                    currentContentTitle = this.dataset.contentTitle || "Conteúdo Interativo";
+                    showScreen('acessoConteudo');
+                });
+            });
+
+            const btnFecharConteudo = document.getElementById('btn-fechar-conteudo');
+            if (btnFecharConteudo) {
+                btnFecharConteudo.addEventListener('click', function() {
+                    const conteudoWrapper = document.getElementById('conteudo-wrapper');
+                    if (conteudoWrapper) conteudoWrapper.innerHTML = ''; 
+                    const placeholderText = document.getElementById('acesso-conteudo-placeholder');
+                    if (placeholderText) {
+                         placeholderText.textContent = 'Carregando...'; 
+                         placeholderText.style.display = 'block';
+                    }
+                    showScreen('recomendacao');
+                });
+            }
+            
+            const fontSizeSelect = document.getElementById('font-size-content');
+            if(fontSizeSelect) {
+                fontSizeSelect.addEventListener('change', function() {
+                    const conteudoWrapper = document.getElementById('conteudo-wrapper');
+                    conteudoWrapper.classList.remove('text-sm', 'text-base', 'text-lg', 'text-xl'); 
+                    let newSizeClass = 'text-base'; 
+                    if (this.value === 'medio') {
+                        newSizeClass = 'text-lg'; 
+                    } else if (this.value === 'grande') {
+                        newSizeClass = 'text-xl'; 
+                    }
+                    conteudoWrapper.classList.add(newSizeClass);
+                    
+                    if (currentContentData[currentContentTitle] && currentContentData[currentContentTitle].type === "text") {
+                        conteudoWrapper.querySelectorAll('p').forEach(pEl => {
+                            pEl.className = `text-gray-700 mb-2 leading-relaxed ${newSizeClass}`;
+                        });
+                         conteudoWrapper.querySelectorAll('h2').forEach(hEl => {
+                            hEl.className = `font-semibold mb-3 text-purple-700 ${newSizeClass === 'text-xl' ? 'text-2xl' : (newSizeClass === 'text-lg' ? 'text-xl' : 'text-lg') }`; 
+                        });
+                    }
+                });
+            }
+
+
+            const btnMarcarConcluido = document.getElementById('btn-marcar-concluido');
+            if (btnMarcarConcluido) {
+                btnMarcarConcluido.addEventListener('click', function() {
+                    showCustomAlert(`"${currentContentTitle}" marcado como concluído!`, 'Progresso Atualizado', 'success');
+                    const conteudoWrapper = document.getElementById('conteudo-wrapper');
+                    if (conteudoWrapper) conteudoWrapper.innerHTML = ''; 
+                    const placeholderText = document.getElementById('acesso-conteudo-placeholder');
+                     if (placeholderText) {
+                         placeholderText.textContent = 'Carregando...';
+                         placeholderText.style.display = 'block';
+                    }
+                    showScreen('progressoUsuario'); 
+                });
+            }
+            
+            const btnAjustarPreferenciasPerfil = document.getElementById('btn-ajustar-preferencias-perfil');
+            if(btnAjustarPreferenciasPerfil) {
+                btnAjustarPreferenciasPerfil.addEventListener('click', function(event) {
+                     event.preventDefault();
+                     showScreen('questionario');
+                });
+            }
+
+            const btnSairContaPerfil = document.getElementById('btn-sair-conta-perfil');
+            if(btnSairContaPerfil) {
+                btnSairContaPerfil.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    currentUserName = "Sky"; 
+                    currentUserEmail = "sky@exemplo.com";
+                    
+                    const formLoginEmail = document.getElementById('email-login');
+                    if(formLoginEmail) formLoginEmail.value = 'sky@exemplo.com'; 
+                    const formLoginPass = document.getElementById('senha-login');
+                    if(formLoginPass) formLoginPass.value = 'senha123'; 
+                    
+                    const formCadastroNome = document.getElementById('nome-completo');
+                    if(formCadastroNome) formCadastroNome.value = '';
+                    const formCadastroEmail = document.getElementById('email-cadastro');
+                    if(formCadastroEmail) formCadastroEmail.value = '';
+                    
+                    showScreen('login');
+                });
+            }
+            updateDynamicContent(); 
+        });
+    </script>
+
+</body>
+</html>
