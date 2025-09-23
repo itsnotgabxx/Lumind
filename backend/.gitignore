@@ -1,0 +1,21 @@
+# Ambientes Virtuais
+venv/
+.venv/
+
+# Arquivos de Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Arquivos de IDEs
+.idea/
+.vscode/
+
+# Arquivos de Sistema
+.DS_Store
+Thumbs.db
