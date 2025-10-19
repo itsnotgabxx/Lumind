@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models.user_model import User
-from app.schemas.user_schema import UserCreate, LearningPreferencesUpdate, UserProfileUpdate
+from app.schemas.user_schema import UserCreate, LearningPreferencesUpdate, UserProfileUpdate, AccessibilitySettings
 from passlib.context import CryptContext
 from typing import Optional
 import json
@@ -81,6 +81,17 @@ def update_user_profile(db: Session, user_id: int, profile_update: UserProfileUp
         user.guardian_name = profile_update.guardian_name
     if profile_update.guardian_email is not None:
         user.guardian_email = profile_update.guardian_email
+    
+    db.commit()
+    db.refresh(user)
+    return user
+
+def update_user_accessibility(db: Session, user_id: int, accessibility_settings: AccessibilitySettings) -> Optional[User]:
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return None
+    
+    user.accessibility_settings = json.dumps(accessibility_settings.dict())
     
     db.commit()
     db.refresh(user)

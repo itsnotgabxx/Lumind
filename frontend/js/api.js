@@ -111,6 +111,13 @@ class LumindAPI {
         });
     }
 
+    async updateAccessibility(accessibilityData) {
+        return await this.request('/auth/accessibility', {
+            method: 'PUT',
+            body: JSON.stringify(accessibilityData)
+        });
+    }
+
     // Conteúdo
     async getContent() {
         return await this.request('/content');

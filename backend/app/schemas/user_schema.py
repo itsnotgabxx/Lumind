@@ -90,3 +90,9 @@ class MessageResponse(BaseModel):
     message_type: str
     created_at: datetime
     is_read: bool = False
+
+class AccessibilitySettings(BaseModel):
+    font_size: str = "padrão"  # padrão, medio, grande
+    contrast: str = "padrão"  # padrão, alto_contraste
+    reduce_animations: bool = False
+    text_to_speech: bool = False

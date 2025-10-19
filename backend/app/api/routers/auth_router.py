@@ -6,7 +6,7 @@ from jose import JWTError, jwt
 from app.db.database import get_db
 from app.schemas.user_schema import (
     UserCreate, UserLogin, UserResponse, Token, 
-    LearningPreferencesUpdate, UserProfileUpdate
+    LearningPreferencesUpdate, UserProfileUpdate, AccessibilitySettings
 )
 from app.services.user_service import (
     create_user, authenticate_user, get_user_by_email,
@@ -100,6 +100,22 @@ async def update_profile(
 ):
     """Atualiza o perfil do usuário"""
     updated_user = update_user_profile(db, current_user.id, profile_update)
+    if not updated_user:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuário não encontrado"
+        )
+    return updated_user
+
+@router.put("/accessibility", response_model=UserResponse)
+async def update_accessibility(
+    accessibility_settings: AccessibilitySettings,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Atualiza as configurações de acessibilidade do usuário"""
+    from app.services.user_service import update_user_accessibility
+    updated_user = update_user_accessibility(db, current_user.id, accessibility_settings)
     if not updated_user:
         raise HTTPException(
             status_code=404,

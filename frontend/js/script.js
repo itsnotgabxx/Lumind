@@ -238,13 +238,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Formulário Enviar Incentivo
     const formEnviarIncentivo = document.getElementById('form-enviar-incentivo');
     if(formEnviarIncentivo){
-        formEnviarIncentivo.addEventListener('submit', function(event){
+        formEnviarIncentivo.addEventListener('submit', async function(event){
             event.preventDefault();
             const mensagemIncentivo = document.getElementById('mensagem-incentivo').value;
             if(mensagemIncentivo.trim()){
-                 showCustomAlert(`Mensagem de incentivo enviada para ${currentUserName}! (simulado)`, "Mensagem Enviada!", "success");
-                 document.getElementById('mensagem-incentivo').value = '';
-                 showScreen('acompanhamentoResponsavel');
+                try {
+                    if (api.token && api.user) {
+                        // Envia mensagem para o próprio usuário (simulando responsável enviando para estudante)
+                        await api.sendMessage(api.user.id, mensagemIncentivo, 'incentive');
+                        showCustomAlert(`Mensagem de incentivo enviada para ${currentUserName}!`, "Mensagem Enviada!", "success");
+                    } else {
+                        showCustomAlert(`Mensagem de incentivo enviada para ${currentUserName}! (simulado)`, "Mensagem Enviada!", "success");
+                    }
+                    document.getElementById('mensagem-incentivo').value = '';
+                    showScreen('acompanhamentoResponsavel');
+                } catch (error) {
+                    showCustomAlert("Erro ao enviar mensagem. Tente novamente.", "Erro", "error");
+                }
             } else {
                 showCustomAlert("Por favor, escreva uma mensagem.", "Campo Obrigatório", "warning");
             }
@@ -362,9 +372,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const formPerfilAcessibilidade = document.getElementById('form-perfil-acessibilidade');
     if(formPerfilAcessibilidade) {
-        formPerfilAcessibilidade.addEventListener('submit', function(event) {
+        formPerfilAcessibilidade.addEventListener('submit', async function(event) {
             event.preventDefault();
-            showCustomAlert('Opções de acessibilidade salvas!', 'Sucesso', 'success');
+            
+            try {
+                const accessibilityData = {
+                    font_size: document.getElementById('acess-font-size').value,
+                    contrast: document.getElementById('acess-contrast').value,
+                    reduce_animations: document.getElementById('acess-animations').checked,
+                    text_to_speech: document.getElementById('acess-tts-global').checked
+                };
+                
+                if (api.token && api.user) {
+                    await api.updateAccessibility(accessibilityData);
+                    showCustomAlert('Opções de acessibilidade salvas!', 'Sucesso', 'success');
+                } else {
+                    showCustomAlert('Opções de acessibilidade salvas! (simulado)', 'Sucesso', 'success');
+                }
+            } catch (error) {
+                showCustomAlert('Erro ao salvar configurações de acessibilidade.', 'Erro', 'error');
+            }
         });
     }
 
@@ -503,6 +530,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     updateDynamicContent(); 
+    
+    // Adiciona listener para o botão "Ver Meu Progresso"
+    const btnVerProgresso = document.querySelector('button[onclick="showScreen(\'progressoUsuario\')"]');
+    if (btnVerProgresso) {
+        btnVerProgresso.addEventListener('click', async function(event) {
+            event.preventDefault();
+            if (api.token && api.user) {
+                try {
+                    const progress = await api.getUserProgress();
+                    const activities = await api.getUserActivities();
+                    renderUserProgress(progress);
+                    renderUserActivities(activities);
+                } catch (error) {
+                    console.error('Erro ao carregar progresso:', error);
+                }
+            }
+            showScreen('progressoUsuario');
+        });
+    }
+    
+    // Adiciona listener para o botão "Responsável"
+    const btnResponsavel = document.querySelector('button[onclick="showScreen(\'acompanhamentoResponsavel\')"]');
+    if (btnResponsavel) {
+        btnResponsavel.addEventListener('click', async function(event) {
+            event.preventDefault();
+            if (api.token && api.user) {
+                try {
+                    const progress = await api.getUserProgress();
+                    const activities = await api.getUserActivities();
+                    renderGuardianPanel(progress, activities);
+                } catch (error) {
+                    console.error('Erro ao carregar dados para responsável:', error);
+                }
+            }
+            showScreen('acompanhamentoResponsavel');
+        });
+    }
 });
 
 // Função para carregar dados do usuário da API
@@ -515,6 +579,9 @@ async function loadUserData() {
         
         // Carrega recomendações
         const recommendations = await api.getRecommendations();
+        
+        // Carrega atividades do usuário
+        const activities = await api.getUserActivities();
         
         // Atualiza dados locais
         currentUserName = api.user.full_name;
@@ -547,6 +614,10 @@ async function loadUserData() {
         
         // Renderiza recomendações no grid
         renderRecommendations(recommendations);
+        
+        // Renderiza progresso e atividades
+        renderUserProgress(progress);
+        renderUserActivities(activities);
 
         updateDynamicContent();
     } catch (error) {
@@ -595,4 +666,169 @@ function renderRecommendations(recommendations) {
 
         grid.appendChild(card);
     });
+}
+
+// Renderiza progresso do usuário
+function renderUserProgress(progress) {
+    if (!progress) return;
+    
+    // Atualiza resumo geral
+    const progressPercentage = document.querySelector('#progressoUsuario .text-3xl.font-bold.text-green-600');
+    if (progressPercentage) {
+        progressPercentage.textContent = `${progress.progress_percentage}%`;
+    }
+    
+    const progressBar = document.querySelector('#progressoUsuario .progress-bar-fill');
+    if (progressBar) {
+        progressBar.style.width = `${progress.progress_percentage}%`;
+    }
+    
+    // Atualiza conquistas
+    const achievementsContainer = document.querySelector('#progressoUsuario .flex.flex-wrap.gap-4');
+    if (achievementsContainer && progress.achievements) {
+        achievementsContainer.innerHTML = '';
+        
+        progress.achievements.forEach((achievement, index) => {
+            const span = document.createElement('span');
+            span.className = 'text-3xl transform hover:scale-125 transition-transform text-amber-500';
+            span.title = achievement;
+            
+            // Mapeia conquistas para emojis
+            const emojiMap = {
+                'Explorador Curioso': '🌍',
+                'Mestre dos Vídeos': '🎬',
+                'Leitor Voraz': '📚'
+            };
+            
+            span.textContent = emojiMap[achievement] || '🏆';
+            achievementsContainer.appendChild(span);
+        });
+        
+        // Adiciona conquistas não desbloqueadas
+        const totalAchievements = 10;
+        for (let i = progress.achievements.length; i < totalAchievements; i++) {
+            const span = document.createElement('span');
+            span.className = 'text-3xl text-gray-300';
+            span.title = 'Ainda não desbloqueado';
+            span.textContent = '❓';
+            achievementsContainer.appendChild(span);
+        }
+        
+        const achievementsText = document.querySelector('#progressoUsuario .text-sm.text-gray-500.mt-3');
+        if (achievementsText) {
+            achievementsText.textContent = `${progress.achievements.length} de ${totalAchievements} conquistas!`;
+        }
+    }
+}
+
+// Renderiza atividades do usuário
+function renderUserActivities(activities) {
+    if (!activities || !Array.isArray(activities)) return;
+    
+    const activitiesList = document.querySelector('#progressoUsuario .space-y-3');
+    if (!activitiesList) return;
+    
+    activitiesList.innerHTML = '';
+    
+    activities.forEach(activity => {
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors';
+        
+        const div = document.createElement('div');
+        
+        const title = document.createElement('p');
+        title.className = 'font-medium text-gray-700';
+        title.textContent = activity.content?.title || 'Atividade';
+        div.appendChild(title);
+        
+        const status = document.createElement('p');
+        status.className = 'text-sm text-gray-500';
+        
+        let statusText = '';
+        let statusIcon = '';
+        
+        switch (activity.status) {
+            case 'completed':
+                statusText = 'Concluído';
+                statusIcon = '<i class="fas fa-check-circle mr-1"></i>';
+                break;
+            case 'in_progress':
+                statusText = `Em andamento - ${activity.progress_percentage}%`;
+                statusIcon = '<i class="fas fa-spinner fa-spin mr-1"></i>';
+                break;
+            default:
+                statusText = 'Não iniciado';
+                statusIcon = '<i class="far fa-circle mr-1"></i>';
+        }
+        
+        status.innerHTML = statusText;
+        div.appendChild(status);
+        
+        const span = document.createElement('span');
+        span.className = activity.status === 'completed' ? 'text-green-500 font-semibold' : 
+                        activity.status === 'in_progress' ? 'text-blue-500 font-semibold' : 
+                        'text-gray-400 font-semibold';
+        span.innerHTML = statusIcon;
+        
+        li.appendChild(div);
+        li.appendChild(span);
+        
+        activitiesList.appendChild(li);
+    });
+}
+
+// Renderiza painel do responsável
+function renderGuardianPanel(progress, activities) {
+    if (!progress) return;
+    
+    // Atualiza visão geral
+    const timeSpent = document.querySelector('#acompanhamentoResponsavel .text-xl.font-semibold.text-gray-800');
+    if (timeSpent) {
+        timeSpent.textContent = `${Math.floor(progress.total_time_spent / 60)} horas`;
+    }
+    
+    const activitiesCompleted = document.querySelectorAll('#acompanhamentoResponsavel .text-xl.font-semibold.text-gray-800')[1];
+    if (activitiesCompleted) {
+        activitiesCompleted.textContent = progress.completed_activities.toString();
+    }
+    
+    const progressBar = document.querySelector('#acompanhamentoResponsavel .progress-bar-fill');
+    if (progressBar) {
+        progressBar.style.width = `${progress.progress_percentage}%`;
+    }
+    
+    const progressText = document.querySelector('#acompanhamentoResponsavel .text-sm.text-right.text-gray-500');
+    if (progressText) {
+        progressText.textContent = `${progress.progress_percentage}%`;
+    }
+    
+    // Atualiza alertas e observações baseado no progresso
+    const alertsContainer = document.querySelector('#acompanhamentoResponsavel .space-y-3');
+    if (alertsContainer && activities) {
+        alertsContainer.innerHTML = '';
+        
+        // Alerta de dificuldade se há atividades em andamento há muito tempo
+        const inProgressActivities = activities.filter(a => a.status === 'in_progress');
+        if (inProgressActivities.length > 0) {
+            const alert = document.createElement('li');
+            alert.className = 'p-3 bg-yellow-50 border border-yellow-200 rounded-md';
+            alert.innerHTML = `
+                <p class="font-medium text-yellow-700"><i class="fas fa-exclamation-triangle mr-2"></i> Atividades em Andamento</p>
+                <p class="text-sm text-yellow-600 mt-1">${currentUserName} tem ${inProgressActivities.length} atividade(s) em andamento.</p>
+            `;
+            alertsContainer.appendChild(alert);
+        }
+        
+        // Alerta de conquista se completou atividades recentemente
+        const completedActivities = activities.filter(a => a.status === 'completed');
+        if (completedActivities.length > 0) {
+            const alert = document.createElement('li');
+            alert.className = 'p-3 bg-green-50 border border-green-200 rounded-md';
+            alert.innerHTML = `
+                <p class="font-medium text-green-700"><i class="fas fa-star mr-2"></i> Conquista Notável!</p>
+                <p class="text-sm text-green-600 mt-1">${currentUserName} completou ${completedActivities.length} atividade(s) com sucesso!</p>
+            `;
+            alertsContainer.appendChild(alert);
+        }
+    }
 }
