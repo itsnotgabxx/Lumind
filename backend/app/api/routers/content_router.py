@@ -7,8 +7,6 @@ from app.services.content_service import (
     get_all_content, get_content_by_id, get_user_activity_progress,
     update_activity_progress, get_user_progress_summary, get_recommendations_for_user
 )
-from app.api.routers.auth_router import get_current_user
-from app.models.user_model import User
 
 router = APIRouter()
 
@@ -36,32 +34,32 @@ async def get_content(
         )
     return content
 
-@router.get("/recommendations", response_model=List[ContentItem])
+@router.get("/users/{user_id}/recommendations", response_model=List[ContentItem])
 async def get_recommendations(
+    user_id: int,
     limit: int = 5,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Obtém recomendações personalizadas para o usuário"""
-    recommendations = get_recommendations_for_user(db, current_user.id, limit)
+    recommendations = get_recommendations_for_user(db, user_id, limit)
     return recommendations
 
-@router.get("/progress", response_model=UserProgress)
+@router.get("/users/{user_id}/progress", response_model=UserProgress)
 async def get_user_progress(
-    current_user: User = Depends(get_current_user),
+    user_id: int,
     db: Session = Depends(get_db)
 ):
     """Obtém o progresso do usuário"""
-    progress = get_user_progress_summary(db, current_user.id)
+    progress = get_user_progress_summary(db, user_id)
     return progress
 
-@router.post("/progress/{content_id}")
+@router.post("/users/{user_id}/progress/{content_id}")
 async def update_progress(
+    user_id: int,
     content_id: int,
     status: str,
     progress_percentage: int = 0,
     time_spent: int = 0,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Atualiza o progresso do usuário em um conteúdo"""
@@ -80,16 +78,16 @@ async def update_progress(
         )
     
     progress = update_activity_progress(
-        db, current_user.id, content_id, status, progress_percentage, time_spent
+        db, user_id, content_id, status, progress_percentage, time_spent
     )
     
     return {"message": "Progresso atualizado com sucesso", "progress": progress}
 
-@router.get("/activities")
+@router.get("/users/{user_id}/activities")
 async def get_user_activities(
-    current_user: User = Depends(get_current_user),
+    user_id: int,
     db: Session = Depends(get_db)
 ):
     """Lista todas as atividades do usuário com progresso"""
-    activities = get_user_activity_progress(db, current_user.id)
+    activities = get_user_activity_progress(db, user_id)
     return activities

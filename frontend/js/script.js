@@ -211,7 +211,7 @@ function updateDynamicContent() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Verifica se o usuário já está logado
-    if (api.token && api.user) {
+    if (api.user) {
         showScreen('recomendacao');
         await loadUserData();
     } else {
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const mensagemIncentivo = document.getElementById('mensagem-incentivo').value;
             if(mensagemIncentivo.trim()){
                 try {
-                    if (api.token && api.user) {
+                    if (api.user) {
                         // Envia mensagem para o próprio usuário (simulando responsável enviando para estudante)
                         await api.sendMessage(api.user.id, mensagemIncentivo, 'incentive');
                         showCustomAlert(`Mensagem de incentivo enviada para ${currentUserName}!`, "Mensagem Enviada!", "success");
@@ -319,10 +319,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         formLogin.addEventListener('submit', async function(event) {
             event.preventDefault();
             const email = document.getElementById('email-login').value;
-            const password = document.getElementById('senha-login').value;
 
             try {
-                await api.login(email, password);
+                await api.login(email); // A senha não é mais necessária
                 
                 currentUserName = api.user.full_name;
                 currentUserEmail = api.user.email;
@@ -383,7 +382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     text_to_speech: document.getElementById('acess-tts-global').checked
                 };
                 
-                if (api.token && api.user) {
+                if (api.user) {
                     await api.updateAccessibility(accessibilityData);
                     showCustomAlert('Opções de acessibilidade salvas!', 'Sucesso', 'success');
                 } else {
@@ -476,7 +475,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnMarcarConcluido) {
         btnMarcarConcluido.addEventListener('click', async function() {
             try {
-                if (api.token && currentContentId) {
+                if (api.user && currentContentId) {
                     await api.updateProgress(currentContentId, 'completed', 100, 0);
                 }
                 showCustomAlert(`"${currentContentTitle}" marcado como concluído!`, 'Progresso Atualizado', 'success');
@@ -536,7 +535,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnVerProgresso) {
         btnVerProgresso.addEventListener('click', async function(event) {
             event.preventDefault();
-            if (api.token && api.user) {
+            if (api.user) {
                 try {
                     const progress = await api.getUserProgress();
                     const activities = await api.getUserActivities();
@@ -555,7 +554,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnResponsavel) {
         btnResponsavel.addEventListener('click', async function(event) {
             event.preventDefault();
-            if (api.token && api.user) {
+            if (api.user) {
                 try {
                     const progress = await api.getUserProgress();
                     const activities = await api.getUserActivities();
@@ -579,6 +578,9 @@ async function loadUserData() {
         
         // Carrega recomendações
         const recommendations = await api.getRecommendations();
+        
+        // Renderiza recomendações no grid
+        renderRecommendations(recommendations);
         
         // Carrega atividades do usuário
         const activities = await api.getUserActivities();
@@ -611,9 +613,6 @@ async function loadUserData() {
                 console.error('Erro ao parsear interesses:', e);
             }
         }
-        
-        // Renderiza recomendações no grid
-        renderRecommendations(recommendations);
         
         // Renderiza progresso e atividades
         renderUserProgress(progress);

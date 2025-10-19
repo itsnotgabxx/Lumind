@@ -25,7 +25,7 @@ user_model.Base.metadata.create_all(bind=engine)
 content_model.Base.metadata.create_all(bind=engine)
 
 # Incluir routers
-app.include_router(auth_router.router, prefix="/api/auth", tags=["authentication"])
+app.include_router(auth_router.router, prefix="/api/users", tags=["users"])
 app.include_router(content_router.router, prefix="/api", tags=["content"])
 app.include_router(message_router.router, prefix="/api/messages", tags=["messages"])
 

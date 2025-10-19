@@ -9,7 +9,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
+    password = Column(String(255), nullable=False) # Campo mantido para compatibilidade com o frontend, mas não é mais hasheado
     birth_date = Column(DateTime, nullable=True)
     guardian_name = Column(String(255), nullable=True)
     guardian_email = Column(String(255), nullable=True)

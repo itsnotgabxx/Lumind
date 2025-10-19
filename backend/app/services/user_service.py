@@ -1,17 +1,8 @@
 from sqlalchemy.orm import Session
 from app.models.user_model import User
 from app.schemas.user_schema import UserCreate, LearningPreferencesUpdate, UserProfileUpdate, AccessibilitySettings
-from passlib.context import CryptContext
 from typing import Optional
 import json
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter(User.email == email).first()
@@ -20,8 +11,6 @@ def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()
 
 def create_user(db: Session, user: UserCreate) -> User:
-    hashed_password = get_password_hash(user.password)
-    
     # Converte listas para JSON strings
     learning_preferences_json = None
     interests_json = None
@@ -34,7 +23,7 @@ def create_user(db: Session, user: UserCreate) -> User:
     db_user = User(
         full_name=user.full_name,
         email=user.email,
-        hashed_password=hashed_password,
+        password=user.password, # Senha é salva como texto plano
         birth_date=user.birth_date,
         guardian_name=user.guardian_name,
         guardian_email=user.guardian_email,
@@ -46,14 +35,6 @@ def create_user(db: Session, user: UserCreate) -> User:
     db.commit()
     db.refresh(db_user)
     return db_user
-
-def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
-    user = get_user_by_email(db, email)
-    if not user:
-        return None
-    if not verify_password(password, user.hashed_password):
-        return None
-    return user
 
 def update_user_preferences(db: Session, user_id: int, preferences: LearningPreferencesUpdate) -> Optional[User]:
     user = get_user_by_id(db, user_id)

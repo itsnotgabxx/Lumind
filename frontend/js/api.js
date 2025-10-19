@@ -4,7 +4,6 @@ const API_BASE_URL = 'http://localhost:8000/api';
 // Classe para gerenciar a API
 class LumindAPI {
     constructor() {
-        this.token = localStorage.getItem('lumind_token');
         this.user = JSON.parse(localStorage.getItem('lumind_user') || 'null');
     }
 
@@ -18,11 +17,6 @@ class LumindAPI {
             },
             ...options
         };
-
-        // Adiciona token de autenticação se disponível
-        if (this.token) {
-            config.headers.Authorization = `Bearer ${this.token}`;
-        }
 
         try {
             const response = await fetch(url, config);
@@ -40,79 +34,57 @@ class LumindAPI {
     }
 
     // Autenticação
-    async login(email, password) {
-        const formData = new FormData();
-        formData.append('username', email);
-        formData.append('password', password);
-
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-            method: 'POST',
-            body: formData
+    async login(email) {
+        // Usa o novo endpoint que não requer senha
+        const user = await this.request(`/users/login-by-email?user_email=${encodeURIComponent(email)}`, {
+            method: 'POST'
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.detail || 'Erro no login');
-        }
-
-        this.token = data.access_token;
-        localStorage.setItem('lumind_token', this.token);
-
-        // Busca dados do usuário
-        await this.getCurrentUser();
-        return data;
+        this.user = user;
+        localStorage.setItem('lumind_user', JSON.stringify(user));
+        return user;
     }
 
     async register(userData) {
-        const data = await this.request('/auth/register', {
+        const newUser = await this.request('/users/register', {
             method: 'POST',
             body: JSON.stringify(userData)
         });
 
         // Após registro, faz login automaticamente
-        await this.login(userData.email, userData.password);
-        return data;
+        await this.login(newUser.email);
+        return newUser;
     }
 
     async getCurrentUser() {
-        if (!this.token) return null;
-
-        try {
-            const user = await this.request('/auth/me');
-            this.user = user;
-            localStorage.setItem('lumind_user', JSON.stringify(user));
-            return user;
-        } catch (error) {
-            this.logout();
-            return null;
-        }
+        // Apenas retorna o usuário que já está em memória/localStorage
+        return this.user;
     }
 
     logout() {
-        this.token = null;
         this.user = null;
-        localStorage.removeItem('lumind_token');
         localStorage.removeItem('lumind_user');
     }
 
     // Preferências de aprendizado
     async updatePreferences(preferences) {
-        return await this.request('/auth/preferences', {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/users/${this.user.id}/preferences`, {
             method: 'PUT',
             body: JSON.stringify(preferences)
         });
     }
 
     async updateProfile(profileData) {
-        return await this.request('/auth/profile', {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/users/${this.user.id}/profile`, {
             method: 'PUT',
             body: JSON.stringify(profileData)
         });
     }
 
     async updateAccessibility(accessibilityData) {
-        return await this.request('/auth/accessibility', {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/users/${this.user.id}/accessibility`, {
             method: 'PUT',
             body: JSON.stringify(accessibilityData)
         });
@@ -120,7 +92,7 @@ class LumindAPI {
 
     // Conteúdo
     async getContent() {
-        return await this.request('/content');
+        return await this.request(`/content`);
     }
 
     async getContentById(id) {
@@ -128,27 +100,32 @@ class LumindAPI {
     }
 
     async getRecommendations(limit = 5) {
-        return await this.request(`/recommendations?limit=${limit}`);
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/users/${this.user.id}/recommendations?limit=${limit}`);
     }
 
     // Progresso
     async getUserProgress() {
-        return await this.request('/progress');
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/users/${this.user.id}/progress`);
     }
 
     async updateProgress(contentId, status, progressPercentage = 0, timeSpent = 0) {
-        return await this.request(`/progress/${contentId}?status=${status}&progress_percentage=${progressPercentage}&time_spent=${timeSpent}`, {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/users/${this.user.id}/progress/${contentId}?status=${status}&progress_percentage=${progressPercentage}&time_spent=${timeSpent}`, {
             method: 'POST'
         });
     }
 
     async getUserActivities() {
-        return await this.request('/activities');
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/users/${this.user.id}/activities`);
     }
 
     // Mensagens
     async sendMessage(recipientId, message, messageType = 'incentive') {
-        return await this.request('/messages/send', {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/messages/users/${this.user.id}/send`, {
             method: 'POST',
             body: JSON.stringify({
                 recipient_id: recipientId,
@@ -159,22 +136,26 @@ class LumindAPI {
     }
 
     async getReceivedMessages(messageType = null) {
-        const endpoint = messageType ? `/messages/received?message_type=${messageType}` : '/messages/received';
+        if (!this.user) throw new Error("Usuário não logado.");
+        const endpoint = messageType ? `/messages/users/${this.user.id}/received?message_type=${messageType}` : `/messages/users/${this.user.id}/received`;
         return await this.request(endpoint);
     }
 
     async getUnreadCount() {
-        return await this.request('/messages/unread-count');
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/messages/users/${this.user.id}/unread-count`);
     }
 
     async markMessageAsRead(messageId) {
-        return await this.request(`/messages/mark-read/${messageId}`, {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/messages/users/${this.user.id}/mark-read/${messageId}`, {
             method: 'POST'
         });
     }
 
     async getGuardianMessages(studentId) {
-        return await this.request(`/messages/guardian/${studentId}`);
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/messages/guardian/${this.user.id}/student/${studentId}`);
     }
 }
 

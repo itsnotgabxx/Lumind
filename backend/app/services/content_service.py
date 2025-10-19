@@ -111,12 +111,12 @@ def get_recommendations_for_user(db: Session, user_id: int, limit: int = 5) -> L
     recommended_content = []
     
     # Se o usuário prefere vídeos, busca vídeos
-    if "video" in learning_preferences:
+    if "video" in learning_preferences or "imagem" in learning_preferences:
         videos = get_content_by_type(db, "video")
         recommended_content.extend(videos[:2])
     
     # Se o usuário prefere leitura, busca textos
-    if "leitura" in learning_preferences:
+    if "leitura" in learning_preferences or "audio" in learning_preferences:
         texts = get_content_by_type(db, "text")
         recommended_content.extend(texts[:2])
     
