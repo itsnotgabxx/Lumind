@@ -4,10 +4,17 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from app.db.database import get_db
-from app.schemas.user_schema import UserCreate, UserLogin, UserResponse, Token
-from app.services.user_service import create_user, authenticate_user, get_user_by_email
+from app.schemas.user_schema import (
+    UserCreate, UserLogin, UserResponse, Token, 
+    LearningPreferencesUpdate, UserProfileUpdate
+)
+from app.services.user_service import (
+    create_user, authenticate_user, get_user_by_email,
+    update_user_preferences, update_user_profile
+)
 from app.models.user_model import User
 from app.core.config import settings
+import json
 
 router = APIRouter()
 
@@ -69,3 +76,33 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
 @router.get("/me", response_model=UserResponse)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+@router.put("/preferences", response_model=UserResponse)
+async def update_preferences(
+    preferences: LearningPreferencesUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Atualiza as preferências de aprendizado do usuário"""
+    updated_user = update_user_preferences(db, current_user.id, preferences)
+    if not updated_user:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuário não encontrado"
+        )
+    return updated_user
+
+@router.put("/profile", response_model=UserResponse)
+async def update_profile(
+    profile_update: UserProfileUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Atualiza o perfil do usuário"""
+    updated_user = update_user_profile(db, current_user.id, profile_update)
+    if not updated_user:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuário não encontrado"
+        )
+    return updated_user

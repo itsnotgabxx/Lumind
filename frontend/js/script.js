@@ -1,6 +1,7 @@
 let currentUserName = "Sky"; 
 let currentUserEmail = "sky@exemplo.com"; 
 let currentContentTitle = "Conteúdo Interativo"; 
+let currentContentId = null; // id do conteúdo vindo do backend
 let currentContentData = { 
     "Aventuras no Espaço Sideral": {
         type: "video",
@@ -208,8 +209,14 @@ function updateDynamicContent() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    showScreen('login'); 
+document.addEventListener('DOMContentLoaded', async () => {
+    // Verifica se o usuário já está logado
+    if (api.token && api.user) {
+        showScreen('recomendacao');
+        await loadUserData();
+    } else {
+        showScreen('login');
+    }
 
     // Formulário Esqueci Senha
     const formEsqueciSenha = document.getElementById('form-esqueci-senha');
@@ -271,58 +278,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const formCadastro = document.getElementById('form-cadastro');
     if (formCadastro) {
-        formCadastro.addEventListener('submit', function(event) {
+        formCadastro.addEventListener('submit', async function(event) {
             event.preventDefault();
-            const nomeCompletoInput = document.getElementById('nome-completo');
-            const emailCadastroInput = document.getElementById('email-cadastro');
-            const senha = document.getElementById('senha-cadastro').value;
-            const confirmarSenha = document.getElementById('confirmar-senha').value;
+            const formData = new FormData(formCadastro);
+            const senha = formData.get('senha-cadastro');
+            const confirmarSenha = formData.get('confirmar-senha');
 
             if (senha !== confirmarSenha) {
                 showCustomAlert("As senhas não coincidem. Tente novamente.", "Erro de Cadastro", "error");
                 return;
             }
-            if (nomeCompletoInput && nomeCompletoInput.value.trim() !== "") {
-                currentUserName = nomeCompletoInput.value.trim();
-            } else {
-                currentUserName = "Usuário"; 
+
+            try {
+                const userData = formDataToUserCreate(formData);
+                await api.register(userData);
+                
+                currentUserName = userData.full_name;
+                currentUserEmail = userData.email;
+                
+                showCustomAlert(`Cadastro realizado para ${currentUserName}! Preencha o questionário.`, "Bem-vindo(a)!", "success");
+                showScreen('questionario');
+            } catch (error) {
+                showCustomAlert(error.message, "Erro no Cadastro", "error");
             }
-            currentUserEmail = emailCadastroInput.value.trim() || "usuario@exemplo.com";
-            showCustomAlert(`Cadastro realizado para ${currentUserName}! Preencha o questionário.`, "Bem-vindo(a)!", "success");
-            showScreen('questionario');
         });
     }
 
     const formLogin = document.getElementById('form-login');
     if (formLogin) {
-        formLogin.addEventListener('submit', function(event) {
+        formLogin.addEventListener('submit', async function(event) {
             event.preventDefault();
-            const emailLoginInput = document.getElementById('email-login');
-            if (emailLoginInput && emailLoginInput.value.toLowerCase() === "sky@exemplo.com") {
-                currentUserName = "Sky";
-                currentUserEmail = "sky@exemplo.com";
-            } else if (emailLoginInput && emailLoginInput.value.includes('@')) {
-                currentUserName = emailLoginInput.value.split('@')[0];
-                currentUserEmail = emailLoginInput.value;
-            } else {
-                currentUserName = "Usuário Logado";
-                currentUserEmail = "logado@exemplo.com";
+            const email = document.getElementById('email-login').value;
+            const password = document.getElementById('senha-login').value;
+
+            try {
+                await api.login(email, password);
+                
+                currentUserName = api.user.full_name;
+                currentUserEmail = api.user.email;
+                
+                // Atualiza o nome do responsável no formulário de contato com especialista
+                const nomeContatoEspecialista = document.getElementById('nome-contato-especialista');
+                if (nomeContatoEspecialista) {
+                    nomeContatoEspecialista.value = `Responsável por ${currentUserName}`;
+                }
+                
+                await loadUserData();
+                showScreen('recomendacao');
+            } catch (error) {
+                showCustomAlert(error.message, "Erro no Login", "error");
             }
-            // Atualiza o nome do responsável no formulário de contato com especialista
-            const nomeContatoEspecialista = document.getElementById('nome-contato-especialista');
-            if (nomeContatoEspecialista) {
-                nomeContatoEspecialista.value = `Responsável por ${currentUserName}`;
-            }
-            showScreen('recomendacao');
         });
     }
 
     const formQuestionario = document.getElementById('form-questionario');
     if (formQuestionario) {
-        formQuestionario.addEventListener('submit', function(event) {
+        formQuestionario.addEventListener('submit', async function(event) {
             event.preventDefault();
-            showCustomAlert("Preferências salvas! Preparando suas recomendações.", "Obrigado!", "success");
-            showScreen('recomendacao');
+            
+            try {
+                const preferences = questionnaireDataToPreferences();
+                await api.updatePreferences(preferences);
+                
+                showCustomAlert("Preferências salvas! Preparando suas recomendações.", "Obrigado!", "success");
+                await loadUserData();
+                showScreen('recomendacao');
+            } catch (error) {
+                showCustomAlert(error.message, "Erro ao Salvar Preferências", "error");
+            }
         });
     }
     
@@ -345,11 +368,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    document.querySelectorAll('.btn-explorar-conteudo').forEach(button => {
-        button.addEventListener('click', function() {
-            currentContentTitle = this.dataset.contentTitle || "Conteúdo Interativo";
-            showScreen('acessoConteudo');
-        });
+    // Delegação de evento para botões de explorar (inclui itens renderizados dinamicamente)
+    document.addEventListener('click', async (ev) => {
+        const btn = ev.target.closest('.btn-explorar-conteudo');
+        if (!btn) return;
+
+        const contentId = btn.getAttribute('data-content-id');
+        const contentTitle = btn.getAttribute('data-content-title');
+
+        // Se vier ID do backend, busca conteúdo real
+        if (contentId) {
+            try {
+                const content = await api.getContentById(contentId);
+                currentContentId = content.id;
+                currentContentTitle = content.title;
+
+                // Monta estrutura temporária para reuso do renderer existente
+                currentContentData[currentContentTitle] = {
+                    type: content.type,
+                    source: content.source || undefined,
+                    description: content.description || '',
+                    title: content.title,
+                    paragraphs: content.content ? content.content.split('\n\n') : [],
+                    image: content.image_url || undefined,
+                    gameElement: content.type === 'interactive_game' ? `<div class="text-center p-8"><i class="fas fa-gamepad text-5xl text-amber-500 mb-4"></i><p class="text-lg">${content.title}</p><button class="btn-secondary mt-4 text-sm">Começar Jogo</button></div>` : undefined
+                };
+                showScreen('acessoConteudo');
+            } catch (e) {
+                showCustomAlert('Não foi possível carregar o conteúdo.', 'Erro', 'error');
+            }
+            return;
+        }
+
+        // Fallback: comportamento antigo por título
+        currentContentTitle = contentTitle || "Conteúdo Interativo";
+        currentContentId = null;
+        showScreen('acessoConteudo');
     });
 
     const btnFecharConteudo = document.getElementById('btn-fechar-conteudo');
@@ -393,14 +447,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const btnMarcarConcluido = document.getElementById('btn-marcar-concluido');
     if (btnMarcarConcluido) {
-        btnMarcarConcluido.addEventListener('click', function() {
-            showCustomAlert(`"${currentContentTitle}" marcado como concluído!`, 'Progresso Atualizado', 'success');
+        btnMarcarConcluido.addEventListener('click', async function() {
+            try {
+                if (api.token && currentContentId) {
+                    await api.updateProgress(currentContentId, 'completed', 100, 0);
+                }
+                showCustomAlert(`"${currentContentTitle}" marcado como concluído!`, 'Progresso Atualizado', 'success');
+            } catch (e) {
+                showCustomAlert('Falha ao registrar progresso. Mesmo assim marcamos localmente.', 'Aviso', 'warning');
+            }
+
             const conteudoWrapper = document.getElementById('conteudo-wrapper');
             if (conteudoWrapper) conteudoWrapper.innerHTML = ''; 
             const placeholderText = document.getElementById('acesso-conteudo-placeholder');
-             if (placeholderText) {
-                 placeholderText.textContent = 'Carregando...';
-                 placeholderText.style.display = 'block';
+            if (placeholderText) {
+                placeholderText.textContent = 'Carregando...';
+                placeholderText.style.display = 'block';
             }
             showScreen('progressoUsuario'); 
         });
@@ -418,9 +480,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btnSairContaPerfil) {
         btnSairContaPerfil.addEventListener('click', function(event) {
             event.preventDefault();
+            
+            // Limpa dados da API
+            api.logout();
+            
+            // Reseta variáveis locais
             currentUserName = "Sky"; 
             currentUserEmail = "sky@exemplo.com";
             
+            // Limpa formulários
             const formLoginEmail = document.getElementById('email-login');
             if(formLoginEmail) formLoginEmail.value = 'sky@exemplo.com'; 
             const formLoginPass = document.getElementById('senha-login');
@@ -436,3 +504,95 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updateDynamicContent(); 
 });
+
+// Função para carregar dados do usuário da API
+async function loadUserData() {
+    if (!api.user) return;
+    
+    try {
+        // Carrega progresso do usuário
+        const progress = await api.getUserProgress();
+        
+        // Carrega recomendações
+        const recommendations = await api.getRecommendations();
+        
+        // Atualiza dados locais
+        currentUserName = api.user.full_name;
+        currentUserEmail = api.user.email;
+        
+        // Atualiza preferências no perfil se disponíveis
+        if (api.user.learning_preferences) {
+            try {
+                const prefs = JSON.parse(api.user.learning_preferences);
+                const perfilEstilos = document.getElementById('perfil-estilos');
+                if (perfilEstilos) {
+                    perfilEstilos.textContent = prefs.join(', ');
+                }
+            } catch (e) {
+                console.error('Erro ao parsear preferências:', e);
+            }
+        }
+        
+        if (api.user.interests) {
+            try {
+                const interests = JSON.parse(api.user.interests);
+                const perfilInteresses = document.getElementById('perfil-interesses');
+                if (perfilInteresses) {
+                    perfilInteresses.textContent = interests.join(', ');
+                }
+            } catch (e) {
+                console.error('Erro ao parsear interesses:', e);
+            }
+        }
+        
+        // Renderiza recomendações no grid
+        renderRecommendations(recommendations);
+
+        updateDynamicContent();
+    } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+    }
+}
+
+// Renderiza cards de recomendação a partir da API
+function renderRecommendations(recommendations) {
+    const grid = document.querySelector('#recomendacao .grid');
+    if (!grid || !Array.isArray(recommendations)) return;
+
+    grid.innerHTML = '';
+
+    recommendations.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card transform hover:shadow-lg transition-shadow duration-300 flex flex-col';
+
+        const img = document.createElement('img');
+        img.src = item.image_url || 'images/math.png';
+        img.alt = item.title;
+        img.className = 'rounded-md mb-4 w-full h-48 object-cover';
+        card.appendChild(img);
+
+        const h3 = document.createElement('h3');
+        h3.className = 'text-lg font-semibold mb-2 text-gray-800';
+        h3.textContent = item.title;
+        card.appendChild(h3);
+
+        const p = document.createElement('p');
+        p.className = 'text-gray-600 text-sm mb-3 flex-grow';
+        p.textContent = item.description || '';
+        card.appendChild(p);
+
+        const tag = document.createElement('span');
+        tag.className = 'content-tag self-start mb-4';
+        tag.innerHTML = item.type === 'video' ? '<i class="fas fa-video mr-1"></i> Vídeo' : (item.type === 'text' ? '<i class="fas fa-book-open mr-1"></i> Leitura' : '<i class="fas fa-puzzle-piece mr-1"></i> Jogo');
+        card.appendChild(tag);
+
+        const btn = document.createElement('button');
+        btn.className = 'mt-auto w-full btn-secondary text-sm btn-explorar-conteudo';
+        btn.setAttribute('data-content-id', item.id);
+        btn.setAttribute('data-content-title', item.title);
+        btn.innerHTML = '<i class="fas fa-play-circle mr-2"></i>Explorar';
+        card.appendChild(btn);
+
+        grid.appendChild(card);
+    });
+}

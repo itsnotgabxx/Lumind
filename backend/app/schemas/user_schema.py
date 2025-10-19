@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 class UserBase(BaseModel):
@@ -34,3 +34,59 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+# Novos schemas para funcionalidades adicionais
+class LearningPreferencesUpdate(BaseModel):
+    learning_preferences: List[str]
+    interests: List[str]
+    distractions: str
+
+class UserProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    birth_date: Optional[datetime] = None
+    guardian_name: Optional[str] = None
+    guardian_email: Optional[EmailStr] = None
+
+class ContentItem(BaseModel):
+    id: int
+    title: str
+    description: str
+    type: str  # video, text, interactive_game
+    source: Optional[str] = None
+    content: Optional[str] = None
+    image_url: Optional[str] = None
+    tags: List[str] = []
+
+class ActivityProgress(BaseModel):
+    content_id: int
+    user_id: int
+    status: str  # not_started, in_progress, completed
+    progress_percentage: int
+    time_spent: int  # em minutos
+    completed_at: Optional[datetime] = None
+
+class UserProgress(BaseModel):
+    total_activities: int
+    completed_activities: int
+    in_progress_activities: int
+    total_time_spent: int
+    achievements: List[str]
+    progress_percentage: int
+
+class RecommendationRequest(BaseModel):
+    user_id: int
+    limit: int = 5
+
+class MessageCreate(BaseModel):
+    recipient_id: int
+    message: str
+    message_type: str = "incentive"  # incentive, support, general
+
+class MessageResponse(BaseModel):
+    id: int
+    sender_id: int
+    recipient_id: int
+    message: str
+    message_type: str
+    created_at: datetime
+    is_read: bool = False

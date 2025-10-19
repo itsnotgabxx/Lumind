@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 class User(Base):
@@ -18,3 +19,8 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relacionamentos
+    activity_progress = relationship("ActivityProgress", back_populates="user")
+    sent_messages = relationship("Message", foreign_keys="Message.sender_id")
+    received_messages = relationship("Message", foreign_keys="Message.recipient_id")
