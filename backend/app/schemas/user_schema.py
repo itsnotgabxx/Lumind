@@ -1,6 +1,7 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+import json
 
 class UserBase(BaseModel):
     full_name: str
@@ -45,6 +46,22 @@ class ContentItem(BaseModel):
     content: Optional[str] = None
     image_url: Optional[str] = None
     tags: List[str] = []
+
+    # --- Adicione este validador ---
+    @field_validator('tags', mode='before')
+    @classmethod
+    def parse_tags_json(cls, v):
+        if isinstance(v, str): # Se o valor vindo do banco for uma string
+            try:
+                # Tenta carregar a string como JSON e retornar a lista
+                return json.loads(v) 
+            except json.JSONDecodeError:
+                # Se não for um JSON válido, retorna lista vazia (ou pode logar um aviso)
+                print(f"Aviso: Campo 'tags' com valor '{v}' não é um JSON válido.")
+                return [] 
+        # Se já for uma lista (ou None), retorna o valor original
+        return v
+    # --- Fim do validador ---
 
 class ActivityProgress(BaseModel):
     content_id: int
