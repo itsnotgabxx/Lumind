@@ -15,10 +15,32 @@ class UserBase(BaseModel):
     birth_date: Optional[datetime] = None
     guardian_name: Optional[str] = None
     guardian_email: Optional[EmailStr] = None
-    learning_preferences: Optional[List[str]] = None
-    interests: Optional[List[str]] = None
+    learning_preferences: Optional[List[str]] = []
+    interests: Optional[List[str]] = []
     distractions: Optional[str] = None
     accessibility_settings: Optional[AccessibilitySettings] = None
+
+    @field_validator('learning_preferences', 'interests', mode='before')
+    @classmethod
+    def parse_list_json(cls, v):
+        """Converte strings JSON de volta para listas."""
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return []
+        return v
+
+    @field_validator('accessibility_settings', mode='before')
+    @classmethod
+    def parse_dict_json(cls, v):
+        """Converte a string JSON de configurações de volta para um dict."""
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return None
+        return v
 
 class UserCreate(UserBase):
     password: str
@@ -58,17 +80,13 @@ class ContentItem(BaseModel):
     @field_validator('tags', mode='before')
     @classmethod
     def parse_tags_json(cls, v):
-        if isinstance(v, str): # Se o valor vindo do banco for uma string
+        if isinstance(v, str):
             try:
-                # Tenta carregar a string como JSON e retornar a lista
                 return json.loads(v) 
             except json.JSONDecodeError:
-                # Se não for um JSON válido, retorna lista vazia (ou pode logar um aviso)
                 print(f"Aviso: Campo 'tags' com valor '{v}' não é um JSON válido.")
                 return [] 
-        # Se já for uma lista (ou None), retorna o valor original
         return v
-    # --- Fim do validador ---
 
 class ActivityProgress(BaseModel):
     content_id: int
