@@ -384,6 +384,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 if (api.user) {
                     await api.updateAccessibility(accessibilityData);
+                    
+                    applyAccessibilitySettings(accessibilityData); 
                     showCustomAlert('Opções de acessibilidade salvas!', 'Sucesso', 'success');
                 } else {
                     showCustomAlert('Opções de acessibilidade salvas! (simulado)', 'Sucesso', 'success');
@@ -576,6 +578,26 @@ async function loadUserData() {
         // Carrega progresso do usuário
         const progress = await api.getUserProgress();
         
+        // Aplica configurações de acessibilidade
+        if (api.user.accessibility_settings) {
+            try {
+                // As configurações podem vir como um objeto ou uma string JSON
+                const settings = typeof api.user.accessibility_settings === 'string' 
+                    ? JSON.parse(api.user.accessibility_settings) 
+                    : api.user.accessibility_settings;
+                
+                applyAccessibilitySettings(settings);
+                
+                // Atualiza os valores do formulário no perfil
+                document.getElementById('acess-font-size').value = settings.font_size || 'Padrão';
+                document.getElementById('acess-contrast').value = settings.contrast || 'Padrão Lumind';
+                document.getElementById('acess-animations').checked = settings.reduce_animations || false;
+                document.getElementById('acess-tts-global').checked = settings.text_to_speech || false;
+            } catch (e) {
+                console.error("Erro ao aplicar configurações de acessibilidade:", e);
+            }
+        }
+        
         // Carrega recomendações
         const recommendations = await api.getRecommendations();
         
@@ -718,6 +740,44 @@ function renderUserProgress(progress) {
             achievementsText.textContent = `${progress.achievements.length} de ${totalAchievements} conquistas!`;
         }
     }
+}
+
+/**
+ * Aplica as configurações de acessibilidade salvas em todo o documento.
+ * @param {object} settings - O objeto de configurações vindo da API.
+ * Ex: { font_size: "medio", contrast: "alto_contraste", ... }
+ */
+function applyAccessibilitySettings(settings) {
+    if (!settings) {
+        console.warn("Configurações de acessibilidade não encontradas.");
+        return;
+    }
+
+    const body = document.body;
+
+    // 1. Tamanho da Fonte
+    body.classList.remove('font-size-padrao', 'font-size-medio', 'font-size-grande');
+    if (settings.font_size === 'medio') {
+        body.classList.add('font-size-medio');
+    } else if (settings.font_size === 'grande') {
+        body.classList.add('font-size-grande');
+    } else {
+        body.classList.add('font-size-padrao');
+    }
+
+    // 2. Alto Contraste
+    body.classList.remove('high-contrast'); // Remove para garantir
+    if (settings.contrast === 'alto_contraste' || settings.contrast === 'Alto Contraste') {
+        body.classList.add('high-contrast');
+    }
+
+    // 3. Reduzir Animações
+    body.classList.remove('reduce-motion'); // Remove para garantir
+    if (settings.reduce_animations) {
+        body.classList.add('reduce-motion');
+    }
+
+    // 4. Suporte a Leitor de Tela (a lógica principal é tratada por leitores de tela nativos, mas podemos adicionar atributos ARIA onde necessário)
 }
 
 // Renderiza atividades do usuário

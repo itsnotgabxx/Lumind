@@ -3,6 +3,12 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 import json
 
+class AccessibilitySettings(BaseModel):
+    font_size: str = "padrão"  # padrão, medio, grande
+    contrast: str = "padrão"  # padrão, alto_contraste
+    reduce_animations: bool = False
+    text_to_speech: bool = False
+
 class UserBase(BaseModel):
     full_name: str
     email: EmailStr
@@ -12,6 +18,7 @@ class UserBase(BaseModel):
     learning_preferences: Optional[List[str]] = None
     interests: Optional[List[str]] = None
     distractions: Optional[str] = None
+    accessibility_settings: Optional[AccessibilitySettings] = None
 
 class UserCreate(UserBase):
     password: str
@@ -96,9 +103,3 @@ class MessageResponse(BaseModel):
     message_type: str
     created_at: datetime
     is_read: bool = False
-
-class AccessibilitySettings(BaseModel):
-    font_size: str = "padrão"  # padrão, medio, grande
-    contrast: str = "padrão"  # padrão, alto_contraste
-    reduce_animations: bool = False
-    text_to_speech: bool = False

@@ -217,3 +217,69 @@ body {
     display: inline-block; 
     margin-top: 0.25rem;
 }
+
+/* --- INÍCIO DAS REGRAS DE ACESSIBILIDADE --- */
+body.font-size-medio {
+    font-size: 112.5%;
+}
+body.font-size-grande {
+    font-size: 125%;
+}
+body.high-contrast {
+    background-color: #000 !important;
+    color: #FFF !important;
+}
+body.high-contrast .bg-white,
+body.high-contrast .bg-gray-50,
+body.high-contrast .bg-gray-100,
+body.high-contrast .card {
+    background-color: #1a1a1a !important;
+    color: #FFF !important;
+    border: 1px solid #FFF !important;
+}
+body.high-contrast .text-gray-500,
+body.high-contrast .text-gray-600,
+body.high-contrast .text-gray-700,
+body.high-contrast .text-gray-800 {
+    color: #f0f0f0 !important;
+}
+body.high-contrast a,
+body.high-contrast .text-blue-600,
+body.high-contrast .text-purple-700 {
+    color: #FFFF00 !important;
+    text-decoration: underline !important;
+}
+body.high-contrast .btn-primary {
+    background-color: #FFFF00 !important;
+    color: #000 !important;
+    border: 2px solid #FFFF00 !important;
+}
+body.high-contrast .btn-secondary {
+    background-color: transparent !important;
+    color: #FFFF00 !important;
+    border: 2px solid #FFFF00 !important;
+}
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast textarea {
+    background-color: #333 !important;
+    color: #FFF !important;
+    border: 1px solid #FFF !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+body.reduce-motion *,
+body.reduce-motion *::before,
+body.reduce-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+}
+/* --- FIM DAS REGRAS DE ACESSIBILIDADE --- */
