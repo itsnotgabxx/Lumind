@@ -1,7 +1,7 @@
 let currentUserName = "Sky"; 
 let currentUserEmail = "sky@exemplo.com"; 
 let currentContentTitle = "Conteúdo Interativo"; 
-let currentContentId = null; // id do conteúdo vindo do backend
+let currentContentId = null;
 let currentContentData = { 
     "Aventuras no Espaço Sideral": {
         type: "video",
@@ -386,6 +386,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     await api.updateAccessibility(accessibilityData);
                     
                     applyAccessibilitySettings(accessibilityData); 
+                    
                     showCustomAlert('Opções de acessibilidade salvas!', 'Sucesso', 'success');
                 } else {
                     showCustomAlert('Opções de acessibilidade salvas! (simulado)', 'Sucesso', 'success');
@@ -581,21 +582,24 @@ async function loadUserData() {
         // Aplica configurações de acessibilidade
         if (api.user.accessibility_settings) {
             try {
-                // As configurações podem vir como um objeto ou uma string JSON
-                const settings = typeof api.user.accessibility_settings === 'string' 
-                    ? JSON.parse(api.user.accessibility_settings) 
-                    : api.user.accessibility_settings;
+                // As configurações vêm como um objeto ou string JSON, o validador Pydantic já deve ter convertido
+                const settings = api.user.accessibility_settings;
                 
+                // Aplica as classes no <body>
                 applyAccessibilitySettings(settings);
                 
-                // Atualiza os valores do formulário no perfil
-                document.getElementById('acess-font-size').value = settings.font_size || 'Padrão';
-                document.getElementById('acess-contrast').value = settings.contrast || 'Padrão Lumind';
+                // Atualiza os <select> e <checkbox> no formulário do perfil
+                document.getElementById('acess-font-size').value = settings.font_size || 'padrao';
+                document.getElementById('acess-contrast').value = settings.contrast || 'padrao';
                 document.getElementById('acess-animations').checked = settings.reduce_animations || false;
                 document.getElementById('acess-tts-global').checked = settings.text_to_speech || false;
+
             } catch (e) {
                 console.error("Erro ao aplicar configurações de acessibilidade:", e);
             }
+        } else {
+            // Aplica o padrão se não houver nada salvo
+            applyAccessibilitySettings({ font_size: 'padrao', contrast: 'padrao', reduce_animations: false });
         }
         
         // Carrega recomendações
@@ -610,6 +614,54 @@ async function loadUserData() {
         // Atualiza dados locais
         currentUserName = api.user.full_name;
         currentUserEmail = api.user.email;
+        
+      // Aplica configurações de acessibilidade
+        if (api.user.accessibility_settings) {
+            try {
+                console.log('[loadUserData] accessibility_settings do backend:', api.user.accessibility_settings);
+                
+                // Verifica se já é um objeto ou se é uma string JSON
+                let settings;
+                if (typeof api.user.accessibility_settings === 'string') {
+                    settings = JSON.parse(api.user.accessibility_settings);
+                } else {
+                    settings = api.user.accessibility_settings;
+                }
+                
+                console.log('[loadUserData] Settings parseados:', settings);
+                
+                // Aplica as classes no <body>
+                applyAccessibilitySettings(settings);
+                
+                // Atualiza os <select> e <checkbox> no formulário do perfil
+                const fontSize = document.getElementById('acess-font-size');
+                const contrast = document.getElementById('acess-contrast');
+                const animations = document.getElementById('acess-animations');
+                const tts = document.getElementById('acess-tts-global');
+                
+                if (fontSize) {
+                    fontSize.value = settings.font_size || 'Padrão';
+                    console.log('[loadUserData] Select fonte atualizado para:', fontSize.value);
+                }
+                if (contrast) {
+                    contrast.value = settings.contrast || 'Padrão';
+                    console.log('[loadUserData] Select contraste atualizado para:', contrast.value);
+                }
+                if (animations) {
+                    animations.checked = settings.reduce_animations || false;
+                }
+                if (tts) {
+                    tts.checked = settings.text_to_speech || false;
+                }
+
+            } catch (e) {
+                console.error("Erro ao aplicar configurações de acessibilidade:", e);
+            }
+        } else {
+            console.log('[loadUserData] Nenhuma configuração de acessibilidade encontrada, aplicando padrão');
+            // Aplica o padrão se não houver nada salvo
+            applyAccessibilitySettings({ font_size: 'Padrão', contrast: 'Padrão', reduce_animations: false });
+        }
         
         // Atualiza preferências no perfil se disponíveis
         if (api.user.learning_preferences) {
@@ -742,42 +794,66 @@ function renderUserProgress(progress) {
     }
 }
 
+
 /**
  * Aplica as configurações de acessibilidade salvas em todo o documento.
  * @param {object} settings - O objeto de configurações vindo da API.
  * Ex: { font_size: "medio", contrast: "alto_contraste", ... }
  */
 function applyAccessibilitySettings(settings) {
+    console.log('[applyAccessibilitySettings] Recebido:', settings);
+    
     if (!settings) {
-        console.warn("Configurações de acessibilidade não encontradas.");
-        return;
+        console.warn("Configurações de acessibilidade não encontradas para aplicar."); 
+        settings = { font_size: 'Padrão', contrast: 'Padrão', reduce_animations: false };
     }
 
-    const body = document.body;
+    const bodyEl = document.body;
 
     // 1. Tamanho da Fonte
-    body.classList.remove('font-size-padrao', 'font-size-medio', 'font-size-grande');
-    if (settings.font_size === 'medio') {
-        body.classList.add('font-size-medio');
-    } else if (settings.font_size === 'grande') {
-        body.classList.add('font-size-grande');
+    bodyEl.classList.remove('font-size-padrao', 'font-size-medio', 'font-size-grande');
+    
+    const fontSizeMap = {
+        'Padrão': 'font-size-padrao',
+        'Médio': 'font-size-medio',
+        'Grande': 'font-size-grande',
+        'padrao': 'font-size-padrao',
+        'medio': 'font-size-medio',
+        'grande': 'font-size-grande'
+    };
+    
+    const fontClass = fontSizeMap[settings.font_size] || 'font-size-padrao';
+    if (fontClass !== 'font-size-padrao') {
+        bodyEl.classList.add(fontClass);
+        console.log(`[Acessibilidade] Classe de fonte ADICIONADA: ${fontClass}`);
     } else {
-        body.classList.add('font-size-padrao');
+        console.log(`[Acessibilidade] Fonte padrão`);
     }
 
     // 2. Alto Contraste
-    body.classList.remove('high-contrast'); // Remove para garantir
-    if (settings.contrast === 'alto_contraste' || settings.contrast === 'Alto Contraste') {
-        body.classList.add('high-contrast');
+    bodyEl.classList.remove('high-contrast');
+    
+    const contrastMap = {
+        'Alto Contraste': 'high-contrast',
+        'alto_contraste': 'high-contrast',
+        'Alto contraste': 'high-contrast'
+    };
+    
+    if (contrastMap[settings.contrast]) {
+        bodyEl.classList.add('high-contrast');
+        console.log(`[Acessibilidade] Alto contraste ATIVADO`);
+    } else {
+        console.log(`[Acessibilidade] Contraste padrão`);
     }
 
     // 3. Reduzir Animações
-    body.classList.remove('reduce-motion'); // Remove para garantir
+    bodyEl.classList.remove('reduce-motion');
     if (settings.reduce_animations) {
-        body.classList.add('reduce-motion');
+        bodyEl.classList.add('reduce-motion');
+        console.log(`[Acessibilidade] Animações reduzidas`);
     }
-
-    // 4. Suporte a Leitor de Tela (a lógica principal é tratada por leitores de tela nativos, mas podemos adicionar atributos ARIA onde necessário)
+    
+    console.log(`[Acessibilidade] Classes finais:`, bodyEl.className);
 }
 
 // Renderiza atividades do usuário

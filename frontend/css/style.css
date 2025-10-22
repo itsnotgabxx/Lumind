@@ -240,7 +240,8 @@ body.high-contrast .card {
 body.high-contrast .text-gray-500,
 body.high-contrast .text-gray-600,
 body.high-contrast .text-gray-700,
-body.high-contrast .text-gray-800 {
+body.high-contrast .text-gray-800,
+body.high-contrast .text-gray-900 {
     color: #f0f0f0 !important;
 }
 body.high-contrast a,
@@ -266,14 +267,8 @@ body.high-contrast textarea {
     color: #FFF !important;
     border: 1px solid #FFF !important;
 }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
+
+/* Desliga todas as transições e animações do Tailwind */
 body.reduce-motion *,
 body.reduce-motion *::before,
 body.reduce-motion *::after {
@@ -282,4 +277,5 @@ body.reduce-motion *::after {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
 }
+
 /* --- FIM DAS REGRAS DE ACESSIBILIDADE --- */
