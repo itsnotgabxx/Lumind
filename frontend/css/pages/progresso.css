@@ -1,0 +1,35 @@
+/* Estilos para cards de conquista */
+.achievement-card {
+    width: calc(25% - 1rem);
+    min-width: 150px;
+}
+
+.achievement-card.locked {
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.achievement-card.locked:hover {
+    opacity: 0.9;
+}
+
+/* Estilos para cards de atividade */
+.activity-card {
+    transition: transform 0.2s;
+}
+
+.activity-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Barra de progresso */
+.progress-container {
+    background: var(--lumind-bg-main);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(to right, var(--lumind-blue-light), var(--lumind-blue));
+    transition: width 1s ease-in-out;
+}
