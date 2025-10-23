@@ -1,0 +1,70 @@
+/* Variáveis de cores e estilos globais */
+:root {
+    --lumind-purple: #8B5CF6; 
+    --lumind-purple-light: #A78BFA; 
+    --lumind-purple-dark: #6D28D9; 
+    --lumind-blue: #3B82F6;   
+    --lumind-blue-light: #60A5FA; 
+    --lumind-white: #FFFFFF;
+    --lumind-bg-main: #F9FAFB; 
+    --lumind-bg-card: #FFFFFF; 
+    --lumind-border: #E5E7EB; 
+    --lumind-text-dark: #1F2937;  
+    --lumind-text-medium: #4B5563; 
+    --lumind-text-light: #6B7280; 
+    --lumind-accent-gold-soft: #FBBF24; 
+    --lumind-accent-teal-soft: #2DD4BF; 
+    --lumind-success: #10B981; 
+    --lumind-error: #EF4444; 
+    --lumind-warning: #F59E0B; 
+    --lumind-info: #3B82F6; 
+}
+
+/* Estilos base */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--lumind-bg-main); 
+    color: var(--lumind-text-dark);
+}
+
+/* Layout de telas */
+.screen {
+    min-height: 100vh;
+    padding: 1rem; 
+}
+
+@media (min-width: 640px) { 
+    .screen {
+        padding: 2rem;
+    }
+}
+
+.active-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Tipografia */
+.screen-title { 
+    font-size: 1.5rem; 
+    font-weight: 600; 
+    color: var(--lumind-text-dark); 
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.screen-subtitle { 
+    font-size: 0.9rem; 
+    color: var(--lumind-text-light);
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .screen-title {
+         font-size: 1.8rem;
+    }
+    .screen-subtitle {
+         font-size: 1rem;
+    }
+}

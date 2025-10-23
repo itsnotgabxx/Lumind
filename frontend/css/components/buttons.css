@@ -1,0 +1,49 @@
+/* Estilos para botões */
+.btn-primary {
+    background-color: var(--lumind-purple);
+    color: var(--lumind-white);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn-primary:hover {
+    background-color: var(--lumind-purple-dark);
+    box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3);
+}
+
+.btn-secondary {
+    background-color: var(--lumind-blue);
+    color: var(--lumind-white);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn-secondary:hover {
+    background-color: #2563EB; 
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.btn-subtle {
+    background-color: var(--lumind-bg-card);
+    color: var(--lumind-purple);
+    padding: 0.6rem 1.2rem; 
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    cursor: pointer;
+    border: 1px solid var(--lumind-purple-light);
+}
+
+.btn-subtle:hover {
+    background-color: #F5F3FF; 
+    border-color: var(--lumind-purple);
+    color: var(--lumind-purple-dark);
+}
