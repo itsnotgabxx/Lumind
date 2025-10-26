@@ -47,5 +47,13 @@ class Message(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relacionamentos
-    sender = relationship("User", foreign_keys=[sender_id])
-    recipient = relationship("User", foreign_keys=[recipient_id])
+    sender = relationship(
+        "User",
+        foreign_keys=[sender_id],
+        back_populates="sent_messages"
+    )
+    recipient = relationship(
+        "User",
+        foreign_keys=[recipient_id],
+        back_populates="received_messages"
+    )
