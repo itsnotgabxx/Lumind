@@ -1,4 +1,4 @@
-import { userState } from './userState.js';
+import { userState } from '../utils/userState.js';
 
 export const authMiddleware = async () => {
     const user = userState.user;

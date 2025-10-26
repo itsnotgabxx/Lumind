@@ -1,3 +1,7 @@
+@import url('components/navbar.css');
+@import url('pages/acompanhamento.css');
+@import url('pages/progresso.css');
+
 body {
     font-family: 'Inter', sans-serif;
 }

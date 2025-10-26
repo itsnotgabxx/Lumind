@@ -1,16 +1,16 @@
 import { api } from '../api.js';
 import { showCustomAlert } from '../utils/alert.js';
 
-// Componente principal
 export default async function ConteudoPage({ params }) {
     const contentId = params.id;
     let content;
 
     try {
-        content = await api.getContent(contentId);
+        content = await api.getContentById(contentId); 
     } catch (error) {
         showCustomAlert('Erro ao carregar conteúdo', 'Erro', 'error');
-        return '';
+        window.router.navigate('/recomendacao');
+        return '<p>Erro ao carregar...</p>';
     }
 
     return `
@@ -29,14 +29,14 @@ export default async function ConteudoPage({ params }) {
                 ${await renderContent(content)}
             </div>
 
-            <div class="mt-6 flex justify-between items-center">
-                <select id="font-size-content" class="input-field w-48">
+            <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <select id="font-size-content" class="input-field w-full sm:w-48">
                     <option value="normal">Tamanho do Texto</option>
-                    <option value="large">Texto Grande</option>
-                    <option value="larger">Texto Maior</option>
+                    <option value="large">Texto Grande (1.2em)</option>
+                    <option value="larger">Texto Maior (1.4em)</option>
                 </select>
 
-                <button id="btn-marcar-concluido" class="btn-primary">
+                <button id="btn-marcar-concluido" class="btn-primary w-full sm:w-auto">
                     <i class="fas fa-check mr-2"></i>Marcar como Concluído
                 </button>
             </div>
@@ -44,7 +44,6 @@ export default async function ConteudoPage({ params }) {
     `;
 }
 
-// Função auxiliar para renderizar o tipo de conteúdo
 function getContentTypeIcon(type) {
     switch(type) {
         case 'video':
@@ -56,7 +55,6 @@ function getContentTypeIcon(type) {
     }
 }
 
-// Função para renderizar o conteúdo com lazy loading
 async function renderContent(content) {
     switch(content.type) {
         case 'video':
@@ -73,9 +71,9 @@ async function renderContent(content) {
     }
 }
 
-// Setup de eventos quando a página é carregada
-export function setup() {
-    // Configurar listeners de eventos
+export function setup({ params }) {
+    const contentId = params.id;
+
     const btnFechar = document.getElementById('btn-fechar-conteudo');
     if (btnFechar) {
         btnFechar.addEventListener('click', () => {
@@ -96,8 +94,9 @@ export function setup() {
     if (btnConcluido) {
         btnConcluido.addEventListener('click', async () => {
             try {
-                await api.markContentAsCompleted(params.id);
+                await api.updateProgress(contentId, 'completed', 100, 0);
                 showCustomAlert('Conteúdo marcado como concluído!', 'Sucesso', 'success');
+                window.router.navigate('/progresso');
             } catch (error) {
                 showCustomAlert('Erro ao marcar como concluído', 'Erro', 'error');
             }

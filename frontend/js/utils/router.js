@@ -1,76 +1,111 @@
+// frontend/js/utils/router.js (O CÓDIGO CORRETO)
+import { userState } from './userState.js';
+import { NavBar } from '../components/NavBar.js'; // <-- ADICIONE ESTA LINHA
+
 export class Router {
-    constructor() {
-        this.routes = new Map();
-        this.currentRoute = null;
+    constructor(routes) {
+        this.routes = routes; // Recebe as rotas do routes.js
+        this.app = document.getElementById('app');
+        this.navBar = new NavBar(userState.user);
+        this.navContainer = document.getElementById('navbar-container');
         
-        // Intercepta mudanças na URL
-        window.addEventListener('popstate', this._handleRoute.bind(this));
-    }
+        userState.subscribe((user) => {
+            this.navBar = new NavBar(user);
+            this.navContainer.innerHTML = this.navBar.render();
+            if (user) {
+                this.navBar.setupEventListeners();
+            }
+        });
 
-    // Registra uma nova rota
-    register(path, {
-        component,
-        title,
-        auth = false,
-        middleware = []
-    }) {
-        this.routes.set(path, {
-            component,
-            title,
-            auth,
-            middleware
+        window.addEventListener('popstate', (event) => {
+            this._handleRoute(event.state);
         });
     }
 
-    // Navega para uma rota específica
-    async navigate(path, data = {}) {
-        // Atualiza a URL
-        window.history.pushState(data, '', path);
-        await this._handleRoute();
+    init() {
+    // ADICIONE ESTE CÓDIGO
+    // Escuta todos os cliques na janela
+    window.addEventListener('click', e => {
+        // Verifica se o clique foi em um <a> ou dentro de um <a> que tenha [data-link]
+        const link = e.target.closest('a[data-link]');
+
+        if (link) {
+            e.preventDefault(); // Impede o navegador de recarregar a página
+            this.navigate(link.pathname); // Usa seu router para navegar
+        }
+    });
+    // FIM DO CÓDIGO ADICIONADO
+
+    this.routes.push({
+        path: '/404',
+        component: () => import('../pages/404.js'),
+        title: 'Página não encontrada'
+    });
+
+    this._handleRoute(null);
+}
+
+    navigate(path, state = {}) {
+        window.history.pushState(state, '', path);
+        this._handleRoute(state);
     }
 
-    // Manipula a mudança de rota
-    async _handleRoute() {
-        const path = window.location.pathname;
-        const route = this.routes.get(path) || this.routes.get('/404');
+    _pathToRegex(path) {
+        const regex = new RegExp('^' + path.replace(/\//g, '\\/').replace(/:\w+/g, '([^\\/]+)') + '$');
+        return regex;
+    }
 
-        if (!route) {
-            console.error(`Rota não encontrada: ${path}`);
-            return;
-        }
-
-        // Executa middlewares
-        for (const middleware of route.middleware) {
-            const result = await middleware();
-            if (!result) return; // Middleware bloqueou a navegação
-        }
-
-        // Atualiza o título da página
-        document.title = `${route.title} - Lumind`;
-
-        // Carrega o componente de forma lazy
-        try {
-            const content = await route.component();
-            document.getElementById('app').innerHTML = content;
+    _findRoute(path) {
+        let params = {};
+        const potentialRoute = this.routes.find(route => {
+            const regex = this._pathToRegex(route.path);
+            const match = path.match(regex);
             
-            // Dispara evento de mudança de rota
-            window.dispatchEvent(new CustomEvent('routeChanged', { 
-                detail: { path, data: window.history.state } 
-            }));
-        } catch (error) {
-            console.error('Erro ao carregar componente:', error);
-        }
-    }
-
-    // Inicializa o router
-    async init() {
-        // Registra rotas padrão
-        this.register('/404', {
-            component: () => import('../pages/404.js'),
-            title: 'Página não encontrada'
+            if (match) {
+                const paramKeys = (route.path.match(/:\w+/g) || []).map(key => key.substring(1));
+                params = paramKeys.reduce((acc, key, index) => {
+                    acc[key] = match[index + 1];
+                    return acc;
+                }, {});
+                return true;
+            }
+            return false;
         });
 
-        // Trata a rota inicial
-        await this._handleRoute();
+        if (potentialRoute) {
+            return { route: potentialRoute, params };
+        }
+        
+        return { route: this.routes.find(r => r.path === '/404'), params: {} };
+    }
+
+    async _handleRoute(state) {
+        const path = window.location.pathname;
+        const { route, params } = this._findRoute(path);
+
+        if (route.middleware) {
+            for (const middleware of route.middleware) {
+                const result = await middleware(this); 
+                if (!result) return;
+            }
+        }
+
+        const module = await route.component();
+        
+        // Passa params e state para a função default (render)
+        const content = await module.default({ params, state }); 
+        this.app.innerHTML = content;
+
+        // Passa params e state para a função setup (eventos)
+        if (module.setup) {
+            module.setup({ params, state });
+        }
+
+        document.title = `${route.title} - Lumind`;
+        this.navBar = new NavBar(userState.user);
+        this.navContainer.innerHTML = this.navBar.render();
+        if (userState.user) {
+            this.navBar.setupEventListeners();
+        }
     }
 }

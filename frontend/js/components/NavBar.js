@@ -10,7 +10,7 @@ export class NavBar {
                     <div class="flex justify-between h-16">
                         <div class="flex">
                             <div class="flex-shrink-0 flex items-center">
-                                <a href="/" class="text-purple-600 font-bold text-xl">Lumind</a>
+                               <a href="/" class="text-purple-600 font-bold text-xl" data-link>Lumind</a>
                             </div>
                             ${this.user ? this.authenticatedLinks() : this.guestLinks()}
                         </div>
@@ -22,40 +22,34 @@ export class NavBar {
     }
 
     authenticatedLinks() {
-        return `
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <a href="/recomendacao" 
-                   class="nav-link ${this.isActive('/recomendacao')}">
-                    Recomendações
-                </a>
-                <a href="/progresso" 
-                   class="nav-link ${this.isActive('/progresso')}">
-                    Meu Progresso
-                </a>
-                ${this.user.role === 'guardian' ? `
-                    <a href="/acompanhamento" 
-                       class="nav-link ${this.isActive('/acompanhamento')}">
-                        Acompanhamento
-                    </a>
-                ` : ''}
-            </div>
-        `;
-    }
+    return `
+        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <a href="/recomendacao" 
+               class="nav-link ${this.isActive('/recomendacao')}" data-link> 
+                Recomendações
+            </a>
+            <a href="/progresso" 
+               class="nav-link ${this.isActive('/progresso')}" data-link>
+                Meu Progresso
+            </a>
+        </div>
+    `;
+}
 
     guestLinks() {
-        return `
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <a href="/login" 
-                   class="nav-link ${this.isActive('/login')}">
-                    Entrar
-                </a>
-                <a href="/cadastro" 
-                   class="nav-link ${this.isActive('/cadastro')}">
-                    Criar Conta
-                </a>
-            </div>
-        `;
-    }
+    return `
+        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <a href="/login" 
+               class="nav-link ${this.isActive('/login')}" data-link>
+                Entrar
+            </a>
+            <a href="/cadastro" 
+               class="nav-link ${this.isActive('/cadastro')}" data-link>
+                Criar Conta
+            </a>
+        </div>
+    `;
+}
 
     userMenu() {
         return `
@@ -79,10 +73,10 @@ export class NavBar {
                          aria-labelledby="user-menu-button" 
                          tabindex="-1">
                         <a href="/perfil" 
-                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" 
-                           role="menuitem">
-                            Meu Perfil
-                        </a>
+   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" 
+   role="menuitem" data-link>
+    Meu Perfil
+</a>
                         <a href="#" 
                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" 
                            role="menuitem"

@@ -1,3 +1,8 @@
+// CORREÇÃO: Adicionando os imports necessários
+import { api } from '../api.js';
+import { showCustomAlert } from '../utils/alert.js';
+import { userState } from '../utils/userState.js';
+
 export default function AcompanhamentoPage() {
     return `
         <div class="w-full max-w-4xl mx-auto">
@@ -6,7 +11,6 @@ export default function AcompanhamentoPage() {
                 <p id="acompanhamento-responsavel-intro" class="screen-subtitle"></p>
             </div>
 
-            <!-- Visão Geral -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div class="card">
                     <h3 class="text-lg font-semibold text-gray-800 mb-3">Tempo de Estudo</h3>
@@ -21,7 +25,6 @@ export default function AcompanhamentoPage() {
                 </div>
             </div>
 
-            <!-- Progresso -->
             <div class="card mb-8">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold text-gray-800">Progresso Geral</h3>
@@ -32,19 +35,17 @@ export default function AcompanhamentoPage() {
                 </div>
             </div>
 
-            <!-- Alertas e Observações -->
             <div class="card">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Alertas e Observações</h3>
                 <div class="space-y-3" id="alertas-container">
-                    <!-- Alertas serão inseridos aqui dinamicamente -->
-                </div>
+                    </div>
             </div>
 
-            <!-- Enviar Incentivo -->
             <div class="card mt-8">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Enviar Mensagem de Incentivo</h3>
                 <form id="form-enviar-incentivo">
                     <textarea 
+                        id="incentivo-textarea" 
                         class="input-field" 
                         rows="4" 
                         placeholder="Escreva uma mensagem positiva..."
@@ -65,24 +66,34 @@ export function setup() {
 }
 
 async function updateAcompanhamentoData() {
-    const loading = document.getElementById('loading-overlay');
-    loading.style.display = 'flex';
+    // O 'loading-overlay' não existe no seu index.html. 
+    // Se você adicionar um, descomente estas linhas.
+    // const loading = document.getElementById('loading-overlay');
+    // if (loading) loading.style.display = 'flex';
 
     try {
+        const user = userState.user;
+        if (!user) {
+            window.router.navigate('/login');
+            return;
+        }
+
         // Busca dados do progresso
         const progress = await api.getUserProgress();
         const activities = await api.getUserActivities();
         
         // Atualiza texto introdutório
         const intro = document.getElementById('acompanhamento-responsavel-intro');
-        if (intro && api.user) {
-            intro.innerHTML = `Acompanhe o progresso de ${api.user.full_name}.`;
+        if (intro) {
+            intro.innerHTML = `Acompanhe o progresso de ${user.full_name}.`;
         }
 
         // Atualiza tempo de estudo
         const tempoEstudo = document.getElementById('tempo-estudo');
         if (tempoEstudo) {
-            tempoEstudo.textContent = `${progress.study_time_week || 0}h`;
+            // Assumindo que a API retorna 'total_time_spent' em minutos
+            const horas = Math.floor((progress.total_time_spent || 0) / 60);
+            tempoEstudo.textContent = `${horas}h`;
         }
 
         // Atualiza atividades concluídas
@@ -105,7 +116,7 @@ async function updateAcompanhamentoData() {
     } catch (error) {
         showCustomAlert('Erro ao carregar dados de acompanhamento', 'Erro', 'error');
     } finally {
-        loading.style.display = 'none';
+        // if (loading) loading.style.display = 'none';
     }
 }
 
@@ -116,18 +127,23 @@ function renderAlertas(progress, activities) {
     container.innerHTML = '';
     const alertas = gerarAlertas(progress, activities);
 
+    if (alertas.length === 0) {
+        container.innerHTML = '<p class="text-gray-600">Nenhum alerta ou observação no momento.</p>';
+        return;
+    }
+
     alertas.forEach(alerta => {
         const div = document.createElement('div');
-        div.className = `alert-card p-4 rounded-lg border ${alerta.type === 'warning' ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'}`;
+        div.className = `alert-card p-4 rounded-lg border ${alerta.type === 'warning' ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'}`;
         
         div.innerHTML = `
             <div class="flex items-start">
                 <div class="flex-shrink-0">
-                    <i class="${alerta.icon} text-xl ${alerta.type === 'warning' ? 'text-amber-500' : 'text-blue-500'}"></i>
+                    <i class="${alerta.icon} text-xl ${alerta.type === 'warning' ? 'text-yellow-500' : 'text-green-500'}"></i>
                 </div>
                 <div class="ml-3">
-                    <h4 class="font-medium ${alerta.type === 'warning' ? 'text-amber-800' : 'text-blue-800'}">${alerta.title}</h4>
-                    <p class="${alerta.type === 'warning' ? 'text-amber-700' : 'text-blue-700'}">${alerta.message}</p>
+                    <h4 class="font-medium ${alerta.type === 'warning' ? 'text-yellow-800' : 'text-green-800'}">${alerta.title}</h4>
+                    <p class="${alerta.type === 'warning' ? 'text-yellow-700' : 'text-green-700'}">${alerta.message}</p>
                 </div>
             </div>
         `;
@@ -138,38 +154,27 @@ function renderAlertas(progress, activities) {
 
 function gerarAlertas(progress, activities) {
     const alertas = [];
+    const user = userState.user;
+    if (!user) return [];
 
-    // Verifica inatividade
-    const ultimaAtividade = activities[0]?.timestamp;
-    if (ultimaAtividade) {
-        const diasInativo = Math.floor((new Date() - new Date(ultimaAtividade)) / (1000 * 60 * 60 * 24));
-        if (diasInativo > 7) {
-            alertas.push({
-                type: 'warning',
-                icon: 'fas fa-exclamation-circle',
-                title: 'Período de Inatividade',
-                message: `Não há atividades registradas nos últimos ${diasInativo} dias.`
-            });
-        }
-    }
-
-    // Verifica progresso lento
-    if (progress.progress_percentage < 30) {
+    // Verifica atividades em progresso
+    const inProgress = activities.filter(a => a.status === 'in_progress');
+    if (inProgress.length > 0) {
         alertas.push({
-            type: 'info',
-            icon: 'fas fa-info-circle',
-            title: 'Sugestão',
-            message: 'Que tal estabelecer metas diárias de estudo?'
+            type: 'warning',
+            icon: 'fas fa-exclamation-circle',
+            title: 'Atividades em Andamento',
+            message: `${user.full_name} tem ${inProgress.length} atividade(s) em andamento.`
         });
     }
 
     // Adiciona observações positivas
-    if (progress.study_time_week > 5) {
+    if (progress.completed_activities > 0) {
         alertas.push({
             type: 'info',
             icon: 'fas fa-star',
             title: 'Ótimo Desempenho',
-            message: 'Dedicou bastante tempo aos estudos esta semana!'
+            message: `${user.full_name} já completou ${progress.completed_activities} atividade(s)!`
         });
     }
 
@@ -182,10 +187,18 @@ function setupEventListeners() {
     if (formIncentivo) {
         formIncentivo.addEventListener('submit', async (event) => {
             event.preventDefault();
-            const message = formIncentivo.querySelector('textarea').value;
+            const textarea = document.getElementById('incentivo-textarea');
+            const message = textarea.value;
+            const user = userState.user;
+
+            if (!user) {
+                showCustomAlert('Usuário não encontrado. Faça login novamente.', 'Erro', 'error');
+                return;
+            }
             
             try {
-                await api.sendIncentiveMessage(message);
+                // CORREÇÃO: Chamando 'sendMessage' com o ID do usuário
+                await api.sendMessage(user.id, message, 'incentive');
                 showCustomAlert('Mensagem enviada com sucesso!', 'Sucesso', 'success');
                 formIncentivo.reset();
             } catch (error) {
@@ -194,10 +207,5 @@ function setupEventListeners() {
         });
     }
 
-    // Atualiza dados quando a rota é acessada
-    window.addEventListener('routeChanged', (event) => {
-        if (event.detail.path === '/acompanhamento') {
-            updateAcompanhamentoData();
-        }
-    });
+    // CORREÇÃO: Removido o listener 'routeChanged' que não existe.
 }

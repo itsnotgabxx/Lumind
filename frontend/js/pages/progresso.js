@@ -1,41 +1,107 @@
-export default function ProgressoPage() {
+import { showCustomAlert } from '../utils/alert.js';
+import { userState } from '../utils/userState.js';
+
+// --- Funções de Renderização (movidas do script.js) ---
+
+function renderUserProgress(progress) {
+    if (!progress) return;
+    const pEl = document.getElementById('progresso-percentual');
+    const barEl = document.getElementById('progresso-barra');
+    if(pEl) pEl.textContent = `${progress.progress_percentage}%`;
+    if(barEl) barEl.style.width = `${progress.progress_percentage}%`;
+
+    const achievementsContainer = document.getElementById('conquistas-container');
+    const achievementsText = document.getElementById('conquistas-texto');
+    if (achievementsContainer && achievementsText && progress.achievements) {
+        achievementsContainer.innerHTML = '';
+        const emojiMap = {'Explorador Curioso': '🌍', 'Mestre dos Vídeos': '🎬', 'Leitor Voraz': '📚'};
+        
+        progress.achievements.forEach(ach => {
+            achievementsContainer.innerHTML += `<span class="text-3xl transform hover:scale-125 transition-transform text-amber-500" title="${ach}">${emojiMap[ach] || '🏆'}</span>`;
+        });
+        
+        const totalAchievements = 10;
+        for (let i = progress.achievements.length; i < totalAchievements; i++) {
+            achievementsContainer.innerHTML += `<span class="text-3xl text-gray-300" title="Ainda não desbloqueado">❓</span>`;
+        }
+        achievementsText.textContent = `${progress.achievements.length} de ${totalAchievements} conquistas!`;
+    }
+}
+
+function renderUserActivities(activities) {
+    if (!activities || !Array.isArray(activities)) return;
+    const list = document.getElementById('atividades-recentes-lista');
+    if (!list) return;
+    list.innerHTML = '';
+    
+    activities.forEach(activity => {
+        let statusText = '';
+        let statusIcon = '';
+        switch (activity.status) {
+            case 'completed':
+                statusText = 'Concluído';
+                statusIcon = '<span class="text-green-500 font-semibold"><i class="fas fa-check-circle mr-1"></i></span>';
+                break;
+            case 'in_progress':
+                statusText = `Em andamento - ${activity.progress_percentage}%`;
+                statusIcon = '<span class="text-blue-500 font-semibold"><i class="fas fa-spinner fa-spin mr-1"></i></span>';
+                break;
+            default:
+                statusText = 'Não iniciado';
+                statusIcon = '<span class="text-gray-400 font-semibold"><i class="far fa-circle mr-1"></i></span>';
+        }
+
+        list.innerHTML += `
+            <li class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+                <div>
+                    <p class="font-medium text-gray-700">${activity.content?.title || 'Atividade'}</p>
+                    <p class="text-sm text-gray-500">${statusText}</p>
+                </div>
+                ${statusIcon}
+            </li>
+        `;
+    });
+}
+
+// --- Componente da Página ---
+
+export default function ProgressoUsuarioPage() {
+    // Este HTML é baseado no seu index.html original
     return `
-        <div class="w-full max-w-4xl mx-auto">
-            <h1 id="progresso-header" class="screen-title text-center mb-8"></h1>
-            
-            <!-- Resumo do Progresso -->
-            <div class="card mb-8">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Seu Progresso Geral</h2>
-                        <p class="text-gray-600 mt-1">Continue assim! Cada conquista conta.</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-3xl font-bold text-green-600" id="progress-percentage">0%</span>
-                        <p class="text-sm text-gray-500">completado</p>
-                    </div>
+        <div class="items-start pt-8 w-full">
+            <div class="container mx-auto px-4 w-full">
+                <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
+                    <h1 id="progresso-header" class="screen-title sm:text-left order-2 sm:order-1 flex-grow">Seu Progresso!</h1>
+                    <button data-route="/recomendacao" class="btn-subtle text-sm order-1 sm:order-2 w-full sm:w-auto"><i class="fas fa-arrow-left mr-2"></i> Voltar</button>
                 </div>
-                
-                <!-- Barra de Progresso -->
-                <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="progress-bar-fill h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-                </div>
-            </div>
+                <p class="screen-subtitle mb-8 text-center sm:text-left">Veja o quanto você já aprendeu.</p>
 
-            <!-- Conquistas -->
-            <div class="card mb-8">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Suas Conquistas</h2>
-                <div class="flex flex-wrap gap-4" id="achievements-container">
-                    <!-- Conquistas serão inseridas aqui dinamicamente -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="card">
+                        <h2 class="text-lg font-semibold mb-3"><i class="fas fa-flag-checkered mr-2 text-green-500"></i>Resumo Geral</h2>
+                        <p id="progresso-percentual" class="text-3xl font-bold text-green-600">0%</p>
+                        <p class="text-gray-600">do seu plano concluído!</p>
+                        <div class="w-full bg-gray-200 rounded-full h-3 mt-4">
+                            <div id="progresso-barra" class="progress-bar-fill h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h2 class="text-lg font-semibold mb-3"><i class="fas fa-trophy mr-2 text-amber-400"></i>Conquistas</h2>
+                        <div id="conquistas-container" class="flex flex-wrap gap-4 mt-4">
+                            <span class="text-3xl text-gray-300">...</span>
+                        </div>
+                        <p id="conquistas-texto" class="text-sm text-gray-500 mt-3">Carregando...</p>
+                    </div>
                 </div>
-                <p class="text-sm text-gray-500 mt-3" id="achievements-text"></p>
-            </div>
 
-            <!-- Atividades Recentes -->
-            <div class="card">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Atividades Recentes</h2>
-                <div class="space-y-3" id="activities-container">
-                    <!-- Atividades serão inseridas aqui dinamicamente -->
+                <div class="card mb-8">
+                    <h2 class="text-lg font-semibold mb-4"><i class="fas fa-history mr-2 text-blue-500"></i>Atividades Recentes</h2>
+                    <ul id="atividades-recentes-lista" class="space-y-3">
+                        <p class="text-gray-500">Carregando atividades...</p>
+                    </ul>
+                </div>
+                <div class="text-right">
+                    <button data-route="/historico" class="btn-subtle"><i class="fas fa-list-alt mr-2"></i>Ver Histórico Completo</button>
                 </div>
             </div>
         </div>
@@ -43,142 +109,38 @@ export default function ProgressoPage() {
 }
 
 export function setup() {
-    updateProgressData();
-    setupEventListeners();
-}
-
-async function updateProgressData() {
-    const loading = document.getElementById('loading-overlay');
-    loading.style.display = 'flex';
-
-    try {
-        // Busca dados do progresso
-        const progress = await api.getUserProgress();
-        
-        // Atualiza cabeçalho
-        const header = document.getElementById('progresso-header');
-        if (header && api.user) {
-            header.innerHTML = `Seu Progresso, ${api.user.full_name}!`;
-        }
-
-        // Atualiza porcentagem
-        const percentage = document.getElementById('progress-percentage');
-        const progressBar = document.querySelector('.progress-bar-fill');
-        if (percentage && progressBar) {
-            percentage.textContent = `${progress.progress_percentage}%`;
-            progressBar.style.width = `${progress.progress_percentage}%`;
-        }
-
-        // Renderiza conquistas
-        renderAchievements(progress.achievements);
-
-        // Renderiza atividades
-        const activities = await api.getUserActivities();
-        renderActivities(activities);
-
-    } catch (error) {
-        showCustomAlert('Erro ao carregar progresso', 'Erro', 'error');
-    } finally {
-        loading.style.display = 'none';
+    const user = userState.user;
+    if (!user) {
+        window.router.navigate('/login');
+        return;
     }
-}
 
-function renderAchievements(achievements) {
-    const container = document.getElementById('achievements-container');
-    if (!container) return;
+    // Atualiza cabeçalho
+    const header = document.getElementById('progresso-header');
+    if (header) {
+        header.innerHTML = `Seu Progresso, ${user.full_name}!`;
+    }
 
-    container.innerHTML = '';
-    
-    // Renderiza conquistas obtidas
-    achievements.forEach(achievement => {
-        container.appendChild(createAchievementCard(achievement, true));
+    // Adiciona listeners de navegação
+    document.querySelectorAll('[data-route]').forEach(element => {
+        element.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.router.navigate(element.dataset.route);
+        });
     });
 
-    // Adiciona conquistas bloqueadas
-    const totalAchievements = 10;
-    for (let i = achievements.length; i < totalAchievements; i++) {
-        container.appendChild(createAchievementCard(null, false));
-    }
-
-    // Atualiza texto de conquistas
-    const text = document.getElementById('achievements-text');
-    if (text) {
-        text.textContent = `${achievements.length} de ${totalAchievements} conquistas desbloqueadas`;
-    }
-}
-
-function createAchievementCard(achievement, unlocked) {
-    const div = document.createElement('div');
-    div.className = `achievement-card ${unlocked ? 'unlocked' : 'locked'}`;
-    
-    if (unlocked) {
-        div.innerHTML = `
-            <div class="p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
-                <i class="${achievement.icon} text-2xl text-purple-500"></i>
-                <h3 class="font-medium text-purple-900 mt-2">${achievement.title}</h3>
-                <p class="text-sm text-purple-700">${achievement.description}</p>
-            </div>
-        `;
-    } else {
-        div.innerHTML = `
-            <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                <i class="fas fa-lock text-2xl text-gray-400"></i>
-                <h3 class="font-medium text-gray-500 mt-2">???</h3>
-                <p class="text-sm text-gray-400">Conquista bloqueada</p>
-            </div>
-        `;
-    }
-
-    return div;
-}
-
-function renderActivities(activities) {
-    const container = document.getElementById('activities-container');
-    if (!container || !Array.isArray(activities)) return;
-
-    container.innerHTML = '';
-    
-    activities.forEach(activity => {
-        const div = document.createElement('div');
-        div.className = 'activity-card p-4 bg-white rounded-lg border border-gray-200';
-        
-        const icon = getActivityIcon(activity.type);
-        const date = new Date(activity.timestamp).toLocaleDateString('pt-BR');
-        
-        div.innerHTML = `
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <i class="${icon} text-xl text-blue-500"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-gray-800">${activity.description}</p>
-                    <span class="text-sm text-gray-500">${date}</span>
-                </div>
-            </div>
-        `;
-        
-        container.appendChild(div);
-    });
-}
-
-function getActivityIcon(type) {
-    switch(type) {
-        case 'completion':
-            return 'fas fa-check-circle';
-        case 'achievement':
-            return 'fas fa-trophy';
-        case 'login':
-            return 'fas fa-sign-in-alt';
-        default:
-            return 'fas fa-circle';
-    }
-}
-
-function setupEventListeners() {
-    // Atualiza dados quando a rota é acessada
-    window.addEventListener('routeChanged', (event) => {
-        if (event.detail.path === '/progresso') {
-            updateProgressData();
+    // Carrega dados de progresso
+    const loadProgress = async () => {
+        try {
+            const progress = await api.getUserProgress();
+            renderUserProgress(progress);
+            
+            const activities = await api.getUserActivities();
+            renderUserActivities(activities);
+        } catch (error) {
+            showCustomAlert('Erro ao carregar seu progresso.', 'Erro', 'error');
         }
-    });
+    };
+    
+    loadProgress();
 }

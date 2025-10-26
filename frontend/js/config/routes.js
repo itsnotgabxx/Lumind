@@ -1,3 +1,4 @@
+// frontend/js/config/routes.js (O CÓDIGO CORRETO)
 import { authMiddleware, guestMiddleware } from '../middleware/auth.js';
 
 export const routes = [
@@ -20,6 +21,12 @@ export const routes = [
         middleware: [guestMiddleware]
     },
     {
+        path: '/esqueciSenha',
+        component: () => import('../pages/esqueciSenha.js'),
+        title: 'Recuperar Senha',
+        middleware: [guestMiddleware]
+    },
+    {
         path: '/questionario',
         component: () => import('../pages/questionario.js'),
         title: 'Questionário',
@@ -32,8 +39,8 @@ export const routes = [
         middleware: [authMiddleware]
     },
     {
-        path: '/perfil',
-        component: () => import('../pages/profile.js'),
+        path: '/perfil', // A rota é /perfil
+        component: () => import('../pages/profile.js'), // O arquivo é profile.js
         title: 'Meu Perfil',
         middleware: [authMiddleware]
     },
@@ -47,6 +54,30 @@ export const routes = [
         path: '/conteudo/:id',
         component: () => import('../pages/conteudo.js'),
         title: 'Conteúdo',
+        middleware: [authMiddleware]
+    },
+    {
+        path: '/acompanhamento',
+        component: () => import('../pages/acompanhamento.js'),
+        title: 'Acompanhamento',
+        middleware: [authMiddleware]
+    },
+    {
+        path: '/enviarIncentivo',
+        component: () => import('../pages/enviarIncentivo.js'),
+        title: 'Enviar Incentivo',
+        middleware: [authMiddleware]
+    },
+    {
+        path: '/falarComEspecialista',
+        component: () => import('../pages/falarComEspecialista.js'),
+        title: 'Falar com Especialista',
+        middleware: [authMiddleware]
+    },
+    {
+        path: '/historico',
+        component: () => import('../pages/historicoCompleto.js'),
+        title: 'Histórico Completo',
         middleware: [authMiddleware]
     }
 ];

@@ -1,11 +1,33 @@
+/* Estilos para .nav-link que antes usavam @apply */
 .nav-link {
-    @apply inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300;
+    display: inline-flex;
+    align-items: center;
+    padding-left: 0.25rem; /* px-1 */
+    padding-right: 0.25rem; /* px-1 */
+    padding-top: 0.25rem; /* pt-1 */
+    font-size: 0.875rem; /* text-sm */
+    line-height: 1.25rem; /* text-sm */
+    font-weight: 500; /* font-medium */
+    color: rgb(107 114 128); /* text-gray-500 */
+    border-bottom-width: 2px;
+    border-color: transparent; /* Adicionado para alinhamento */
 }
 
+.nav-link:hover {
+    color: rgb(55 65 81); /* hover:text-gray-700 */
+    border-color: rgb(209 213 219); /* hover:border-gray-300 */
+}
+
+/* Estilos para .nav-link.active que antes usavam @apply */
 .nav-link.active {
-    @apply border-purple-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium;
+    /* (Muitos estilos são herdados de .nav-link) */
+    border-color: var(--lumind-purple, #8B5CF6); /* border-purple-500 */
+    color: rgb(17 24 39); /* text-gray-900 */
+    border-bottom-width: 2px; /* border-b-2 */
 }
 
+
+/* O restante do seu arquivo (animações) estava correto e pode ser mantido */
 .user-menu {
     transition: opacity 0.2s, transform 0.2s;
     transform-origin: top right;
