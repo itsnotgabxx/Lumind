@@ -4,6 +4,7 @@ from app.api.routers import auth_router, content_router, message_router, ml_rout
 from app.core.config import settings
 from app.db.database import engine
 from app.models import user_model, content_model
+from app.core.firebase_config import initialize_firebase  # 👈 ADICIONAR ESTA LINHA
 
 app = FastAPI(
     title="Lumind API",
@@ -19,6 +20,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 👇 ADICIONAR ESTE EVENTO DE STARTUP
+@app.on_event("startup")
+async def startup_event():
+    initialize_firebase()
+    print("🚀 Firebase Admin inicializado!")
 
 # Criar tabelas do banco de dados
 user_model.Base.metadata.create_all(bind=engine)

@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
+from app.core.firebase_config import verify_firebase_token  # 👈 ADICIONAR ESTE IMPORT
+from app.services.user_service import create_user
 from app.schemas.user_schema import (
     UserCreate, UserResponse,
     LearningPreferencesUpdate, UserProfileUpdate, AccessibilitySettings
@@ -52,7 +54,6 @@ async def update_preferences(
     db: Session = Depends(get_db)
 ):
     """Atualiza as preferências de aprendizado do usuário"""
-    # Verifica se o usuário existe
     user = get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
@@ -64,6 +65,7 @@ async def update_preferences(
             detail="Usuário não encontrado"
         )
     return updated_user
+
 @router.put("/{user_id}/profile", response_model=UserResponse)
 async def update_profile(
     user_id: int,
@@ -71,7 +73,6 @@ async def update_profile(
     db: Session = Depends(get_db)
 ):
     """Atualiza o perfil do usuário"""
-    # Verifica se o usuário existe
     user = get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
@@ -91,7 +92,6 @@ async def update_accessibility(
     db: Session = Depends(get_db)
 ):
     """Atualiza as configurações de acessibilidade do usuário"""
-    # Verifica se o usuário existe
     user = get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
@@ -104,3 +104,47 @@ async def update_accessibility(
             detail="Usuário não encontrado"
         )
     return updated_user
+
+# 👇 SUBSTITUIR ESTA ROTA INTEIRA
+@router.post("/google")
+async def google_login(data: dict, db: Session = Depends(get_db)):
+    """
+    Faz login com Google usando o token do Firebase.
+    Se o usuário não existir, cria um novo.
+    """
+    token = data.get("token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Token não enviado")
+
+    try:
+        # ✅ Usar Firebase Admin SDK em vez de google.oauth2
+        decoded_token = verify_firebase_token(token)
+        
+        # Extrair dados do token
+        email = decoded_token.get("email")
+        name = decoded_token.get("name", "Usuário Google")
+        firebase_uid = decoded_token.get("uid")
+        
+        print(f"✅ Token Firebase válido! Email: {email}, UID: {firebase_uid}")
+
+        # Procura usuário existente
+        user = get_user_by_email(db, email=email)
+        if not user:
+            print(f"📝 Criando novo usuário: {email}")
+            new_user_data = UserCreate(
+                email=email,
+                full_name=name,
+                password="-"  # não precisa de senha para login via Google
+            )
+            user = create_user(db=db, user=new_user_data)
+        else:
+            print(f"✅ Usuário existente encontrado: {email}")
+
+        return {"user": user}
+
+    except ValueError as e:
+        print(f"❌ Token inválido: {e}")
+        raise HTTPException(status_code=401, detail="Token inválido ou expirado")
+    except Exception as e:
+        print(f"❌ Erro ao processar login Google: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")

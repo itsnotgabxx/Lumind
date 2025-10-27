@@ -157,7 +157,19 @@ class LumindAPI {
         if (!this.user) throw new Error("Usuário não logado.");
         return await this.request(`/messages/guardian/${this.user.id}/student/${studentId}`);
     }
+
+    async googleLogin(token) {
+       const data = await this.request('/users/google', {
+    method: 'POST',
+    body: JSON.stringify({ token })
+});
+
+        this.user = data.user;
+        localStorage.setItem('lumind_user', JSON.stringify(this.user));
+        return this.user;
+    }
 }
+
 
 // Instância global da API
 export const api = new LumindAPI();
