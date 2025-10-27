@@ -47,6 +47,8 @@ venv.bak/
 *.swo
 *~
 
+backend/app/core/lumind-auth-firebase-adminsdk-fbsvc-4308e4bfa1.json
+
 # OS
 .DS_Store
 .DS_Store?
