@@ -1,6 +1,7 @@
 import { showCustomAlert } from '../utils/alert.js';
 import { userState } from '../utils/userState.js';
 import { applyAccessibilitySettings } from '../utils/accessibility.js'; 
+import { showConfirmDialog } from '../utils/confirmDialog.js'; // 👈 ADICIONAR ESTA LINHA
 
 export default function PerfilUsuarioPage() {
     // Este HTML é baseado no seu index.html original
@@ -153,10 +154,30 @@ export function setup() {
         }
     });
 
-    // Botão Sair
+   // Botão Sair
+// Botão Sair
     document.getElementById('btn-sair-conta-perfil').addEventListener('click', () => {
-        api.logout();
-        userState.user = null;
-        window.router.navigate('/login');
+        showConfirmDialog(
+            'Você tem certeza que deseja sair da sua conta?',
+            'Sair da Conta',
+            () => {
+                // Confirmou - faz logout
+                api.logout();
+                userState.user = null;
+                sessionStorage.clear();
+                
+                showCustomAlert('Você saiu com sucesso!', 'Até logo!', 'success');
+                
+                window.router.navigate('/login');
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            },
+            () => {
+                // Cancelou - não faz nada
+                console.log('Logout cancelado');
+            }
+        );
     });
 }

@@ -1,3 +1,6 @@
+import { userState } from '../utils/userState.js';
+import { showConfirmDialog } from '../utils/confirmDialog.js'; // 👈 ADICIONAR ESTA LINHA
+
 export class NavBar {
     constructor(user = null) {
         this.user = user;
@@ -98,30 +101,46 @@ export class NavBar {
     }
 
     setupEventListeners() {
-        // Toggle menu do usuário
-        const menuButton = document.getElementById('user-menu-button');
-        const menu = document.querySelector('.user-menu');
-        
-        if (menuButton && menu) {
-            menuButton.addEventListener('click', () => {
-                menu.classList.toggle('hidden');
-            });
+    // Toggle menu do usuário
+    const menuButton = document.getElementById('user-menu-button');
+    const menu = document.querySelector('.user-menu');
+    
+    if (menuButton && menu) {
+        menuButton.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
 
-            // Fecha o menu quando clicar fora
-            document.addEventListener('click', (e) => {
-                if (!menuButton.contains(e.target) && !menu.contains(e.target)) {
-                    menu.classList.add('hidden');
-                }
-            });
-        }
+        // Fecha o menu quando clicar fora
+        document.addEventListener('click', (e) => {
+            if (!menuButton.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    }
 
-        // Botão de logout
-        const logoutButton = document.getElementById('logout-button');
+    // Botão de logout
+    const logoutButton = document.getElementById('logout-button');
         if (logoutButton) {
-            logoutButton.addEventListener('click', async (e) => {
+            logoutButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                await api.logout();
-                window.router.navigate('/login');
+
+                showConfirmDialog(
+                    'Você tem certeza que deseja sair da sua conta?',
+                    'Sair da Conta',
+                    () => {
+                        // Confirmou - faz logout
+                        api.logout();
+                        userState.user = null;
+                        sessionStorage.clear();
+                        localStorage.clear();
+                        
+                        window.location.reload();
+                    },
+                    () => {
+                        // Cancelou - não faz nada
+                        console.log('Logout cancelado');
+                    }
+                );
             });
         }
     }
