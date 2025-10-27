@@ -44,6 +44,8 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    firebase_uid: Optional[str] = None  # 👈 ADICIONAR ESTA LINHA
+
 
 class UserResponse(UserBase):
     id: int

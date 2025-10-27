@@ -18,15 +18,13 @@ router = APIRouter()
 async def login_by_email(user_email: str, db: Session = Depends(get_db)):
     """
     Faz o 'login' de um usuário buscando-o pelo email.
-    Se o usuário não existir, cria um novo com dados padrão.
     """
     user = get_user_by_email(db, email=user_email)
     if not user:
-        # Se o usuário não existe, cria um novo na hora.
-        new_user_data = UserCreate(
-            email=user_email, full_name="Novo Usuário", password="-"
+        raise HTTPException(
+            status_code=404,
+            detail="Usuário não encontrado. Por favor, cadastre-se primeiro."
         )
-        user = create_user(db=db, user=new_user_data)
     return user
 
 @router.post("/register", response_model=UserResponse)
@@ -105,42 +103,50 @@ async def update_accessibility(
         )
     return updated_user
 
-# 👇 SUBSTITUIR ESTA ROTA INTEIRA
 @router.post("/google")
 async def google_login(data: dict, db: Session = Depends(get_db)):
     """
     Faz login com Google usando o token do Firebase.
-    Se o usuário não existir, cria um novo.
+    Se o usuário não existir, retorna indicador para cadastro.
     """
     token = data.get("token")
     if not token:
         raise HTTPException(status_code=400, detail="Token não enviado")
 
     try:
-        # ✅ Usar Firebase Admin SDK em vez de google.oauth2
+        # Verificar o token do Firebase
         decoded_token = verify_firebase_token(token)
         
         # Extrair dados do token
         email = decoded_token.get("email")
         name = decoded_token.get("name", "Usuário Google")
         firebase_uid = decoded_token.get("uid")
+        picture = decoded_token.get("picture", "")
         
         print(f"✅ Token Firebase válido! Email: {email}, UID: {firebase_uid}")
 
         # Procura usuário existente
         user = get_user_by_email(db, email=email)
+        
         if not user:
-            print(f"📝 Criando novo usuário: {email}")
-            new_user_data = UserCreate(
-                email=email,
-                full_name=name,
-                password="-"  # não precisa de senha para login via Google
-            )
-            user = create_user(db=db, user=new_user_data)
+            # 👇 USUÁRIO NOVO - retorna dados para cadastro
+            print(f"📝 Usuário novo detectado: {email}")
+            return {
+                "is_new_user": True,
+                "google_data": {
+                    "email": email,
+                    "full_name": name,
+                    "firebase_uid": firebase_uid,
+                    "picture": picture
+                }
+            }
         else:
+            # 👇 USUÁRIO EXISTENTE - retorna dados do usuário
             print(f"✅ Usuário existente encontrado: {email}")
-
-        return {"user": user}
+            return {
+                "is_new_user": False,
+                "user": user
+            }
 
     except ValueError as e:
         print(f"❌ Token inválido: {e}")
@@ -148,3 +154,24 @@ async def google_login(data: dict, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"❌ Erro ao processar login Google: {e}")
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+    
+
+    
+@router.post("/google/complete-registration", response_model=UserResponse)
+async def complete_google_registration(user_data: UserCreate, db: Session = Depends(get_db)):
+    """
+    Completa o cadastro de um usuário que fez login com Google.
+    """
+    # Verifica se o usuário já existe
+    existing_user = get_user_by_email(db, email=user_data.email)
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Este email já está cadastrado"
+        )
+    
+    # Cria o novo usuário
+    new_user = create_user(db=db, user=user_data)
+    print(f"✅ Cadastro Google completo: {new_user.email}")
+    
+    return new_user

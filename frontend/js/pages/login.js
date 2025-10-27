@@ -70,7 +70,7 @@ export function setup() {
     }
 
     // 👇 novo listener para login com Google
-   if (btnGoogle) {
+  if (btnGoogle) {
     btnGoogle.addEventListener('click', async () => {
         loading.style.display = 'flex';
         try {
@@ -78,12 +78,27 @@ export function setup() {
             const user = result.user;
             const token = await user.getIdToken();
 
-            // 👈 aqui você envia o token para o backend
-            await api.googleLogin(token);
+            // Envia o token para o backend
+            const response = await api.googleLogin(token);
 
-            userState.user = api.user;
-            showCustomAlert("Login com Google realizado com sucesso!", "Bem-vindo(a)", "success");
-            window.router.navigate('/recomendacao');
+            // 👇 VERIFICAR SE É USUÁRIO NOVO
+            if (response.isNewUser) {
+                // Salva dados do Google temporariamente
+                sessionStorage.setItem('google_registration_data', JSON.stringify(response.googleData));
+                
+                // Redireciona para cadastro
+                showCustomAlert(
+                    "Bem-vindo! Complete seu cadastro para continuar.",
+                    "Primeiro acesso",
+                    "info"
+                );
+                window.router.navigate('/cadastro');
+            } else {
+                // Login bem-sucedido
+                userState.user = response.user;
+                showCustomAlert("Login com Google realizado com sucesso!", "Bem-vindo(a)", "success");
+                window.router.navigate('/recomendacao');
+            }
         } catch (err) {
             console.error(err);
             showCustomAlert("Erro ao fazer login com Google", "Erro", "error");

@@ -20,6 +20,7 @@ def create_user(db: Session, user: UserCreate) -> User:
     if user.interests:
         interests_json = json.dumps(user.interests)
     
+    # 👇 ADICIONAR SUPORTE PARA firebase_uid
     db_user = User(
         full_name=user.full_name,
         email=user.email,
@@ -29,7 +30,8 @@ def create_user(db: Session, user: UserCreate) -> User:
         guardian_email=user.guardian_email,
         learning_preferences=learning_preferences_json,
         interests=interests_json,
-        distractions=user.distractions
+        distractions=user.distractions,
+        firebase_uid=getattr(user, 'firebase_uid', None)  # 👈 ADICIONAR ESTA LINHA
     )
     db.add(db_user)
     db.commit()

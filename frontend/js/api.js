@@ -159,15 +159,40 @@ class LumindAPI {
     }
 
     async googleLogin(token) {
-       const data = await this.request('/users/google', {
-    method: 'POST',
-    body: JSON.stringify({ token })
-});
+    const data = await this.request('/users/google', {
+        method: 'POST',
+        body: JSON.stringify({ token })
+    });
 
+    // 👇 VERIFICAR SE É USUÁRIO NOVO
+    if (data.is_new_user) {
+        // Retorna os dados do Google para o cadastro
+        return {
+            isNewUser: true,
+            googleData: data.google_data
+        };
+    } else {
+        // Usuário existente - faz login normalmente
         this.user = data.user;
         localStorage.setItem('lumind_user', JSON.stringify(this.user));
-        return this.user;
+        return {
+            isNewUser: false,
+            user: this.user
+        };
     }
+}
+
+// 👇 NOVO MÉTODO para completar cadastro com Google
+async completeGoogleRegistration(userData) {
+    const newUser = await this.request('/users/google/complete-registration', {
+        method: 'POST',
+        body: JSON.stringify(userData)
+    });
+    
+    this.user = newUser;
+    localStorage.setItem('lumind_user', JSON.stringify(newUser));
+    return newUser;
+}
 }
 
 
