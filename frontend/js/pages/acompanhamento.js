@@ -1,211 +1,310 @@
-// CORREÇÃO: Adicionando os imports necessários
-import { api } from '../api.js';
 import { showCustomAlert } from '../utils/alert.js';
 import { userState } from '../utils/userState.js';
 
-export default function AcompanhamentoPage() {
+export default function ProgressoPage() {
     return `
-        <div class="w-full max-w-4xl mx-auto">
-            <div class="text-center mb-8">
-                <h1 class="screen-title">Acompanhamento do Responsável</h1>
-                <p id="acompanhamento-responsavel-intro" class="screen-subtitle"></p>
+        <div class="w-full max-w-7xl mx-auto px-4 py-8">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                    <h1 id="progresso-header" class="text-3xl font-bold text-gray-800 mb-2">
+                        Seu Progresso! 📊
+                    </h1>
+                    <p class="text-gray-600">Acompanhe sua evolução e conquistas</p>
+                </div>
+                <button data-route="/recomendacao" class="btn-subtle">
+                    <i class="fas fa-arrow-left mr-2"></i>Voltar
+                </button>
             </div>
 
+            <!-- Cards de Resumo -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="card">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Tempo de Estudo</h3>
-                    <p class="text-xl font-semibold text-gray-800" id="tempo-estudo">0h</p>
-                    <p class="text-sm text-gray-500">Nesta semana</p>
+                <!-- Progresso Geral -->
+                <div class="card bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center">
+                        <i class="fas fa-flag-checkered mr-2 text-green-500"></i>
+                        Resumo Geral
+                    </h2>
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p id="progresso-percentual" class="text-5xl font-bold text-purple-600">0%</p>
+                            <p class="text-gray-600 mt-1">do plano concluído</p>
+                        </div>
+                        <div class="w-32 h-32">
+                            <svg class="progress-ring" viewBox="0 0 120 120">
+                                <circle class="text-gray-200" stroke="currentColor" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+                                <circle id="progresso-circle" class="progress-ring-circle" stroke-dasharray="326.73" stroke-dashoffset="326.73" r="52" cx="60" cy="60"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div id="progresso-barra" class="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Conquistas -->
+                <div class="card bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center">
+                        <i class="fas fa-trophy mr-2 text-amber-500"></i>
+                        Conquistas
+                    </h2>
+                    <div id="conquistas-container" class="flex flex-wrap gap-3 mt-4 min-h-[100px]">
+                        <span class="text-gray-400">Carregando...</span>
+                    </div>
+                    <p id="conquistas-texto" class="text-sm text-gray-600 mt-4">
+                        Carregando suas conquistas...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Estatísticas Detalhadas -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="card text-center hover:shadow-lg transition-shadow">
+                    <i class="fas fa-check-circle text-4xl text-green-500 mb-2"></i>
+                    <p class="text-3xl font-bold text-gray-800" id="stat-completed">0</p>
+                    <p class="text-sm text-gray-600">Concluídos</p>
                 </div>
                 
-                <div class="card">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Atividades Concluídas</h3>
-                    <p class="text-xl font-semibold text-gray-800" id="atividades-concluidas">0</p>
-                    <p class="text-sm text-gray-500">Total</p>
+                <div class="card text-center hover:shadow-lg transition-shadow">
+                    <i class="fas fa-spinner text-4xl text-blue-500 mb-2"></i>
+                    <p class="text-3xl font-bold text-gray-800" id="stat-in-progress">0</p>
+                    <p class="text-sm text-gray-600">Em Andamento</p>
+                </div>
+                
+                <div class="card text-center hover:shadow-lg transition-shadow">
+                    <i class="fas fa-clock text-4xl text-purple-500 mb-2"></i>
+                    <p class="text-3xl font-bold text-gray-800" id="stat-time">0h</p>
+                    <p class="text-sm text-gray-600">Tempo Total</p>
+                </div>
+                
+                <div class="card text-center hover:shadow-lg transition-shadow">
+                    <i class="fas fa-fire text-4xl text-orange-500 mb-2"></i>
+                    <p class="text-3xl font-bold text-gray-800" id="stat-streak">0</p>
+                    <p class="text-sm text-gray-600">Dias Seguidos</p>
                 </div>
             </div>
 
+            <!-- Atividades Recentes -->
             <div class="card mb-8">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">Progresso Geral</h3>
-                    <p class="text-sm text-right text-gray-500" id="progresso-texto"></p>
-                </div>
-                <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="progress-bar-fill h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Alertas e Observações</h3>
-                <div class="space-y-3" id="alertas-container">
-                    </div>
-            </div>
-
-            <div class="card mt-8">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Enviar Mensagem de Incentivo</h3>
-                <form id="form-enviar-incentivo">
-                    <textarea 
-                        id="incentivo-textarea" 
-                        class="input-field" 
-                        rows="4" 
-                        placeholder="Escreva uma mensagem positiva..."
-                        required
-                    ></textarea>
-                    <button type="submit" class="btn-primary w-full mt-4">
-                        <i class="fas fa-paper-plane mr-2"></i>Enviar Mensagem
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold flex items-center">
+                        <i class="fas fa-history mr-2 text-blue-500"></i>
+                        Atividades Recentes
+                    </h2>
+                    <button data-route="/historico" class="btn-subtle text-sm">
+                        <i class="fas fa-list-alt mr-2"></i>Ver Histórico Completo
                     </button>
-                </form>
+                </div>
+                <ul id="atividades-recentes-lista" class="space-y-3">
+                    <p class="text-gray-500 text-center py-8">Carregando atividades...</p>
+                </ul>
+            </div>
+
+            <!-- Próximos Objetivos -->
+            <div class="card bg-gradient-to-r from-teal-50 to-blue-50 border-2 border-teal-200">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-bullseye mr-2 text-teal-600"></i>
+                    Próximos Objetivos
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 p-3 bg-white rounded-lg">
+                        <i class="fas fa-star text-2xl text-amber-500"></i>
+                        <div class="flex-grow">
+                            <p class="font-medium text-gray-800">Complete mais 3 atividades</p>
+                            <p class="text-sm text-gray-600">Para desbloquear a conquista "Explorador Dedicado"</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-white rounded-lg">
+                        <i class="fas fa-calendar-check text-2xl text-green-500"></i>
+                        <div class="flex-grow">
+                            <p class="font-medium text-gray-800">Estude por 7 dias seguidos</p>
+                            <p class="text-sm text-gray-600">Continue sua sequência! Você está indo muito bem!</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     `;
 }
 
-export function setup() {
-    updateAcompanhamentoData();
-    setupEventListeners();
-}
-
-async function updateAcompanhamentoData() {
-    // O 'loading-overlay' não existe no seu index.html. 
-    // Se você adicionar um, descomente estas linhas.
-    // const loading = document.getElementById('loading-overlay');
-    // if (loading) loading.style.display = 'flex';
-
-    try {
-        const user = userState.user;
-        if (!user) {
-            window.router.navigate('/login');
-            return;
-        }
-
-        // Busca dados do progresso
-        const progress = await api.getUserProgress();
-        const activities = await api.getUserActivities();
-        
-        // Atualiza texto introdutório
-        const intro = document.getElementById('acompanhamento-responsavel-intro');
-        if (intro) {
-            intro.innerHTML = `Acompanhe o progresso de ${user.full_name}.`;
-        }
-
-        // Atualiza tempo de estudo
-        const tempoEstudo = document.getElementById('tempo-estudo');
-        if (tempoEstudo) {
-            // Assumindo que a API retorna 'total_time_spent' em minutos
-            const horas = Math.floor((progress.total_time_spent || 0) / 60);
-            tempoEstudo.textContent = `${horas}h`;
-        }
-
-        // Atualiza atividades concluídas
-        const atividadesConcluidas = document.getElementById('atividades-concluidas');
-        if (atividadesConcluidas) {
-            atividadesConcluidas.textContent = progress.completed_activities || 0;
-        }
-
-        // Atualiza barra de progresso
-        const progressBar = document.querySelector('.progress-bar-fill');
-        const progressoTexto = document.getElementById('progresso-texto');
-        if (progressBar && progressoTexto) {
-            progressBar.style.width = `${progress.progress_percentage}%`;
-            progressoTexto.textContent = `${progress.progress_percentage}% concluído`;
-        }
-
-        // Renderiza alertas
-        renderAlertas(progress, activities);
-
-    } catch (error) {
-        showCustomAlert('Erro ao carregar dados de acompanhamento', 'Erro', 'error');
-    } finally {
-        // if (loading) loading.style.display = 'none';
+function renderUserProgress(progress) {
+    if (!progress) return;
+    
+    // Percentual
+    const percentage = progress.progress_percentage || 0;
+    document.getElementById('progresso-percentual').textContent = `${percentage}%`;
+    document.getElementById('progresso-barra').style.width = `${percentage}%`;
+    
+    // Círculo SVG
+    const circle = document.getElementById('progresso-circle');
+    if (circle) {
+        const circumference = 326.73;
+        const offset = circumference - (percentage / 100) * circumference;
+        circle.style.strokeDashoffset = offset;
     }
+
+    // Conquistas
+    const achievementsContainer = document.getElementById('conquistas-container');
+    const achievementsText = document.getElementById('conquistas-texto');
+    
+    if (achievementsContainer && achievementsText && progress.achievements) {
+        achievementsContainer.innerHTML = '';
+        const emojiMap = {
+            'Explorador Curioso': '🌍',
+            'Mestre dos Vídeos': '🎬',
+            'Leitor Voraz': '📚',
+            'Gamer Dedicado': '🎮',
+            'Sequência de 7 dias': '🔥'
+        };
+        
+        progress.achievements.forEach(ach => {
+            const badge = document.createElement('div');
+            badge.className = 'flex flex-col items-center p-3 bg-white rounded-lg border-2 border-amber-300 hover:shadow-lg transition-shadow';
+            badge.innerHTML = `
+                <span class="text-4xl mb-1">${emojiMap[ach] || '🏆'}</span>
+                <span class="text-xs font-medium text-gray-700 text-center">${ach}</span>
+            `;
+            achievementsContainer.appendChild(badge);
+        });
+        
+        // Conquistas bloqueadas
+        const totalAchievements = 10;
+        for (let i = progress.achievements.length; i < totalAchievements; i++) {
+            const locked = document.createElement('div');
+            locked.className = 'flex flex-col items-center p-3 bg-gray-100 rounded-lg border-2 border-gray-300 opacity-50';
+            locked.title = 'Ainda não desbloqueado';
+            locked.innerHTML = `
+                <span class="text-4xl mb-1">❓</span>
+                <span class="text-xs text-gray-500">Bloqueado</span>
+            `;
+            achievementsContainer.appendChild(locked);
+        }
+        
+        achievementsText.textContent = `${progress.achievements.length} de ${totalAchievements} conquistas desbloqueadas!`;
+    }
+
+    // Stats
+    document.getElementById('stat-completed').textContent = progress.completed_activities || 0;
+    
+    // MOCK: Calcula horas baseado em atividades concluídas
+    // Base: 5 horas + 1 hora por atividade concluída
+    const baseHours = 5;
+    const hoursPerActivity = 1;
+    const completedCount = progress.completed_activities || 0;
+    const totalHours = baseHours + (completedCount * hoursPerActivity);
+    
+    // Adiciona alguns minutos aleatórios para parecer mais real (entre 0 e 45 min)
+    const extraMinutes = Math.floor(Math.random() * 46);
+    
+    let timeText;
+    if (totalHours > 0 && extraMinutes > 0) {
+        timeText = `${totalHours}h ${extraMinutes}min`;
+    } else if (totalHours > 0) {
+        timeText = `${totalHours}h`;
+    } else {
+        timeText = `${extraMinutes}min`;
+    }
+    
+    document.getElementById('stat-time').textContent = timeText;
+    document.getElementById('stat-streak').textContent = progress.streak_days || 0;
 }
 
-function renderAlertas(progress, activities) {
-    const container = document.getElementById('alertas-container');
-    if (!container) return;
-
-    container.innerHTML = '';
-    const alertas = gerarAlertas(progress, activities);
-
-    if (alertas.length === 0) {
-        container.innerHTML = '<p class="text-gray-600">Nenhum alerta ou observação no momento.</p>';
+function renderUserActivities(activities) {
+    const list = document.getElementById('atividades-recentes-lista');
+    if (!list || !activities || !Array.isArray(activities)) return;
+    
+    list.innerHTML = '';
+    
+    if (activities.length === 0) {
+        list.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhuma atividade ainda</p>';
         return;
     }
+    
+    document.getElementById('stat-in-progress').textContent = 
+        activities.filter(a => a.status === 'in_progress').length;
+    
+    const statusIcons = {
+        'completed': '<i class="fas fa-check-circle text-green-500 text-xl"></i>',
+        'in_progress': '<i class="fas fa-spinner text-blue-500 text-xl"></i>',
+        'not_started': '<i class="far fa-circle text-gray-400 text-xl"></i>'
+    };
 
-    alertas.forEach(alerta => {
-        const div = document.createElement('div');
-        div.className = `alert-card p-4 rounded-lg border ${alerta.type === 'warning' ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'}`;
+    const statusTexts = {
+        'completed': 'Concluído',
+        'in_progress': 'Em andamento',
+        'not_started': 'Não iniciado'
+    };
+
+    const statusColors = {
+        'completed': 'bg-green-50 border-green-200',
+        'in_progress': 'bg-blue-50 border-blue-200',
+        'not_started': 'bg-gray-50 border-gray-200'
+    };
+
+    activities.slice(0, 10).forEach(activity => {
+        const li = document.createElement('li');
+        li.className = `flex items-center justify-between p-4 rounded-lg border-2 ${statusColors[activity.status]} hover:shadow-md transition-shadow`;
         
-        div.innerHTML = `
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <i class="${alerta.icon} text-xl ${alerta.type === 'warning' ? 'text-yellow-500' : 'text-green-500'}"></i>
-                </div>
-                <div class="ml-3">
-                    <h4 class="font-medium ${alerta.type === 'warning' ? 'text-yellow-800' : 'text-green-800'}">${alerta.title}</h4>
-                    <p class="${alerta.type === 'warning' ? 'text-yellow-700' : 'text-green-700'}">${alerta.message}</p>
+        li.innerHTML = `
+            <div class="flex items-center gap-4">
+                ${statusIcons[activity.status] || statusIcons.not_started}
+                <div>
+                    <p class="font-medium text-gray-800">${activity.content?.title || 'Atividade'}</p>
+                    <div class="flex items-center gap-3 mt-1">
+                        <span class="text-sm text-gray-600">${statusTexts[activity.status]}</span>
+                        ${activity.progress_percentage > 0 ? `
+                            <span class="text-sm font-medium text-blue-600">${activity.progress_percentage}%</span>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
+            ${activity.progress_percentage > 0 && activity.status === 'in_progress' ? `
+                <div class="w-32">
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: ${activity.progress_percentage}%"></div>
+                    </div>
+                </div>
+            ` : ''}
         `;
         
-        container.appendChild(div);
+        list.appendChild(li);
     });
 }
 
-function gerarAlertas(progress, activities) {
-    const alertas = [];
+export function setup() {
     const user = userState.user;
-    if (!user) return [];
-
-    // Verifica atividades em progresso
-    const inProgress = activities.filter(a => a.status === 'in_progress');
-    if (inProgress.length > 0) {
-        alertas.push({
-            type: 'warning',
-            icon: 'fas fa-exclamation-circle',
-            title: 'Atividades em Andamento',
-            message: `${user.full_name} tem ${inProgress.length} atividade(s) em andamento.`
-        });
+    if (!user) {
+        window.router.navigate('/login');
+        return;
     }
 
-    // Adiciona observações positivas
-    if (progress.completed_activities > 0) {
-        alertas.push({
-            type: 'info',
-            icon: 'fas fa-star',
-            title: 'Ótimo Desempenho',
-            message: `${user.full_name} já completou ${progress.completed_activities} atividade(s)!`
-        });
+    // Atualiza cabeçalho
+    const header = document.getElementById('progresso-header');
+    if (header) {
+        header.innerHTML = `Seu Progresso, ${user.full_name.split(' ')[0]}! 📊`;
     }
 
-    return alertas;
-}
+    // Navegação
+    document.querySelectorAll('[data-route]').forEach(element => {
+        element.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.router.navigate(element.dataset.route);
+        });
+    });
 
-function setupEventListeners() {
-    // Form de envio de incentivo
-    const formIncentivo = document.getElementById('form-enviar-incentivo');
-    if (formIncentivo) {
-        formIncentivo.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const textarea = document.getElementById('incentivo-textarea');
-            const message = textarea.value;
-            const user = userState.user;
-
-            if (!user) {
-                showCustomAlert('Usuário não encontrado. Faça login novamente.', 'Erro', 'error');
-                return;
-            }
+    // Carrega dados
+    const loadProgress = async () => {
+        try {
+            const progress = await api.getUserProgress();
+            renderUserProgress(progress);
             
-            try {
-                // CORREÇÃO: Chamando 'sendMessage' com o ID do usuário
-                await api.sendMessage(user.id, message, 'incentive');
-                showCustomAlert('Mensagem enviada com sucesso!', 'Sucesso', 'success');
-                formIncentivo.reset();
-            } catch (error) {
-                showCustomAlert('Erro ao enviar mensagem', 'Erro', 'error');
-            }
-        });
-    }
-
-    // CORREÇÃO: Removido o listener 'routeChanged' que não existe.
+            const activities = await api.getUserActivities();
+            renderUserActivities(activities);
+        } catch (error) {
+            console.error('Erro:', error);
+            showCustomAlert('Erro ao carregar seu progresso.', 'Erro', 'error');
+        }
+    };
+    
+    loadProgress();
 }

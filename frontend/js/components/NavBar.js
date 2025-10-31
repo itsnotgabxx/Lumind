@@ -1,23 +1,81 @@
 import { userState } from '../utils/userState.js';
-import { showConfirmDialog } from '../utils/confirmDialog.js'; // 👈 ADICIONAR ESTA LINHA
+import { showConfirmDialog } from '../utils/confirmDialog.js';
 
 export class NavBar {
     constructor(user = null) {
         this.user = user;
+        this.mobileMenuOpen = false;
     }
 
     render() {
         return `
-            <nav class="bg-white shadow-sm">
+            <nav class="bg-white shadow-md border-b-2 border-purple-100 sticky top-0 z-50">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex justify-between h-16">
-                        <div class="flex">
-                            <div class="flex-shrink-0 flex items-center">
-                               <a href="/" class="text-purple-600 font-bold text-xl" data-link>Lumind</a>
-                            </div>
+                    <div class="flex justify-between items-center h-20">
+                        <!-- Logo e Marca -->
+                        <div class="flex items-center gap-3">
+                            <a href="/" class="flex items-center gap-3 group" data-link>
+                                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                                    <span class="text-white font-bold text-xl">L</span>
+                                </div>
+                                <div class="hidden sm:block">
+                                    <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                                        Lumind
+                                    </h1>
+                                    <p class="text-xs text-gray-500 -mt-1">Aprendizado Inclusivo</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Desktop Navigation -->
+                        <div class="hidden md:flex items-center gap-2">
                             ${this.user ? this.authenticatedLinks() : this.guestLinks()}
                         </div>
-                        ${this.user ? this.userMenu() : ''}
+
+                        <!-- User Menu / Auth Buttons -->
+                        <div class="hidden md:flex items-center gap-3">
+                            ${this.user ? this.userMenu() : this.authButtons()}
+                        </div>
+
+                        <!-- Mobile Menu Button -->
+                        <button 
+                            id="mobile-menu-button" 
+                            class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                            aria-label="Menu"
+                        >
+                            <i class="fas fa-bars text-2xl text-gray-600"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu -->
+                <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-200 shadow-lg">
+                    <div class="px-4 py-4 space-y-3">
+                        ${this.user ? this.mobileAuthenticatedLinks() : this.mobileGuestLinks()}
+                        
+                        ${this.user ? `
+                            <div class="pt-4 border-t border-gray-200">
+                                <div class="flex items-center gap-3 mb-4 p-3 bg-purple-50 rounded-lg">
+                                    <img class="h-12 w-12 rounded-full border-2 border-purple-300" 
+                                         src="${this.getUserAvatar()}" 
+                                         alt="${this.user.full_name}">
+                                    <div>
+                                        <p class="font-semibold text-gray-800">${this.user.full_name}</p>
+                                        <p class="text-sm text-gray-600">${this.user.email}</p>
+                                    </div>
+                                </div>
+                                <a href="/perfil" 
+                                   class="mobile-nav-link" 
+                                   data-link>
+                                    <i class="fas fa-user-circle w-6"></i>
+                                    <span>Meu Perfil</span>
+                                </a>
+                                <button id="mobile-logout-button" class="mobile-nav-link w-full text-red-600 hover:bg-red-50">
+                                    <i class="fas fa-sign-out-alt w-6"></i>
+                                    <span>Sair</span>
+                                </button>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             </nav>
@@ -25,67 +83,149 @@ export class NavBar {
     }
 
     authenticatedLinks() {
-    return `
-        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+        return `
             <a href="/recomendacao" 
-               class="nav-link ${this.isActive('/recomendacao')}" data-link> 
-                Recomendações
+               class="desktop-nav-link ${this.isActive('/recomendacao')}" 
+               data-link>
+                <i class="fas fa-star"></i>
+                <span>Explorar</span>
             </a>
             <a href="/progresso" 
-               class="nav-link ${this.isActive('/progresso')}" data-link>
-                Meu Progresso
+               class="desktop-nav-link ${this.isActive('/progresso')}" 
+               data-link>
+                <i class="fas fa-chart-line"></i>
+                <span>Progresso</span>
             </a>
-        </div>
-    `;
-}
+            <a href="/acompanhamento" 
+               class="desktop-nav-link ${this.isActive('/acompanhamento')}" 
+               data-link>
+                <i class="fas fa-user-friends"></i>
+                <span>Responsável</span>
+            </a>
+        `;
+    }
 
     guestLinks() {
-    return `
-        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+        return `
+            <a href="/" 
+               class="desktop-nav-link ${this.isActive('/')}" 
+               data-link>
+                <i class="fas fa-home"></i>
+                <span>Início</span>
+            </a>
+        `;
+    }
+
+    mobileAuthenticatedLinks() {
+        return `
+            <a href="/recomendacao" 
+               class="mobile-nav-link ${this.isActive('/recomendacao')}" 
+               data-link>
+                <i class="fas fa-star w-6"></i>
+                <span>Explorar Conteúdos</span>
+            </a>
+            <a href="/progresso" 
+               class="mobile-nav-link ${this.isActive('/progresso')}" 
+               data-link>
+                <i class="fas fa-chart-line w-6"></i>
+                <span>Meu Progresso</span>
+            </a>
+            <a href="/acompanhamento" 
+               class="mobile-nav-link ${this.isActive('/acompanhamento')}" 
+               data-link>
+                <i class="fas fa-user-friends w-6"></i>
+                <span>Área do Responsável</span>
+            </a>
+        `;
+    }
+
+    mobileGuestLinks() {
+        return `
+            <a href="/" 
+               class="mobile-nav-link ${this.isActive('/')}" 
+               data-link>
+                <i class="fas fa-home w-6"></i>
+                <span>Início</span>
+            </a>
             <a href="/login" 
-               class="nav-link ${this.isActive('/login')}" data-link>
-                Entrar
+               class="mobile-nav-link" 
+               data-link>
+                <i class="fas fa-sign-in-alt w-6"></i>
+                <span>Entrar</span>
             </a>
             <a href="/cadastro" 
-               class="nav-link ${this.isActive('/cadastro')}" data-link>
-                Criar Conta
+               class="mobile-nav-link" 
+               data-link>
+                <i class="fas fa-user-plus w-6"></i>
+                <span>Criar Conta</span>
             </a>
-        </div>
-    `;
-}
+        `;
+    }
+
+    authButtons() {
+        return `
+            <a href="/login" class="btn-subtle" data-link>
+                Entrar
+            </a>
+            <a href="/cadastro" class="btn-primary" data-link>
+                Começar Grátis
+            </a>
+        `;
+    }
 
     userMenu() {
         return `
-            <div class="hidden sm:ml-6 sm:flex sm:items-center">
-                <div class="ml-3 relative">
-                    <div>
-                        <button type="button" 
-                                class="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500" 
-                                id="user-menu-button" 
-                                aria-expanded="false" 
-                                aria-haspopup="true">
-                            <span class="sr-only">Abrir menu do usuário</span>
-                            <img class="h-8 w-8 rounded-full" 
-                                 src="${this.getUserAvatar()}" 
-                                 alt="${this.user.full_name}">
-                        </button>
+            <div class="relative">
+                <button type="button" 
+                        class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors" 
+                        id="user-menu-button" 
+                        aria-expanded="false" 
+                        aria-haspopup="true">
+                    <img class="h-10 w-10 rounded-full border-2 border-purple-300 shadow-sm" 
+                         src="${this.getUserAvatar()}" 
+                         alt="${this.user.full_name}">
+                    <div class="hidden lg:block text-left">
+                        <p class="text-sm font-semibold text-gray-800">${this.user.full_name.split(' ')[0]}</p>
+                        <p class="text-xs text-gray-500">Estudante</p>
                     </div>
-                    <div class="user-menu hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" 
-                         role="menu" 
-                         aria-orientation="vertical" 
-                         aria-labelledby="user-menu-button" 
-                         tabindex="-1">
+                    <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+                </button>
+                
+                <div class="user-menu hidden absolute right-0 mt-2 w-56 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 overflow-hidden" 
+                     role="menu">
+                    <div class="p-4 bg-gradient-to-br from-purple-50 to-blue-50 border-b">
+                        <p class="font-semibold text-gray-800">${this.user.full_name}</p>
+                        <p class="text-sm text-gray-600">${this.user.email}</p>
+                    </div>
+                    <div class="py-2">
                         <a href="/perfil" 
-   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" 
-   role="menuitem" data-link>
-    Meu Perfil
-</a>
-                        <a href="#" 
-                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" 
-                           role="menuitem"
-                           id="logout-button">
-                            Sair
+                           class="dropdown-menu-item" 
+                           role="menuitem" 
+                           data-link>
+                            <i class="fas fa-user-circle w-5"></i>
+                            <span>Meu Perfil</span>
                         </a>
+                        <a href="/progresso" 
+                           class="dropdown-menu-item" 
+                           role="menuitem" 
+                           data-link>
+                            <i class="fas fa-chart-bar w-5"></i>
+                            <span>Estatísticas</span>
+                        </a>
+                        <a href="/acompanhamento" 
+                           class="dropdown-menu-item" 
+                           role="menuitem" 
+                           data-link>
+                            <i class="fas fa-user-shield w-5"></i>
+                            <span>Área do Responsável</span>
+                        </a>
+                    </div>
+                    <div class="border-t">
+                        <button id="logout-button" 
+                                class="dropdown-menu-item w-full text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt w-5"></i>
+                            <span>Sair da Conta</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -93,7 +233,8 @@ export class NavBar {
     }
 
     getUserAvatar() {
-        return `https://placehold.co/80x80/A78BFA/FFFFFF?text=${this.user.full_name.substring(0,1).toUpperCase()}`;
+        const initial = this.user.full_name.substring(0,1).toUpperCase();
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(this.user.full_name)}&background=8B5CF6&color=fff&size=128&bold=true`;
     }
 
     isActive(path) {
@@ -101,47 +242,79 @@ export class NavBar {
     }
 
     setupEventListeners() {
-    // Toggle menu do usuário
-    const menuButton = document.getElementById('user-menu-button');
-    const menu = document.querySelector('.user-menu');
-    
-    if (menuButton && menu) {
-        menuButton.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
-        });
+        // Desktop user menu toggle
+        const menuButton = document.getElementById('user-menu-button');
+        const menu = document.querySelector('.user-menu');
+        
+        if (menuButton && menu) {
+            menuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+                const isExpanded = !menu.classList.contains('hidden');
+                menuButton.setAttribute('aria-expanded', isExpanded);
+            });
 
-        // Fecha o menu quando clicar fora
-        document.addEventListener('click', (e) => {
-            if (!menuButton.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.add('hidden');
-            }
-        });
-    }
+            document.addEventListener('click', (e) => {
+                if (!menuButton.contains(e.target) && !menu.contains(e.target)) {
+                    menu.classList.add('hidden');
+                    menuButton.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
 
-    // Botão de logout
-    const logoutButton = document.getElementById('logout-button');
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                const icon = mobileMenuButton.querySelector('i');
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            });
+
+            // Fecha menu ao clicar em um link
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    const icon = mobileMenuButton.querySelector('i');
+                    icon.classList.add('fa-bars');
+                    icon.classList.remove('fa-times');
+                });
+            });
+        }
+
+        // Desktop logout
+        const logoutButton = document.getElementById('logout-button');
         if (logoutButton) {
             logoutButton.addEventListener('click', (e) => {
                 e.preventDefault();
-
-                showConfirmDialog(
-                    'Você tem certeza que deseja sair da sua conta?',
-                    'Sair da Conta',
-                    () => {
-                        // Confirmou - faz logout
-                        api.logout();
-                        userState.user = null;
-                        sessionStorage.clear();
-                        localStorage.clear();
-                        
-                        window.location.reload();
-                    },
-                    () => {
-                        // Cancelou - não faz nada
-                        console.log('Logout cancelado');
-                    }
-                );
+                this.handleLogout();
             });
         }
+
+        // Mobile logout
+        const mobileLogoutButton = document.getElementById('mobile-logout-button');
+        if (mobileLogoutButton) {
+            mobileLogoutButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleLogout();
+            });
+        }
+    }
+
+    handleLogout() {
+        showConfirmDialog(
+            'Você tem certeza que deseja sair da sua conta?',
+            'Sair da Conta',
+            () => {
+                api.logout();
+                userState.user = null;
+                sessionStorage.clear();
+                localStorage.clear();
+                window.location.href = '/';
+            }
+        );
     }
 }
