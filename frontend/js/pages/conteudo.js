@@ -1,6 +1,7 @@
 import { api } from '../api.js';
 import { showCustomAlert } from '../utils/alert.js';
 import { userState } from '../utils/userState.js';
+import GamePlayer from './content/GamePlayer.js';
 
 export default async function ConteudoPage({ params }) {
     const contentId = params.id;
@@ -123,8 +124,7 @@ async function renderContent(content) {
                 return await import('./content/TextContent.js')
                     .then(module => module.default(content));
             case 'interactive_game':
-                return await import('./content/GameContent.js')
-                    .then(module => module.default(content));
+                return GamePlayer(content);
             case 'audio':
                 return await import('./content/AudioPlayer.js')
                     .then(module => module.default(content))

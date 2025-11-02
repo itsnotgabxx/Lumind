@@ -1,124 +1,345 @@
 import { showCustomAlert } from '../utils/alert.js';
 import { userState } from '../utils/userState.js';
 
-export default function ProgressoPage() {
+export default function AcompanhamentoPage() {
     return `
-        <div class="w-full max-w-7xl mx-auto px-4 py-8">
-            <!-- Header -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                <div>
-                    <h1 id="progresso-header" class="text-3xl font-bold text-gray-800 mb-2">
-                        Seu Progresso! 📊
-                    </h1>
-                    <p class="text-gray-600">Acompanhe sua evolução e conquistas</p>
+        <div class="w-full max-w-[1400px] mx-auto px-4 py-6 sm:py-8">
+            <!-- Header Principal -->
+            <div class="bg-gradient-to-r from-teal-50 via-blue-50 to-purple-50 rounded-2xl p-6 sm:p-8 mb-8 border-2 border-teal-200 shadow-lg">
+                <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-teal-500 rounded-xl flex items-center justify-center shadow-lg">
+                                <i class="fas fa-user-shield text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h1 id="acompanhamento-header" class="text-2xl sm:text-3xl font-bold text-gray-800">
+                                    Área do Responsável 👨‍👩‍👧‍👦
+                                </h1>
+                                <p class="text-gray-600 text-sm mt-1">
+                                    Acompanhe o desenvolvimento de <span id="student-name" class="font-semibold text-teal-700">...</span>
+                                </p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm sm:text-base max-w-2xl">
+                            Monitore o progresso, envie mensagens de incentivo e mantenha-se informado sobre as atividades do estudante
+                        </p>
+                    </div>
+                    
+                    <button data-route="/recomendacao" class="btn-subtle whitespace-nowrap">
+                        <i class="fas fa-arrow-left mr-2"></i>Voltar
+                    </button>
                 </div>
-                <button data-route="/recomendacao" class="btn-subtle">
-                    <i class="fas fa-arrow-left mr-2"></i>Voltar
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <button data-route="/enviarIncentivo" class="card hover:shadow-xl transition-all p-4 text-left border-2 border-transparent hover:border-purple-300">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-paper-plane text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">Enviar Incentivo</h3>
+                            <p class="text-xs text-gray-600">Motive o estudante</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button data-route="/falarComEspecialista" class="card hover:shadow-xl transition-all p-4 text-left border-2 border-transparent hover:border-blue-300">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-headset text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">Falar com Especialista</h3>
+                            <p class="text-xs text-gray-600">Tire suas dúvidas</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button id="btn-ver-relatorio" class="card hover:shadow-xl transition-all p-4 text-left border-2 border-transparent hover:border-green-300">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-file-download text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">Relatório Completo</h3>
+                            <p class="text-xs text-gray-600">Baixar PDF</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button data-route="/progresso" class="card hover:shadow-xl transition-all p-4 text-left border-2 border-transparent hover:border-amber-300">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-amber-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">Ver Progresso Detalhado</h3>
+                            <p class="text-xs text-gray-600">Estatísticas completas</p>
+                        </div>
+                    </div>
                 </button>
             </div>
 
-            <!-- Cards de Resumo -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Resumo Visual do Progresso -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <!-- Progresso Geral -->
-                <div class="card bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200">
+                <div class="lg:col-span-2 card bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200">
                     <h2 class="text-xl font-semibold mb-4 flex items-center">
-                        <i class="fas fa-flag-checkered mr-2 text-green-500"></i>
-                        Resumo Geral
+                        <i class="fas fa-chart-pie mr-2 text-purple-600"></i>
+                        Visão Geral do Desenvolvimento
                     </h2>
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <p id="progresso-percentual" class="text-5xl font-bold text-purple-600">0%</p>
-                            <p class="text-gray-600 mt-1">do plano concluído</p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-600">Progresso Geral</span>
+                                <i class="fas fa-percentage text-purple-500"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-purple-600" id="overall-progress">0%</div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                <div id="overall-progress-bar" class="bg-purple-500 h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                            </div>
                         </div>
-                        <div class="w-32 h-32">
-                            <svg class="progress-ring" viewBox="0 0 120 120">
-                                <circle class="text-gray-200" stroke="currentColor" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
-                                <circle id="progresso-circle" class="progress-ring-circle" stroke-dasharray="326.73" stroke-dashoffset="326.73" r="52" cx="60" cy="60"/>
-                            </svg>
+
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-600">Tempo de Estudo</span>
+                                <i class="fas fa-clock text-blue-500"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-blue-600" id="study-time">0h</div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                <span id="study-time-trend" class="text-green-600">
+                                    <i class="fas fa-arrow-up"></i> +15% esta semana
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-600">Atividades Completas</span>
+                                <i class="fas fa-check-double text-green-500"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-green-600" id="completed-count">0</div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                de <span id="total-activities">20</span> recomendadas
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-600">Sequência Atual</span>
+                                <i class="fas fa-fire text-orange-500"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-orange-600" id="streak-days">0</div>
+                            <div class="text-xs text-gray-500 mt-1">dias consecutivos</div>
                         </div>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3">
-                        <div id="progresso-barra" class="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+
+                    <!-- Gráfico de Atividade Semanal -->
+                    <div class="bg-white rounded-xl p-4 shadow-sm">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-3">Atividade nos Últimos 7 Dias</h3>
+                        <div class="flex items-end justify-between gap-2 h-24">
+                            <div class="flex-1 bg-gray-100 rounded-t-lg flex flex-col items-center justify-end" style="height: 30%">
+                                <div class="text-xs text-gray-500 mb-1">Seg</div>
+                                <div class="text-xs font-semibold text-gray-700">15m</div>
+                            </div>
+                            <div class="flex-1 bg-purple-200 rounded-t-lg flex flex-col items-center justify-end" style="height: 70%">
+                                <div class="text-xs text-gray-500 mb-1">Ter</div>
+                                <div class="text-xs font-semibold text-purple-700">35m</div>
+                            </div>
+                            <div class="flex-1 bg-purple-300 rounded-t-lg flex flex-col items-center justify-end" style="height: 85%">
+                                <div class="text-xs text-gray-500 mb-1">Qua</div>
+                                <div class="text-xs font-semibold text-purple-800">42m</div>
+                            </div>
+                            <div class="flex-1 bg-purple-200 rounded-t-lg flex flex-col items-center justify-end" style="height: 60%">
+                                <div class="text-xs text-gray-500 mb-1">Qui</div>
+                                <div class="text-xs font-semibold text-purple-700">30m</div>
+                            </div>
+                            <div class="flex-1 bg-purple-400 rounded-t-lg flex flex-col items-center justify-end" style="height: 100%">
+                                <div class="text-xs text-gray-500 mb-1">Sex</div>
+                                <div class="text-xs font-semibold text-purple-900">50m</div>
+                            </div>
+                            <div class="flex-1 bg-gray-100 rounded-t-lg flex flex-col items-center justify-end" style="height: 20%">
+                                <div class="text-xs text-gray-500 mb-1">Sáb</div>
+                                <div class="text-xs font-semibold text-gray-700">10m</div>
+                            </div>
+                            <div class="flex-1 bg-gray-100 rounded-t-lg flex flex-col items-center justify-end" style="height: 40%">
+                                <div class="text-xs text-gray-500 mb-1">Dom</div>
+                                <div class="text-xs font-semibold text-gray-700">20m</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Conquistas -->
-                <div class="card bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200">
-                    <h2 class="text-xl font-semibold mb-4 flex items-center">
-                        <i class="fas fa-trophy mr-2 text-amber-500"></i>
-                        Conquistas
-                    </h2>
-                    <div id="conquistas-container" class="flex flex-wrap gap-3 mt-4 min-h-[100px]">
-                        <span class="text-gray-400">Carregando...</span>
+                <!-- Conquistas e Destaques -->
+                <div class="space-y-6">
+                    <!-- Conquistas Recentes -->
+                    <div class="card bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-trophy mr-2 text-amber-500"></i>
+                            Conquistas Recentes
+                        </h2>
+                        <div id="recent-achievements" class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
+                                <span class="text-3xl">🏆</span>
+                                <div class="flex-grow">
+                                    <div class="font-semibold text-gray-800 text-sm">Carregando...</div>
+                                    <div class="text-xs text-gray-500">aguarde</div>
+                                </div>
+                            </div>
+                        </div>
+                        <button data-route="/progresso" class="w-full mt-4 text-sm text-center text-amber-700 hover:text-amber-800 font-medium">
+                            Ver todas as conquistas <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
                     </div>
-                    <p id="conquistas-texto" class="text-sm text-gray-600 mt-4">
-                        Carregando suas conquistas...
-                    </p>
+
+                    <!-- Status do Momento -->
+                    <div class="card bg-gradient-to-br from-green-50 to-teal-50 border-2 border-green-200">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-lightbulb mr-2 text-green-600"></i>
+                            Status do Momento
+                        </h2>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800">Estudando regularmente</p>
+                                    <p class="text-xs text-gray-600">5 dias seguidos esta semana</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-heart text-red-400 mt-1"></i>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800">Temas favoritos</p>
+                                    <p class="text-xs text-gray-600" id="favorite-topics">Xadrez, Espaço</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-star text-amber-400 mt-1"></i>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800">Melhor horário</p>
+                                    <p class="text-xs text-gray-600">Tarde (14h-17h)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Estatísticas Detalhadas -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="card text-center hover:shadow-lg transition-shadow">
-                    <i class="fas fa-check-circle text-4xl text-green-500 mb-2"></i>
-                    <p class="text-3xl font-bold text-gray-800" id="stat-completed">0</p>
-                    <p class="text-sm text-gray-600">Concluídos</p>
-                </div>
-                
-                <div class="card text-center hover:shadow-lg transition-shadow">
-                    <i class="fas fa-spinner text-4xl text-blue-500 mb-2"></i>
-                    <p class="text-3xl font-bold text-gray-800" id="stat-in-progress">0</p>
-                    <p class="text-sm text-gray-600">Em Andamento</p>
-                </div>
-                
-                <div class="card text-center hover:shadow-lg transition-shadow">
-                    <i class="fas fa-clock text-4xl text-purple-500 mb-2"></i>
-                    <p class="text-3xl font-bold text-gray-800" id="stat-time">0h</p>
-                    <p class="text-sm text-gray-600">Tempo Total</p>
-                </div>
-                
-                <div class="card text-center hover:shadow-lg transition-shadow">
-                    <i class="fas fa-fire text-4xl text-orange-500 mb-2"></i>
-                    <p class="text-3xl font-bold text-gray-800" id="stat-streak">0</p>
-                    <p class="text-sm text-gray-600">Dias Seguidos</p>
-                </div>
-            </div>
-
-            <!-- Atividades Recentes -->
-            <div class="card mb-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold flex items-center">
-                        <i class="fas fa-history mr-2 text-blue-500"></i>
-                        Atividades Recentes
-                    </h2>
-                    <button data-route="/historico" class="btn-subtle text-sm">
-                        <i class="fas fa-list-alt mr-2"></i>Ver Histórico Completo
-                    </button>
-                </div>
-                <ul id="atividades-recentes-lista" class="space-y-3">
-                    <p class="text-gray-500 text-center py-8">Carregando atividades...</p>
-                </ul>
-            </div>
-
-            <!-- Próximos Objetivos -->
-            <div class="card bg-gradient-to-r from-teal-50 to-blue-50 border-2 border-teal-200">
-                <h3 class="text-xl font-semibold mb-4 flex items-center">
-                    <i class="fas fa-bullseye mr-2 text-teal-600"></i>
-                    Próximos Objetivos
-                </h3>
-                <div class="space-y-3">
-                    <div class="flex items-center gap-3 p-3 bg-white rounded-lg">
-                        <i class="fas fa-star text-2xl text-amber-500"></i>
-                        <div class="flex-grow">
-                            <p class="font-medium text-gray-800">Complete mais 3 atividades</p>
-                            <p class="text-sm text-gray-600">Para desbloquear a conquista "Explorador Dedicado"</p>
+            <!-- Atividades Recentes e Alertas -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Atividades Recentes -->
+                <div class="lg:col-span-2 card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold flex items-center">
+                            <i class="fas fa-history mr-2 text-blue-500"></i>
+                            Atividades Recentes
+                        </h2>
+                        <button data-route="/historico" class="btn-subtle text-sm">
+                            <i class="fas fa-external-link-alt mr-1"></i>Ver Tudo
+                        </button>
+                    </div>
+                    
+                    <div id="recent-activities" class="space-y-3">
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                            <p class="text-sm">Carregando atividades...</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3 p-3 bg-white rounded-lg">
-                        <i class="fas fa-calendar-check text-2xl text-green-500"></i>
-                        <div class="flex-grow">
-                            <p class="font-medium text-gray-800">Estude por 7 dias seguidos</p>
-                            <p class="text-sm text-gray-600">Continue sua sequência! Você está indo muito bem!</p>
+                </div>
+
+                <!-- Mensagens e Alertas -->
+                <div class="space-y-6">
+                    <!-- Últimas Mensagens Enviadas -->
+                    <div class="card bg-purple-50 border-2 border-purple-200">
+                        <h3 class="text-lg font-semibold mb-3 flex items-center">
+                            <i class="fas fa-envelope mr-2 text-purple-600"></i>
+                            Mensagens Enviadas
+                        </h3>
+                        <div id="sent-messages" class="space-y-2 max-h-48 overflow-y-auto">
+                            <p class="text-sm text-gray-500 text-center py-4">Nenhuma mensagem enviada ainda</p>
+                        </div>
+                        <button data-route="/enviarIncentivo" class="w-full mt-3 btn-primary text-sm">
+                            <i class="fas fa-paper-plane mr-2"></i>Enviar Novo Incentivo
+                        </button>
+                    </div>
+
+                    <!-- Alertas Importantes -->
+                    <div class="card bg-red-50 border-2 border-red-200" id="alerts-card" style="display: none;">
+                        <h3 class="text-lg font-semibold mb-3 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+                            Alertas
+                        </h3>
+                        <div id="alerts-list" class="space-y-2">
+                            <!-- Alertas serão inseridos aqui -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recomendações para Responsável -->
+            <div class="card bg-gradient-to-r from-blue-50 via-teal-50 to-green-50 border-2 border-blue-200">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-magic mr-2 text-blue-600"></i>
+                    Dicas para Apoiar o Desenvolvimento
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white rounded-xl p-4 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-comment-dots text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Celebre as Conquistas</h4>
+                                <p class="text-sm text-gray-600">
+                                    Reconheça cada progresso, por menor que seja. O reforço positivo é fundamental para a motivação!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-4 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-clock text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Crie uma Rotina</h4>
+                                <p class="text-sm text-gray-600">
+                                    Estabeleça horários regulares para estudo. A previsibilidade ajuda no foco e no conforto.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-4 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-hands-helping text-green-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Esteja Presente</h4>
+                                <p class="text-sm text-gray-600">
+                                    Demonstre interesse pelo que está sendo aprendido. Pergunte sobre os conteúdos e compartilhe a alegria!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-4 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-spa text-amber-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Respeite o Ritmo</h4>
+                                <p class="text-sm text-gray-600">
+                                    Cada pessoa aprende de forma única. Evite comparações e valorize o progresso individual.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -127,73 +348,118 @@ export default function ProgressoPage() {
     `;
 }
 
-function renderUserProgress(progress) {
-    if (!progress) return;
-    
-    // Percentual
-    const percentage = progress.progress_percentage || 0;
-    document.getElementById('progresso-percentual').textContent = `${percentage}%`;
-    document.getElementById('progresso-barra').style.width = `${percentage}%`;
-    
-    // Círculo SVG
-    const circle = document.getElementById('progresso-circle');
-    if (circle) {
-        const circumference = 326.73;
-        const offset = circumference - (percentage / 100) * circumference;
-        circle.style.strokeDashoffset = offset;
+// Renderiza conquistas recentes
+function renderRecentAchievements(achievements) {
+    const container = document.getElementById('recent-achievements');
+    if (!container || !achievements || achievements.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Nenhuma conquista ainda</p>';
+        return;
     }
 
-    // Conquistas
-    const achievementsContainer = document.getElementById('conquistas-container');
-    const achievementsText = document.getElementById('conquistas-texto');
-    
-    if (achievementsContainer && achievementsText && progress.achievements) {
-        achievementsContainer.innerHTML = '';
-        const emojiMap = {
-            'Explorador Curioso': '🌍',
-            'Mestre dos Vídeos': '🎬',
-            'Leitor Voraz': '📚',
-            'Gamer Dedicado': '🎮',
-            'Sequência de 7 dias': '🔥'
-        };
-        
-        progress.achievements.forEach(ach => {
-            const badge = document.createElement('div');
-            badge.className = 'flex flex-col items-center p-3 bg-white rounded-lg border-2 border-amber-300 hover:shadow-lg transition-shadow';
-            badge.innerHTML = `
-                <span class="text-4xl mb-1">${emojiMap[ach] || '🏆'}</span>
-                <span class="text-xs font-medium text-gray-700 text-center">${ach}</span>
-            `;
-            achievementsContainer.appendChild(badge);
-        });
-        
-        // Conquistas bloqueadas
-        const totalAchievements = 10;
-        for (let i = progress.achievements.length; i < totalAchievements; i++) {
-            const locked = document.createElement('div');
-            locked.className = 'flex flex-col items-center p-3 bg-gray-100 rounded-lg border-2 border-gray-300 opacity-50';
-            locked.title = 'Ainda não desbloqueado';
-            locked.innerHTML = `
-                <span class="text-4xl mb-1">❓</span>
-                <span class="text-xs text-gray-500">Bloqueado</span>
-            `;
-            achievementsContainer.appendChild(locked);
+    const emojiMap = {
+        'Explorador Curioso': { emoji: '🌍', color: 'green' },
+        'Mestre dos Vídeos': { emoji: '🎬', color: 'purple' },
+        'Leitor Voraz': { emoji: '📚', color: 'blue' },
+        'Gamer Dedicado': { emoji: '🎮', color: 'amber' },
+        'Sequência de 7 dias': { emoji: '🔥', color: 'orange' }
+    };
+
+    container.innerHTML = achievements.slice(0, 3).map(achievement => {
+        const info = emojiMap[achievement] || { emoji: '🏆', color: 'amber' };
+        return `
+            <div class="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
+                <span class="text-3xl">${info.emoji}</span>
+                <div class="flex-grow">
+                    <div class="font-semibold text-gray-800 text-sm">${achievement}</div>
+                    <div class="text-xs text-gray-500">Desbloqueado recentemente</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Renderiza atividades recentes
+function renderRecentActivities(activities) {
+    const container = document.getElementById('recent-activities');
+    if (!container) return;
+
+    if (!activities || activities.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-8">Nenhuma atividade registrada ainda</p>';
+        return;
+    }
+
+    const statusConfig = {
+        'completed': {
+            icon: 'fa-check-circle',
+            color: 'green',
+            bg: 'bg-green-50',
+            border: 'border-green-200',
+            text: 'Concluído'
+        },
+        'in_progress': {
+            icon: 'fa-spinner',
+            color: 'blue',
+            bg: 'bg-blue-50',
+            border: 'border-blue-200',
+            text: 'Em andamento'
+        },
+        'not_started': {
+            icon: 'fa-circle',
+            color: 'gray',
+            bg: 'bg-gray-50',
+            border: 'border-gray-200',
+            text: 'Não iniciado'
         }
-        
-        achievementsText.textContent = `${progress.achievements.length} de ${totalAchievements} conquistas desbloqueadas!`;
-    }
+    };
 
-    // Stats
-    document.getElementById('stat-completed').textContent = progress.completed_activities || 0;
-    
-    // MOCK: Calcula horas baseado em atividades concluídas
-    // Base: 5 horas + 1 hora por atividade concluída
+    container.innerHTML = activities.slice(0, 5).map(activity => {
+        const status = statusConfig[activity.status] || statusConfig.not_started;
+        const date = activity.updated_at ? new Date(activity.updated_at).toLocaleDateString('pt-BR') : 'Data não disponível';
+        
+        return `
+            <div class="flex items-center justify-between p-4 rounded-lg border-2 ${status.bg} ${status.border} hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-4">
+                    <i class="fas ${status.icon} text-${status.color}-500 text-xl"></i>
+                    <div>
+                        <p class="font-medium text-gray-800">${activity.content?.title || 'Atividade'}</p>
+                        <div class="flex items-center gap-3 mt-1">
+                            <span class="text-xs text-gray-600">${status.text}</span>
+                            <span class="text-xs text-gray-400">• ${date}</span>
+                            ${activity.progress_percentage > 0 ? `
+                                <span class="text-xs font-medium text-${status.color}-600">${activity.progress_percentage}%</span>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                ${activity.progress_percentage > 0 && activity.status === 'in_progress' ? `
+                    <div class="w-24">
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-${status.color}-500 h-2 rounded-full" style="width: ${activity.progress_percentage}%"></div>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+// Renderiza estatísticas gerais
+function renderStatistics(progress, activities) {
+    if (!progress) return;
+
+    // Progresso geral
+    const percentage = progress.progress_percentage || 0;
+    document.getElementById('overall-progress').textContent = `${percentage}%`;
+    document.getElementById('overall-progress-bar').style.width = `${percentage}%`;
+
+    // Atividades concluídas
+    const completedCount = progress.completed_activities || 0;
+    document.getElementById('completed-count').textContent = completedCount;
+
+    // Tempo de estudo (MOCK)
     const baseHours = 5;
     const hoursPerActivity = 1;
-    const completedCount = progress.completed_activities || 0;
     const totalHours = baseHours + (completedCount * hoursPerActivity);
-    
-    // Adiciona alguns minutos aleatórios para parecer mais real (entre 0 e 45 min)
     const extraMinutes = Math.floor(Math.random() * 46);
     
     let timeText;
@@ -205,70 +471,83 @@ function renderUserProgress(progress) {
         timeText = `${extraMinutes}min`;
     }
     
-    document.getElementById('stat-time').textContent = timeText;
-    document.getElementById('stat-streak').textContent = progress.streak_days || 0;
+    document.getElementById('study-time').textContent = timeText;
+
+    // Sequência
+    const streakDays = progress.streak_days || 0;
+    document.getElementById('streak-days').textContent = streakDays;
+
+    // Conquistas
+    if (progress.achievements && progress.achievements.length > 0) {
+        renderRecentAchievements(progress.achievements);
+    }
+
+    // Atividades recentes
+    if (activities && activities.length > 0) {
+        renderRecentActivities(activities);
+        
+        // Verifica se há algum alerta
+        const inactiveFor3Days = activities.every(a => {
+            const lastActivity = new Date(a.updated_at);
+            const daysSince = Math.floor((Date.now() - lastActivity) / (1000 * 60 * 60 * 24));
+            return daysSince > 3;
+        });
+
+        if (inactiveFor3Days) {
+            showAlert('Sem atividade há mais de 3 dias', 'Considere enviar uma mensagem de incentivo!');
+        }
+    }
 }
 
-function renderUserActivities(activities) {
-    const list = document.getElementById('atividades-recentes-lista');
-    if (!list || !activities || !Array.isArray(activities)) return;
+// Mostra alertas
+function showAlert(title, message) {
+    const alertsCard = document.getElementById('alerts-card');
+    const alertsList = document.getElementById('alerts-list');
     
-    list.innerHTML = '';
-    
-    if (activities.length === 0) {
-        list.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhuma atividade ainda</p>';
-        return;
-    }
-    
-    document.getElementById('stat-in-progress').textContent = 
-        activities.filter(a => a.status === 'in_progress').length;
-    
-    const statusIcons = {
-        'completed': '<i class="fas fa-check-circle text-green-500 text-xl"></i>',
-        'in_progress': '<i class="fas fa-spinner text-blue-500 text-xl"></i>',
-        'not_started': '<i class="far fa-circle text-gray-400 text-xl"></i>'
-    };
-
-    const statusTexts = {
-        'completed': 'Concluído',
-        'in_progress': 'Em andamento',
-        'not_started': 'Não iniciado'
-    };
-
-    const statusColors = {
-        'completed': 'bg-green-50 border-green-200',
-        'in_progress': 'bg-blue-50 border-blue-200',
-        'not_started': 'bg-gray-50 border-gray-200'
-    };
-
-    activities.slice(0, 10).forEach(activity => {
-        const li = document.createElement('li');
-        li.className = `flex items-center justify-between p-4 rounded-lg border-2 ${statusColors[activity.status]} hover:shadow-md transition-shadow`;
+    if (alertsCard && alertsList) {
+        alertsCard.style.display = 'block';
         
-        li.innerHTML = `
-            <div class="flex items-center gap-4">
-                ${statusIcons[activity.status] || statusIcons.not_started}
+        const alertHTML = `
+            <div class="flex items-start gap-3 p-3 bg-white rounded-lg shadow-sm">
+                <i class="fas fa-exclamation-circle text-red-500 mt-1"></i>
                 <div>
-                    <p class="font-medium text-gray-800">${activity.content?.title || 'Atividade'}</p>
-                    <div class="flex items-center gap-3 mt-1">
-                        <span class="text-sm text-gray-600">${statusTexts[activity.status]}</span>
-                        ${activity.progress_percentage > 0 ? `
-                            <span class="text-sm font-medium text-blue-600">${activity.progress_percentage}%</span>
-                        ` : ''}
-                    </div>
+                    <div class="font-semibold text-gray-800 text-sm">${title}</div>
+                    <div class="text-xs text-gray-600 mt-1">${message}</div>
                 </div>
             </div>
-            ${activity.progress_percentage > 0 && activity.status === 'in_progress' ? `
-                <div class="w-32">
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-blue-500 h-2 rounded-full" style="width: ${activity.progress_percentage}%"></div>
-                    </div>
-                </div>
-            ` : ''}
         `;
         
-        list.appendChild(li);
-    });
+        alertsList.innerHTML += alertHTML;
+    }
+}
+
+// Renderiza mensagens enviadas
+async function renderSentMessages() {
+    const container = document.getElementById('sent-messages');
+    if (!container) return;
+
+    try {
+        // Busca mensagens enviadas (filtradas por tipo 'incentive')
+        const messages = await api.getReceivedMessages('incentive');
+        
+        if (!messages || messages.length === 0) {
+            container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Nenhuma mensagem enviada ainda</p>';
+            return;
+        }
+
+        container.innerHTML = messages.slice(0, 3).map(msg => {
+            const date = new Date(msg.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+            return `
+                <div class="p-2 bg-white rounded-lg text-xs">
+                    <div class="font-medium text-gray-700 mb-1">"${msg.message.substring(0, 50)}${msg.message.length > 50 ? '...' : ''}"</div>
+                    <div class="text-gray-500">${date}</div>
+                </div>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Erro ao carregar mensagens:', error);
+        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Erro ao carregar mensagens</p>';
+    }
 }
 
 export function setup() {
@@ -278,10 +557,20 @@ export function setup() {
         return;
     }
 
-    // Atualiza cabeçalho
-    const header = document.getElementById('progresso-header');
-    if (header) {
-        header.innerHTML = `Seu Progresso, ${user.full_name.split(' ')[0]}! 📊`;
+    // Atualiza nome do estudante
+    const studentNameEl = document.getElementById('student-name');
+    if (studentNameEl) {
+        studentNameEl.textContent = user.full_name;
+    }
+
+    // Atualiza tópicos favoritos
+    try {
+        const interests = user.interests ? JSON.parse(user.interests) : [];
+        if (interests.length > 0) {
+            document.getElementById('favorite-topics').textContent = interests.join(', ');
+        }
+    } catch (e) {
+        console.error('Erro ao processar interesses:', e);
     }
 
     // Navegação
@@ -292,19 +581,30 @@ export function setup() {
         });
     });
 
+    // Botão de relatório
+    document.getElementById('btn-ver-relatorio')?.addEventListener('click', () => {
+        showCustomAlert(
+            'Em breve você poderá baixar relatórios completos em PDF com todo o histórico de atividades e progresso!',
+            'Funcionalidade em Desenvolvimento',
+            'info'
+        );
+    });
+
     // Carrega dados
-    const loadProgress = async () => {
+    const loadData = async () => {
         try {
-            const progress = await api.getUserProgress();
-            renderUserProgress(progress);
-            
-            const activities = await api.getUserActivities();
-            renderUserActivities(activities);
+            const [progress, activities] = await Promise.all([
+                api.getUserProgress(),
+                api.getUserActivities()
+            ]);
+
+            renderStatistics(progress, activities);
+            await renderSentMessages();
         } catch (error) {
-            console.error('Erro:', error);
-            showCustomAlert('Erro ao carregar seu progresso.', 'Erro', 'error');
+            console.error('Erro ao carregar dados:', error);
+            showCustomAlert('Erro ao carregar dados de acompanhamento', 'Erro', 'error');
         }
     };
-    
-    loadProgress();
+
+    loadData();
 }
