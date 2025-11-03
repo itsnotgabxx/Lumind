@@ -15,6 +15,10 @@ class Content(Base):
     image_url = Column(String(500), nullable=True)
     tags = Column(Text, nullable=True)  # JSON string com tags
 
+    content_data = Column(Text, nullable=True)  # 👈 ADICIONE ESTA LINHA
+    difficulty = Column(String(50), nullable=True)  # 👈 E ESTA TAMBÉM
+    duration = Column(String(50), nullable=True)  # 👈 E ESTA
+
      # 👇 ADICIONAR ESTES CAMPOS
     difficulty_level = Column(Integer, default=1)
     learning_style_weights = Column(Text, nullable=True)

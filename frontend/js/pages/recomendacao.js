@@ -191,6 +191,8 @@ export default function RecomendacaoPage() {
 
 // Função para criar card de conteúdo melhorado
 function createContentCard(item) {
+    console.log('🎮 Criando card:', { id: item.id, title: item.title, type: item.type });
+
     const card = document.createElement('div');
     card.className = 'content-card card hover:shadow-2xl transition-all duration-300 flex flex-col group cursor-pointer overflow-hidden';
 
@@ -631,10 +633,14 @@ export function setup() {
             const btn = ev.target.closest('.btn-explorar-conteudo');
             if (!btn) return;
 
-            window.router.navigate(`/conteudo/${btn.dataset.contentId}`, {
-                contentId: btn.dataset.contentId,
-                contentTitle: btn.dataset.contentTitle
-            });
+            
+            // 👇 ADICIONE ESTAS LINHAS
+        console.log('🔍 Botão clicado:', btn.dataset);
+        console.log('🔍 Content ID:', btn.dataset.contentId);
+
+        const contentId = btn.dataset.contentId;
+        console.log('🚀 Navegando para:', `/conteudo/${contentId}`);
+        window.router.navigate(`/conteudo/${contentId}`);
         });
     };
 

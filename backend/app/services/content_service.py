@@ -4,11 +4,53 @@ from app.schemas.user_schema import ContentItem, ActivityProgress as ActivityPro
 from typing import List, Optional
 import json
 
-def get_all_content(db: Session, skip: int = 0, limit: int = 100) -> List[Content]:
-    return db.query(Content).filter(Content.is_active == True).offset(skip).limit(limit).all()
+def get_all_content(db: Session, skip: int = 0, limit: int = 100) -> List[ContentItem]:
+    """Retorna todos os conteúdos ativos com content_data parseado"""
+    contents = db.query(Content).filter(Content.is_active == True).offset(skip).limit(limit).all()
+    
+    # Converter para ContentItem com campos parseados
+    result = []
+    for content in contents:
+        content_dict = {
+            "id": content.id,
+            "title": content.title,
+            "description": content.description,
+            "type": content.type,
+            "source": content.source,
+            "content": content.content,
+            "image_url": content.image_url,
+            "tags": json.loads(content.tags) if content.tags else [],
+            "content_data": json.loads(content.content_data) if content.content_data else None,  # 👈 PARSEADO
+            "difficulty": content.difficulty,
+            "duration": content.duration
+        }
+        result.append(ContentItem(**content_dict))
+    
+    return result
 
-def get_content_by_id(db: Session, content_id: int) -> Optional[Content]:
-    return db.query(Content).filter(Content.id == content_id, Content.is_active == True).first()
+def get_content_by_id(db: Session, content_id: int) -> Optional[ContentItem]:
+    """Retorna um conteúdo específico com content_data parseado"""
+    content = db.query(Content).filter(Content.id == content_id, Content.is_active == True).first()
+    
+    if not content:
+        return None
+    
+    # Converter para ContentItem com campos parseados
+    content_dict = {
+        "id": content.id,
+        "title": content.title,
+        "description": content.description,
+        "type": content.type,
+        "source": content.source,
+        "content": content.content,
+        "image_url": content.image_url,
+        "tags": json.loads(content.tags) if content.tags else [],
+        "content_data": json.loads(content.content_data) if content.content_data else None,  # 👈 PARSEADO
+        "difficulty": content.difficulty,
+        "duration": content.duration
+    }
+    
+    return ContentItem(**content_dict)
 
 def get_content_by_type(db: Session, content_type: str) -> List[Content]:
     return db.query(Content).filter(Content.type == content_type, Content.is_active == True).all()
@@ -83,7 +125,7 @@ def get_user_progress_summary(db: Session, user_id: int) -> dict:
         "achievements": achievements
     }
 
-def get_recommendations_for_user(db: Session, user_id: int, limit: int = 5) -> List[Content]:
+def get_recommendations_for_user(db: Session, user_id: int, limit: int = 5) -> List[ContentItem]:
     # Busca o usuário para obter suas preferências
     from app.services.user_service import get_user_by_id
     user = get_user_by_id(db, user_id)
@@ -112,17 +154,17 @@ def get_recommendations_for_user(db: Session, user_id: int, limit: int = 5) -> L
     
     # Se o usuário prefere vídeos, busca vídeos
     if "video" in learning_preferences or "imagem" in learning_preferences:
-        videos = get_content_by_type(db, "video")
+        videos = get_content_by_type_parsed(db, "video")  # 👈 USAR NOVA FUNÇÃO
         recommended_content.extend(videos[:2])
     
     # Se o usuário prefere leitura, busca textos
     if "leitura" in learning_preferences or "audio" in learning_preferences:
-        texts = get_content_by_type(db, "text")
+        texts = get_content_by_type_parsed(db, "text")  # 👈 USAR NOVA FUNÇÃO
         recommended_content.extend(texts[:2])
     
     # Se o usuário prefere jogos interativos, busca jogos
     if "interativo" in learning_preferences:
-        games = get_content_by_type(db, "interactive_game")
+        games = get_content_by_type_parsed(db, "interactive_game")  # 👈 USAR NOVA FUNÇÃO
         recommended_content.extend(games[:2])
     
     # Se não há preferências específicas, retorna conteúdo variado
@@ -131,3 +173,28 @@ def get_recommendations_for_user(db: Session, user_id: int, limit: int = 5) -> L
         recommended_content = all_content[:limit]
     
     return recommended_content[:limit]
+
+
+# 👇 ADICIONE ESTA NOVA FUNÇÃO
+def get_content_by_type_parsed(db: Session, content_type: str) -> List[ContentItem]:
+    """Retorna conteúdo por tipo com content_data parseado"""
+    contents = db.query(Content).filter(Content.type == content_type, Content.is_active == True).all()
+    
+    result = []
+    for content in contents:
+        content_dict = {
+            "id": content.id,
+            "title": content.title,
+            "description": content.description,
+            "type": content.type,
+            "source": content.source,
+            "content": content.content,
+            "image_url": content.image_url,
+            "tags": json.loads(content.tags) if content.tags else [],
+            "content_data": json.loads(content.content_data) if content.content_data else None,
+            "difficulty": content.difficulty,
+            "duration": content.duration
+        }
+        result.append(ContentItem(**content_dict))
+    
+    return result

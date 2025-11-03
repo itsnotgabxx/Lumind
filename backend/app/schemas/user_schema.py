@@ -78,7 +78,10 @@ class ContentItem(BaseModel):
     image_url: Optional[str] = None
     tags: List[str] = []
 
-    # --- Adicione este validador ---
+    content_data: Optional[Dict[str, Any]] = None  # Para jogos!
+    difficulty: Optional[str] = None
+    duration: Optional[str] = None
+
     @field_validator('tags', mode='before')
     @classmethod
     def parse_tags_json(cls, v):
@@ -89,6 +92,22 @@ class ContentItem(BaseModel):
                 print(f"Aviso: Campo 'tags' com valor '{v}' não é um JSON válido.")
                 return [] 
         return v
+    
+    # 👇 ADICIONE ESTE VALIDADOR AQUI
+    @field_validator('content_data', mode='before')
+    @classmethod
+    def parse_content_data_json(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v) 
+            except json.JSONDecodeError:
+                print(f"Aviso: Campo 'content_data' não é um JSON válido.")
+                return None
+        return v
+    
+    # 👇 E ESTA LINHA NO FINAL
+    class Config:
+        from_attributes = True
 
 class ActivityProgress(BaseModel):
     content_id: int
