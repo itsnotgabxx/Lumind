@@ -9,9 +9,5 @@ export default function VideoPlayer(content) {
                 class="w-full h-full rounded-lg"
             ></iframe>
         </div>
-        <div class="mt-4">
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">${content.title}</h2>
-            <p class="text-gray-600">${content.description}</p>
-        </div>
     `;
 }
