@@ -50,7 +50,9 @@ async def get_user_progress(
     db: Session = Depends(get_db)
 ):
     """Obtém o progresso do usuário"""
+    print(f"\n🔍 [GET_PROGRESS] Requisitado para user_id={user_id}")
     progress = get_user_progress_summary(db, user_id)
+    print(f"✅ [GET_PROGRESS] Retornando: completed={progress['completed_activities']}, total={progress['total_activities']}")
     return progress
 
 @router.post("/users/{user_id}/progress/{content_id}")
@@ -89,5 +91,9 @@ async def get_user_activities(
     db: Session = Depends(get_db)
 ):
     """Lista todas as atividades do usuário com progresso"""
+    print(f"\n🔍 [GET_ACTIVITIES] Requisitado para user_id={user_id}")
     activities = get_user_activity_progress(db, user_id)
+    print(f"✅ [GET_ACTIVITIES] Retornando {len(activities)} atividades")
+    for a in activities:
+        print(f"   - Content {a.content_id}: {a.status}")
     return activities

@@ -419,12 +419,16 @@ async function loadStatistics() {
         const progress = await api.getUserProgress();
         const activities = await api.getUserActivities();
 
-        // DEBUG: Ver o que está vindo da API
-        console.log('Progress completo:', progress);
-        console.log('Activities:', activities);
+        console.log('📊 Progress completo:', progress);
+        console.log('📝 Activities completo:', activities);
 
         const completedCount = progress.completed_activities || 0;
         const inProgressCount = activities.filter(a => a.status === 'in_progress').length || 0;
+        const completedFromActivities = activities.filter(a => a.status === 'completed').length || 0;
+
+        console.log(`✅ Concluídos (progress): ${completedCount}`);
+        console.log(`✅ Concluídos (activities): ${completedFromActivities}`);
+        console.log(`🔄 Em andamento: ${inProgressCount}`);
 
         document.getElementById('stat-concluidos').textContent = completedCount;
         document.getElementById('stat-em-andamento').textContent = inProgressCount;

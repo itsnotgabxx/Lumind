@@ -171,16 +171,60 @@ export async function setup({ params }) {
         });
     });
 
+    // Rastreia tempo real de visualização
+    let startTime = Date.now();
+    let totalTimeSpent = 0;
+
+    const autoSaveInterval = setInterval(async () => {
+        try {
+            // Calcula tempo decorrido desde o início
+            const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+            totalTimeSpent += 30; // Adiciona 30s (intervalo do timer)
+            
+            // Progresso baseado em visibilidade da página
+            const isPageVisible = !document.hidden;
+            const progress = isPageVisible ? Math.min(100, Math.floor(totalTimeSpent / 10)) : 0;
+            
+            console.log(`[Auto-Save] Tempo: ${totalTimeSpent}s | Progresso: ${progress}% | Visível: ${isPageVisible}`);
+            
+            await api.updateProgress(
+                contentId, 
+                'in_progress', 
+                progress,
+                totalTimeSpent
+            );
+        } catch (e) {
+            console.log('Erro no auto-save:', e);
+        }
+    }, 30000);
+
     const btnConcluido = document.getElementById('btn-marcar-concluido');
     if (btnConcluido && !btnConcluido.disabled) {
         btnConcluido.addEventListener('click', async () => {
+            console.log('🎯 [BOTÃO] "Marcar como Concluído" clicado!');
+            console.log(`   contentId: ${contentId}`);
+            
+            // ⏹️ PARAR o auto-save imediatamente
+            clearInterval(autoSaveInterval);
+            console.log('⏹️ Auto-save cancelado');
+            
+            // Debug user info
+            const currentUser = await api.getCurrentUser();
+            console.log('👤 Usuário atual:', {
+                id: currentUser?.id,
+                email: currentUser?.email,
+                name: currentUser?.name
+            });
+            
             const originalText = btnConcluido.innerHTML;
             
             try {
                 btnConcluido.disabled = true;
                 btnConcluido.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...';
                 
-                await api.updateProgress(contentId, 'completed', 100, 0);
+                console.log('📤 Enviando para API: status=completed, progress=100, timeSpent=0');
+                const response = await api.updateProgress(contentId, 'completed', 100, 0);
+                console.log('✅ API respondeu com sucesso!', response);
                 
                 showCustomAlert(
                     'Parabéns! Continue assim e você vai longe! 🎉',
@@ -189,6 +233,7 @@ export async function setup({ params }) {
                 );
                 
                 setTimeout(() => {
+                    console.log('🔄 Navegando para /progresso');
                     window.router.navigate('/progresso');
                 }, 2000);
                 
@@ -223,33 +268,6 @@ export async function setup({ params }) {
             window.router.navigate('/recomendacao');
         }
     });
-
-    // Rastreia tempo real de visualização
-    let startTime = Date.now();
-    let totalTimeSpent = 0;
-
-    const autoSaveInterval = setInterval(async () => {
-        try {
-            // Calcula tempo decorrido desde o início
-            const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-            totalTimeSpent += 30; // Adiciona 30s (intervalo do timer)
-            
-            // Progresso baseado em visibilidade da página
-            const isPageVisible = !document.hidden;
-            const progress = isPageVisible ? Math.min(100, Math.floor(totalTimeSpent / 10)) : 0;
-            
-            console.log(`[Auto-Save] Tempo: ${totalTimeSpent}s | Progresso: ${progress}% | Visível: ${isPageVisible}`);
-            
-            await api.updateProgress(
-                contentId, 
-                'in_progress', 
-                progress,
-                totalTimeSpent
-            );
-        } catch (e) {
-            console.log('Erro no auto-save:', e);
-        }
-    }, 30000);
 
     // Detecta quando usuário sai ou volta para a página
     document.addEventListener('visibilitychange', () => {

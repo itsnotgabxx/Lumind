@@ -61,6 +61,8 @@ def get_user_activity_progress(db: Session, user_id: int) -> List[ActivityProgre
 def update_activity_progress(db: Session, user_id: int, content_id: int, 
                            status: str, progress_percentage: int = 0, 
                            time_spent: int = 0) -> ActivityProgress:
+    print(f"\n📝 [UPDATE] user_id={user_id}, content_id={content_id}, status={status}, progress={progress_percentage}%")
+    
     # Converte time_spent de segundos para minutos (recebido do frontend em segundos)
     time_spent_minutes = time_spent // 60 if time_spent > 0 else 0
     
@@ -71,17 +73,21 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
     ).first()
     
     if existing_progress:
+        print(f"   Atividade já existe: status anterior={existing_progress.status}")
         existing_progress.status = status
         existing_progress.progress_percentage = progress_percentage
         existing_progress.time_spent += time_spent_minutes
         if status == "completed":
             from datetime import datetime
             existing_progress.completed_at = datetime.utcnow()
+            print(f"   ✅ Marcado como CONCLUÍDO")
         db.commit()
         db.refresh(existing_progress)
+        print(f"   Atividade atualizada: status novo={existing_progress.status}")
         return existing_progress
     else:
         # Cria novo progresso
+        print(f"   Criando novo registro de atividade")
         new_progress = ActivityProgress(
             user_id=user_id,
             content_id=content_id,
@@ -92,10 +98,12 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
         if status == "completed":
             from datetime import datetime
             new_progress.completed_at = datetime.utcnow()
+            print(f"   ✅ Novo registro como CONCLUÍDO")
         
         db.add(new_progress)
         db.commit()
         db.refresh(new_progress)
+        print(f"   Novo registro criado com status={new_progress.status}")
         return new_progress
 
 def get_user_progress_summary(db: Session, user_id: int) -> dict:
@@ -109,6 +117,12 @@ def get_user_progress_summary(db: Session, user_id: int) -> dict:
     completed_activities = len([a for a in activities if a.status == "completed"])
     in_progress_activities = len([a for a in activities if a.status == "in_progress"])
     total_time_spent = sum([a.time_spent for a in activities])
+    
+    print(f"📊 [PROGRESS_SUMMARY] user_id={user_id}")
+    print(f"   Total: {total_activities} | Completas: {completed_activities} | Em andamento: {in_progress_activities}")
+    print(f"   Detalhes das atividades:")
+    for a in activities:
+        print(f"      - Content {a.content_id}: status='{a.status}' (tipo: {type(a.status).__name__}), progress={a.progress_percentage}%")
     
     progress_percentage = 0
     if total_activities > 0:

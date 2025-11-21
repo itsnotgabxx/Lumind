@@ -112,7 +112,17 @@ class LumindAPI {
 
     async updateProgress(contentId, status, progressPercentage = 0, timeSpent = 0) {
         if (!this.user) throw new Error("Usuário não logado.");
-        return await this.request(`/users/${this.user.id}/progress/${contentId}?status=${status}&progress_percentage=${progressPercentage}&time_spent=${timeSpent}`, {
+        const userId = this.user.id;
+        const url = `/users/${userId}/progress/${contentId}?status=${status}&progress_percentage=${progressPercentage}&time_spent=${timeSpent}`;
+        console.log(`📤 updateProgress called:`, {
+            userId,
+            contentId,
+            status,
+            progressPercentage,
+            timeSpent,
+            url
+        });
+        return await this.request(url, {
             method: 'POST'
         });
     }
