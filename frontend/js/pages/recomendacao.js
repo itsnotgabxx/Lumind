@@ -429,25 +429,19 @@ async function loadStatistics() {
         document.getElementById('stat-concluidos').textContent = completedCount;
         document.getElementById('stat-em-andamento').textContent = inProgressCount;
         
-        // MOCK: Calcula horas baseado em atividades concluídas
-        // Base: 5 horas + 1 hora por atividade concluída
-        const baseHours = 5;
-        const hoursPerActivity = 1;
-        const totalHours = baseHours + (completedCount * hoursPerActivity);
-        
-        // Adiciona alguns minutos aleatórios para parecer mais real (entre 0 e 45 min)
-        const extraMinutes = Math.floor(Math.random() * 46);
+        // Usa tempo real da API (em minutos, convertido para horas e minutos)
+        const totalMinutes = progress.total_time_spent || 0;
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
         
         let timeText;
-        if (totalHours > 0 && extraMinutes > 0) {
-            timeText = `${totalHours}h ${extraMinutes}min`;
-        } else if (totalHours > 0) {
-            timeText = `${totalHours}h`;
+        if (hours > 0 && minutes > 0) {
+            timeText = `${hours}h ${minutes}min`;
+        } else if (hours > 0) {
+            timeText = `${hours}h`;
         } else {
-            timeText = `${extraMinutes}min`;
+            timeText = `${minutes}min`;
         }
-        
-        console.log('Tempo mockado:', { totalHours, extraMinutes, timeText });
         
         document.getElementById('stat-tempo').textContent = timeText;
         document.getElementById('stat-sequencia').textContent = progress.streak_days || 0;

@@ -61,6 +61,9 @@ def get_user_activity_progress(db: Session, user_id: int) -> List[ActivityProgre
 def update_activity_progress(db: Session, user_id: int, content_id: int, 
                            status: str, progress_percentage: int = 0, 
                            time_spent: int = 0) -> ActivityProgress:
+    # Converte time_spent de segundos para minutos (recebido do frontend em segundos)
+    time_spent_minutes = time_spent // 60 if time_spent > 0 else 0
+    
     # Verifica se já existe um progresso para este usuário e conteúdo
     existing_progress = db.query(ActivityProgress).filter(
         ActivityProgress.user_id == user_id,
@@ -70,7 +73,7 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
     if existing_progress:
         existing_progress.status = status
         existing_progress.progress_percentage = progress_percentage
-        existing_progress.time_spent += time_spent
+        existing_progress.time_spent += time_spent_minutes
         if status == "completed":
             from datetime import datetime
             existing_progress.completed_at = datetime.utcnow()
@@ -84,7 +87,7 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
             content_id=content_id,
             status=status,
             progress_percentage=progress_percentage,
-            time_spent=time_spent
+            time_spent=time_spent_minutes
         )
         if status == "completed":
             from datetime import datetime
@@ -97,6 +100,10 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
 
 def get_user_progress_summary(db: Session, user_id: int) -> dict:
     activities = get_user_activity_progress(db, user_id)
+    
+    # Busca o usuário para pegar streak_days
+    from app.services.user_service import get_user_by_id
+    user = get_user_by_id(db, user_id)
     
     total_activities = len(activities)
     completed_activities = len([a for a in activities if a.status == "completed"])
@@ -116,13 +123,16 @@ def get_user_progress_summary(db: Session, user_id: int) -> dict:
     if completed_activities >= 5:
         achievements.append("Leitor Voraz")
     
+    streak_days = user.streak_days if user else 0
+    
     return {
         "total_activities": total_activities,
         "completed_activities": completed_activities,
         "in_progress_activities": in_progress_activities,
         "total_time_spent": total_time_spent,
         "progress_percentage": progress_percentage,
-        "achievements": achievements
+        "achievements": achievements,
+        "streak_days": streak_days
     }
 
 def get_recommendations_for_user(db: Session, user_id: int, limit: int = 5) -> List[ContentItem]:

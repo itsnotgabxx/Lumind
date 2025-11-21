@@ -159,7 +159,7 @@ export async function setup({ params }) {
     }
 
     try {
-        await api.updateProgress(contentId, 'in_progress', 0, Date.now());
+        await api.updateProgress(contentId, 'in_progress', 0, 0);
     } catch (e) {
         console.log('Erro ao registrar início:', e);
     }
@@ -224,14 +224,41 @@ export async function setup({ params }) {
         }
     });
 
+    // Rastreia tempo real de visualização
+    let startTime = Date.now();
+    let totalTimeSpent = 0;
+
     const autoSaveInterval = setInterval(async () => {
         try {
-            const currentProgress = Math.min(100, Math.floor((Date.now() % 100000) / 1000));
-            await api.updateProgress(contentId, 'in_progress', currentProgress, Date.now());
+            // Calcula tempo decorrido desde o início
+            const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+            totalTimeSpent += 30; // Adiciona 30s (intervalo do timer)
+            
+            // Progresso baseado em visibilidade da página
+            const isPageVisible = !document.hidden;
+            const progress = isPageVisible ? Math.min(100, Math.floor(totalTimeSpent / 10)) : 0;
+            
+            console.log(`[Auto-Save] Tempo: ${totalTimeSpent}s | Progresso: ${progress}% | Visível: ${isPageVisible}`);
+            
+            await api.updateProgress(
+                contentId, 
+                'in_progress', 
+                progress,
+                totalTimeSpent
+            );
         } catch (e) {
             console.log('Erro no auto-save:', e);
         }
     }, 30000);
+
+    // Detecta quando usuário sai ou volta para a página
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            console.log('⏸️ Página perdeu foco - progresso pausado');
+        } else {
+            console.log('▶️ Página em foco - progresso continuando');
+        }
+    });
 
     window.addEventListener('beforeunload', () => {
         clearInterval(autoSaveInterval);

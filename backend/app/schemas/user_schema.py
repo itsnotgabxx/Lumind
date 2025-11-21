@@ -105,7 +105,6 @@ class ContentItem(BaseModel):
                 return None
         return v
     
-    # 👇 E ESTA LINHA NO FINAL
     class Config:
         from_attributes = True
 
@@ -121,9 +120,10 @@ class UserProgress(BaseModel):
     total_activities: int
     completed_activities: int
     in_progress_activities: int
-    total_time_spent: int
+    total_time_spent: int  # em minutos
     achievements: List[str]
     progress_percentage: int
+    streak_days: int = 0  # dias consecutivos de estudo
 
 class RecommendationRequest(BaseModel):
     user_id: int

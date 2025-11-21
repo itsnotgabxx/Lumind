@@ -7,10 +7,10 @@ class User(Base):
     __tablename__ = "users"
     
     id = Column(Integer, primary_key=True, index=True)
-    firebase_uid = Column(String(255), unique=True, nullable=True)  # 👈 ADICIONAR ESTA LINHA
+    firebase_uid = Column(String(255), unique=True, nullable=True)
     full_name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
-    password = Column(String(255), nullable=False) # Campo mantido para compatibilidade com o frontend, mas não é mais hasheado
+    password = Column(String(255), nullable=False)
     birth_date = Column(DateTime, nullable=True)
     guardian_name = Column(String(255), nullable=True)
     guardian_email = Column(String(255), nullable=True)
@@ -19,6 +19,8 @@ class User(Base):
     distractions = Column(Text, nullable=True)  # JSON string
     accessibility_settings = Column(Text, nullable=True)  # JSON string
     is_active = Column(Boolean, default=True)
+    streak_days = Column(Integer, default=0)  # Dias consecutivos de estudo
+    last_activity_date = Column(DateTime, nullable=True)  # Data última atividade
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
