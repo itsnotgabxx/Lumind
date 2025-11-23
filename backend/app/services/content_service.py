@@ -8,7 +8,6 @@ def get_all_content(db: Session, skip: int = 0, limit: int = 100) -> List[Conten
     """Retorna todos os conteúdos ativos com content_data parseado"""
     contents = db.query(Content).filter(Content.is_active == True).offset(skip).limit(limit).all()
     
-    # Converter para ContentItem com campos parseados
     result = []
     for content in contents:
         content_dict = {
@@ -35,7 +34,6 @@ def get_content_by_id(db: Session, content_id: int) -> Optional[ContentItem]:
     if not content:
         return None
     
-    # Converter para ContentItem com campos parseados
     content_dict = {
         "id": content.id,
         "title": content.title,
@@ -64,11 +62,9 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
     print(f"\n📝 [UPDATE] user_id={user_id}, content_id={content_id}, status={status}, progress={progress_percentage}%")
     print(f"   time_spent recebido (segundos): {time_spent}")
     
-    # Converte time_spent de segundos para minutos (recebido do frontend em segundos)
     time_spent_minutes = time_spent // 60 if time_spent > 0 else 0
     print(f"   time_spent convertido (minutos): {time_spent_minutes}")
     
-    # Verifica se já existe um progresso para este usuário e conteúdo
     existing_progress = db.query(ActivityProgress).filter(
         ActivityProgress.user_id == user_id,
         ActivityProgress.content_id == content_id
@@ -84,12 +80,15 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
             from datetime import datetime
             existing_progress.completed_at = datetime.utcnow()
             print(f"   ✅ Marcado como CONCLUÍDO")
+
+            from app.services.user_service import update_user_streak
+            update_user_streak(db, user_id)
         db.commit()
         db.refresh(existing_progress)
         print(f"   Atividade atualizada: status novo={existing_progress.status}, time_spent final={existing_progress.time_spent}min")
         return existing_progress
     else:
-        # Cria novo progresso
+    
         print(f"   Criando novo registro de atividade")
         new_progress = ActivityProgress(
             user_id=user_id,
@@ -102,6 +101,9 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
             from datetime import datetime
             new_progress.completed_at = datetime.utcnow()
             print(f"   ✅ Novo registro como CONCLUÍDO")
+
+            from app.services.user_service import update_user_streak
+            update_user_streak(db, user_id)
         
         db.add(new_progress)
         db.commit()
@@ -112,7 +114,6 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
 def get_user_progress_summary(db: Session, user_id: int) -> dict:
     activities = get_user_activity_progress(db, user_id)
     
-    # Busca o usuário para pegar streak_days
     from app.services.user_service import get_user_by_id
     user = get_user_by_id(db, user_id)
     
@@ -132,8 +133,7 @@ def get_user_progress_summary(db: Session, user_id: int) -> dict:
     progress_percentage = 0
     if total_activities > 0:
         progress_percentage = int((completed_activities / total_activities) * 100)
-    
-    # Simulação de conquistas baseadas no progresso
+
     achievements = []
     if completed_activities >= 1:
         achievements.append("Explorador Curioso")
@@ -155,14 +155,13 @@ def get_user_progress_summary(db: Session, user_id: int) -> dict:
     }
 
 def get_recommendations_for_user(db: Session, user_id: int, limit: int = 5) -> List[ContentItem]:
-    # Busca o usuário para obter suas preferências
+    
     from app.services.user_service import get_user_by_id
     user = get_user_by_id(db, user_id)
     
     if not user:
         return []
     
-    # Converte as preferências de JSON string para lista
     learning_preferences = []
     interests = []
     
@@ -178,33 +177,26 @@ def get_recommendations_for_user(db: Session, user_id: int, limit: int = 5) -> L
         except:
             interests = []
     
-    # Busca conteúdo baseado nas preferências
     recommended_content = []
     
-    # Se o usuário prefere vídeos, busca vídeos
     if "video" in learning_preferences or "imagem" in learning_preferences:
-        videos = get_content_by_type_parsed(db, "video")  # 👈 USAR NOVA FUNÇÃO
+        videos = get_content_by_type_parsed(db, "video")
         recommended_content.extend(videos[:2])
-    
-    # Se o usuário prefere leitura, busca textos
+
     if "leitura" in learning_preferences or "audio" in learning_preferences:
-        texts = get_content_by_type_parsed(db, "text")  # 👈 USAR NOVA FUNÇÃO
+        texts = get_content_by_type_parsed(db, "text")
         recommended_content.extend(texts[:2])
     
-    # Se o usuário prefere jogos interativos, busca jogos
     if "interativo" in learning_preferences:
-        games = get_content_by_type_parsed(db, "interactive_game")  # 👈 USAR NOVA FUNÇÃO
+        games = get_content_by_type_parsed(db, "interactive_game")
         recommended_content.extend(games[:2])
     
-    # Se não há preferências específicas, retorna conteúdo variado
     if not recommended_content:
         all_content = get_all_content(db, limit=limit)
         recommended_content = all_content[:limit]
     
     return recommended_content[:limit]
 
-
-# 👇 ADICIONE ESTA NOVA FUNÇÃO
 def get_content_by_type_parsed(db: Session, content_type: str) -> List[ContentItem]:
     """Retorna conteúdo por tipo com content_data parseado"""
     contents = db.query(Content).filter(Content.type == content_type, Content.is_active == True).all()
