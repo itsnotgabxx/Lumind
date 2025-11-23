@@ -173,19 +173,26 @@ export async function setup({ params }) {
 
     // Rastreia tempo real de visualização
     let startTime = Date.now();
+    let lastSaveTime = Date.now();
     let totalTimeSpent = 0;
 
     const autoSaveInterval = setInterval(async () => {
         try {
-            // Calcula tempo decorrido desde o início
-            const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-            totalTimeSpent += 30; // Adiciona 30s (intervalo do timer)
+            const currentTime = Date.now();
+            const elapsedTime = Math.floor((currentTime - startTime) / 1000);
+            const timeSinceLastSave = Math.floor((currentTime - lastSaveTime) / 1000);
+            
+            if (timeSinceLastSave > 0) {
+                totalTimeSpent = elapsedTime;
+            }
+            
+            lastSaveTime = currentTime;
             
             // Progresso baseado em visibilidade da página
             const isPageVisible = !document.hidden;
             const progress = isPageVisible ? Math.min(100, Math.floor(totalTimeSpent / 10)) : 0;
             
-            console.log(`[Auto-Save] Tempo: ${totalTimeSpent}s | Progresso: ${progress}% | Visível: ${isPageVisible}`);
+            console.log(`[Auto-Save] Tempo total: ${totalTimeSpent}s (${Math.floor(totalTimeSpent / 60)}min) | Progresso: ${progress}% | Visível: ${isPageVisible}`);
             
             await api.updateProgress(
                 contentId, 

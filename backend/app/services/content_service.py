@@ -62,9 +62,11 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
                            status: str, progress_percentage: int = 0, 
                            time_spent: int = 0) -> ActivityProgress:
     print(f"\n📝 [UPDATE] user_id={user_id}, content_id={content_id}, status={status}, progress={progress_percentage}%")
+    print(f"   time_spent recebido (segundos): {time_spent}")
     
     # Converte time_spent de segundos para minutos (recebido do frontend em segundos)
     time_spent_minutes = time_spent // 60 if time_spent > 0 else 0
+    print(f"   time_spent convertido (minutos): {time_spent_minutes}")
     
     # Verifica se já existe um progresso para este usuário e conteúdo
     existing_progress = db.query(ActivityProgress).filter(
@@ -73,17 +75,18 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
     ).first()
     
     if existing_progress:
-        print(f"   Atividade já existe: status anterior={existing_progress.status}")
+        print(f"   Atividade já existe: status anterior={existing_progress.status}, time_spent anterior={existing_progress.time_spent}min")
         existing_progress.status = status
         existing_progress.progress_percentage = progress_percentage
-        existing_progress.time_spent += time_spent_minutes
+        existing_progress.time_spent = time_spent_minutes
+        print(f"   time_spent atualizado para: {existing_progress.time_spent}min")
         if status == "completed":
             from datetime import datetime
             existing_progress.completed_at = datetime.utcnow()
             print(f"   ✅ Marcado como CONCLUÍDO")
         db.commit()
         db.refresh(existing_progress)
-        print(f"   Atividade atualizada: status novo={existing_progress.status}")
+        print(f"   Atividade atualizada: status novo={existing_progress.status}, time_spent final={existing_progress.time_spent}min")
         return existing_progress
     else:
         # Cria novo progresso
@@ -103,7 +106,7 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
         db.add(new_progress)
         db.commit()
         db.refresh(new_progress)
-        print(f"   Novo registro criado com status={new_progress.status}")
+        print(f"   Novo registro criado com status={new_progress.status}, time_spent={new_progress.time_spent}min")
         return new_progress
 
 def get_user_progress_summary(db: Session, user_id: int) -> dict:
@@ -120,9 +123,11 @@ def get_user_progress_summary(db: Session, user_id: int) -> dict:
     
     print(f"📊 [PROGRESS_SUMMARY] user_id={user_id}")
     print(f"   Total: {total_activities} | Completas: {completed_activities} | Em andamento: {in_progress_activities}")
+    print(f"   Tempo total gasto: {total_time_spent}min ({total_time_spent // 60}h {total_time_spent % 60}min)")
     print(f"   Detalhes das atividades:")
     for a in activities:
-        print(f"      - Content {a.content_id}: status='{a.status}' (tipo: {type(a.status).__name__}), progress={a.progress_percentage}%")
+        time_display = f"{a.time_spent // 60}h {a.time_spent % 60}min" if a.time_spent >= 60 else f"{a.time_spent}min"
+        print(f"      - Content {a.content_id}: status='{a.status}', progress={a.progress_percentage}%, tempo={time_display}")
     
     progress_percentage = 0
     if total_activities > 0:
