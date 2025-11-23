@@ -141,34 +141,10 @@ export default function AcompanhamentoPage() {
                     <!-- Gráfico de Atividade Semanal -->
                     <div class="bg-white rounded-xl p-4 shadow-sm">
                         <h3 class="text-sm font-semibold text-gray-700 mb-3">Atividade nos Últimos 7 Dias</h3>
-                        <div class="flex items-end justify-between gap-2 h-24">
-                            <div class="flex-1 bg-gray-100 rounded-t-lg flex flex-col items-center justify-end" style="height: 30%">
-                                <div class="text-xs text-gray-500 mb-1">Seg</div>
-                                <div class="text-xs font-semibold text-gray-700">15m</div>
-                            </div>
-                            <div class="flex-1 bg-purple-200 rounded-t-lg flex flex-col items-center justify-end" style="height: 70%">
-                                <div class="text-xs text-gray-500 mb-1">Ter</div>
-                                <div class="text-xs font-semibold text-purple-700">35m</div>
-                            </div>
-                            <div class="flex-1 bg-purple-300 rounded-t-lg flex flex-col items-center justify-end" style="height: 85%">
-                                <div class="text-xs text-gray-500 mb-1">Qua</div>
-                                <div class="text-xs font-semibold text-purple-800">42m</div>
-                            </div>
-                            <div class="flex-1 bg-purple-200 rounded-t-lg flex flex-col items-center justify-end" style="height: 60%">
-                                <div class="text-xs text-gray-500 mb-1">Qui</div>
-                                <div class="text-xs font-semibold text-purple-700">30m</div>
-                            </div>
-                            <div class="flex-1 bg-purple-400 rounded-t-lg flex flex-col items-center justify-end" style="height: 100%">
-                                <div class="text-xs text-gray-500 mb-1">Sex</div>
-                                <div class="text-xs font-semibold text-purple-900">50m</div>
-                            </div>
-                            <div class="flex-1 bg-gray-100 rounded-t-lg flex flex-col items-center justify-end" style="height: 20%">
-                                <div class="text-xs text-gray-500 mb-1">Sáb</div>
-                                <div class="text-xs font-semibold text-gray-700">10m</div>
-                            </div>
-                            <div class="flex-1 bg-gray-100 rounded-t-lg flex flex-col items-center justify-end" style="height: 40%">
-                                <div class="text-xs text-gray-500 mb-1">Dom</div>
-                                <div class="text-xs font-semibold text-gray-700">20m</div>
+                        <div id="weekly-activity-chart" class="flex items-end justify-between gap-2 h-24">
+                            <div class="text-center py-8 text-gray-500 w-full">
+                                <i class="fas fa-spinner fa-spin text-lg mb-2"></i>
+                                <p class="text-xs">Carregando dados...</p>
                             </div>
                         </div>
                     </div>
@@ -346,6 +322,57 @@ export default function AcompanhamentoPage() {
             </div>
         </div>
     `;
+}
+
+// Renderiza gráfico de atividade dos últimos 7 dias
+function renderWeeklyActivityChart(dailyStats) {
+    const container = document.getElementById('weekly-activity-chart');
+    if (!container || !dailyStats || dailyStats.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-8 text-gray-500 w-full">
+                <i class="fas fa-chart-bar text-lg mb-2"></i>
+                <p class="text-xs">Sem dados de atividade ainda</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Calcula o valor máximo para normalizar as alturas das barras
+    const maxTime = Math.max(...dailyStats.map(day => day.time_spent), 1);
+    const maxHeight = 100; // altura máxima em %
+
+    // Gera as barras do gráfico
+    const chartHTML = dailyStats.map(day => {
+        const heightPercent = maxTime > 0 ? (day.time_spent / maxTime) * maxHeight : 10;
+        const timeText = day.time_spent > 0 ? `${day.time_spent}m` : '0m';
+        
+        // Define a cor baseada no tempo de estudo
+        let colorClass, textColorClass;
+        if (day.time_spent === 0) {
+            colorClass = 'bg-gray-100';
+            textColorClass = 'text-gray-700';
+        } else if (day.time_spent < 15) {
+            colorClass = 'bg-purple-200';
+            textColorClass = 'text-purple-700';
+        } else if (day.time_spent < 30) {
+            colorClass = 'bg-purple-300';
+            textColorClass = 'text-purple-800';
+        } else {
+            colorClass = 'bg-purple-400';
+            textColorClass = 'text-purple-900';
+        }
+
+        return `
+            <div class="flex-1 ${colorClass} rounded-t-lg flex flex-col items-center justify-end transition-all hover:opacity-80" 
+                 style="height: ${Math.max(heightPercent, 15)}%"
+                 title="${day.weekday} - ${day.time_spent} minutos estudados">
+                <div class="text-xs text-gray-500 mb-1">${day.weekday}</div>
+                <div class="text-xs font-semibold ${textColorClass}">${timeText}</div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = chartHTML;
 }
 
 // Renderiza conquistas recentes
@@ -592,12 +619,14 @@ export function setup() {
     // Carrega dados
     const loadData = async () => {
         try {
-            const [progress, activities] = await Promise.all([
+            const [progress, activities, dailyActivity] = await Promise.all([
                 api.getUserProgress(),
-                api.getUserActivities()
+                api.getUserActivities(),
+                api.getDailyActivity(7)
             ]);
 
             renderStatistics(progress, activities);
+            renderWeeklyActivityChart(dailyActivity);
             await renderSentMessages();
         } catch (error) {
             console.error('Erro ao carregar dados:', error);

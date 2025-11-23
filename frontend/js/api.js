@@ -132,6 +132,11 @@ class LumindAPI {
         return await this.request(`/users/${this.user.id}/activities`);
     }
 
+    async getDailyActivity(days = 7) {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/users/${this.user.id}/daily-activity?days=${days}`);
+    }
+
     // Mensagens
     async sendMessage(recipientId, message, messageType = 'incentive') {
         if (!this.user) throw new Error("Usuário não logado.");

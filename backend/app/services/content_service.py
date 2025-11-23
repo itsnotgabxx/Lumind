@@ -171,6 +171,71 @@ def get_user_progress_summary(db: Session, user_id: int) -> dict:
         "streak_days": streak_days
     }
 
+def get_daily_activity_stats(db: Session, user_id: int, days: int = 7) -> List[dict]:
+    """
+    Retorna estatísticas de atividade diária dos últimos N dias.
+    VERSÃO FINAL: Simples e direta, inspirada na lógica do "tempo de estudo total".
+    """
+    from datetime import datetime, timedelta
+    from sqlalchemy import func, and_
+    
+    # Calcula as datas dos últimos N dias
+    today = datetime.utcnow().date()
+    dates = [(today - timedelta(days=i)) for i in range(days-1, -1, -1)]
+    
+    daily_stats = []
+    weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+    
+    for date in dates:
+        day_start = datetime.combine(date, datetime.min.time())
+        day_end = datetime.combine(date, datetime.max.time())
+        
+        # Busca atividades atualizadas neste dia específico
+        daily_activities = db.query(ActivityProgress).filter(
+            and_(
+                ActivityProgress.user_id == user_id,
+                ActivityProgress.updated_at >= day_start,
+                ActivityProgress.updated_at <= day_end
+            )
+        ).all()
+        
+        # Busca atividades concluídas neste dia específico
+        completed_count = db.query(ActivityProgress).filter(
+            and_(
+                ActivityProgress.user_id == user_id,
+                ActivityProgress.completed_at >= day_start,
+                ActivityProgress.completed_at <= day_end,
+                ActivityProgress.status == "completed"
+            )
+        ).count()
+        
+        # VERSÃO SIMPLIFICADA FINAL: 
+        # Se uma atividade foi atualizada hoje, conta metade do tempo total
+        # Isso simula que parte do tempo foi gasta nesse dia
+        time_spent = 0
+        processed_activities = set()
+        
+        for activity in daily_activities:
+            if activity.content_id not in processed_activities:
+                processed_activities.add(activity.content_id)
+                # Conta metade do tempo para simular que foi gasta nesse dia
+                daily_time = activity.time_spent // 2 if activity.time_spent > 0 else 0
+                time_spent += daily_time
+        
+        daily_stats.append({
+            "date": date.isoformat(),
+            "weekday": weekdays[date.weekday()],
+            "time_spent": int(time_spent),
+            "completed_activities": completed_count,
+            "total_activities": len(processed_activities)
+        })
+    
+    print(f"📊 [DAILY_STATS] Calculado para {len(dates)} dias (versão simplificada final):")
+    for stat in daily_stats:
+        print(f"   {stat['weekday']} ({stat['date']}): {stat['time_spent']}min, {stat['completed_activities']} concluídas")
+    
+    return daily_stats
+
 def get_recommendations_for_user(db: Session, user_id: int, limit: int = 5) -> List[ContentItem]:
     
     from app.services.user_service import get_user_by_id

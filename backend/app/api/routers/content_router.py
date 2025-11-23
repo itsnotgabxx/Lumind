@@ -5,7 +5,8 @@ from app.db.database import get_db
 from app.schemas.user_schema import ContentItem, UserProgress, RecommendationRequest
 from app.services.content_service import (
     get_all_content, get_content_by_id, get_user_activity_progress,
-    update_activity_progress, get_user_progress_summary, get_recommendations_for_user
+    update_activity_progress, get_user_progress_summary, get_recommendations_for_user,
+    get_daily_activity_stats
 )
 
 router = APIRouter()
@@ -103,3 +104,19 @@ async def get_user_activities(
         activities_with_content.append(ActivityProgressWithContent.from_orm(a))
     
     return activities_with_content
+
+@router.get("/users/{user_id}/daily-activity")
+async def get_user_daily_activity(
+    user_id: int,
+    days: int = 7,
+    db: Session = Depends(get_db)
+):
+    """Obtém estatísticas de atividade diária dos últimos N dias"""
+    print(f"\n🔍 [DAILY_ACTIVITY] Requisitado para user_id={user_id}, days={days}")
+    daily_stats = get_daily_activity_stats(db, user_id, days)
+    print(f"✅ [DAILY_ACTIVITY] Retornando {len(daily_stats)} dias de dados")
+    
+    for day in daily_stats:
+        print(f"   - {day['weekday']} ({day['date']}): {day['time_spent']}min, {day['completed_activities']} completas")
+    
+    return daily_stats
