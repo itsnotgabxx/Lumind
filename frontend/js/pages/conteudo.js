@@ -112,6 +112,8 @@ async function renderContent(content) {
     }
 }
 
+let globalAutoSaveInterval = null;
+
 export async function setup({ params }) {
     const contentId = params.id;
     console.log('Setup recebeu params:', params);
@@ -124,7 +126,12 @@ export async function setup({ params }) {
         return;
     }
 
-    // Adiciona estilos CSS para vídeos e iframes
+    if (globalAutoSaveInterval !== null) {
+        console.log('🧹 Limpando auto-save anterior antes de iniciar novo');
+        clearInterval(globalAutoSaveInterval);
+        globalAutoSaveInterval = null;
+    }
+
     const style = document.createElement('style');
     style.textContent = `
         #conteudo-wrapper iframe,
@@ -175,30 +182,50 @@ export async function setup({ params }) {
     let startTime = Date.now();
     let lastSaveTime = Date.now();
     let totalTimeSpent = 0;
+    let isContentCompleted = false;
 
-    const autoSaveInterval = setInterval(async () => {
+    try {
+        const activities = await api.getUserActivities();
+        const currentActivity = activities.find(a => a.content_id === parseInt(contentId));
+        if (currentActivity?.status === 'completed') {
+            isContentCompleted = true;
+            console.log('👁️ [REVISÃO] Conteúdo já concluído - modo revisão ativado');
+            console.log('   Rastreando tempo, mas SEM auto-save para não alterar status');
+        }
+    } catch (e) {
+        console.log('Erro ao verificar status anterior:', e);
+    }
+
+    globalAutoSaveInterval = setInterval(async () => {
         try {
+            if (isContentCompleted) {
+                const currentTime = Date.now();
+                const elapsedTime = Math.floor((currentTime - startTime) / 1000);
+                console.log(`[REVISÃO] Tempo rastreado (local): ${elapsedTime}s (${Math.floor(elapsedTime / 60)}min) - nenhum auto-save enviado`);
+                return;
+            }
+
             const currentTime = Date.now();
             const elapsedTime = Math.floor((currentTime - startTime) / 1000);
             const timeSinceLastSave = Math.floor((currentTime - lastSaveTime) / 1000);
             
             if (timeSinceLastSave > 0) {
-                totalTimeSpent = elapsedTime;
+                totalTimeSpent += timeSinceLastSave;  // Acumula localmente
             }
             
             lastSaveTime = currentTime;
             
-            // Progresso baseado em visibilidade da página
             const isPageVisible = !document.hidden;
             const progress = isPageVisible ? Math.min(100, Math.floor(totalTimeSpent / 10)) : 0;
+            const timeToSend = timeSinceLastSave > 0 ? timeSinceLastSave : 0;
             
-            console.log(`[Auto-Save] Tempo total: ${totalTimeSpent}s (${Math.floor(totalTimeSpent / 60)}min) | Progresso: ${progress}% | Visível: ${isPageVisible}`);
+            console.log(`[Auto-Save] Tempo incremental: ${timeToSend}s (${Math.floor(timeToSend / 60)}min) | Tempo total local: ${totalTimeSpent}s | Progresso: ${progress}% | Visível: ${isPageVisible}`);
             
             await api.updateProgress(
                 contentId, 
                 'in_progress', 
                 progress,
-                totalTimeSpent
+                timeToSend
             );
         } catch (e) {
             console.log('Erro no auto-save:', e);
@@ -211,11 +238,15 @@ export async function setup({ params }) {
             console.log('🎯 [BOTÃO] "Marcar como Concluído" clicado!');
             console.log(`   contentId: ${contentId}`);
             
-            // ⏹️ PARAR o auto-save imediatamente
-            clearInterval(autoSaveInterval);
-            console.log('⏹️ Auto-save cancelado');
+            isContentCompleted = true;
+            console.log('🔒 isContentCompleted = true (proteção ativada)');
             
-            // Debug user info
+            if (globalAutoSaveInterval !== null) {
+                clearInterval(globalAutoSaveInterval);
+                globalAutoSaveInterval = null;
+                console.log('⏹️ Auto-save cancelado');
+            }
+            
             const currentUser = await api.getCurrentUser();
             console.log('👤 Usuário atual:', {
                 id: currentUser?.id,
@@ -248,6 +279,7 @@ export async function setup({ params }) {
                 console.error('Erro ao marcar como concluído:', error);
                 showCustomAlert('Erro ao salvar progresso. Tente novamente.', 'Erro', 'error');
                 
+                isContentCompleted = false;
                 btnConcluido.disabled = false;
                 btnConcluido.innerHTML = originalText;
             }
@@ -276,7 +308,6 @@ export async function setup({ params }) {
         }
     });
 
-    // Detecta quando usuário sai ou volta para a página
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             console.log('⏸️ Página perdeu foco - progresso pausado');

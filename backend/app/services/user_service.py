@@ -79,3 +79,44 @@ def update_user_accessibility(db: Session, user_id: int, accessibility_settings:
     db.commit()
     db.refresh(user)
     return user
+
+def update_user_streak(db: Session, user_id: int) -> Optional[User]:
+    """
+    Atualiza o streak de dias consecutivos de estudo do usuário.
+    
+    Regra:
+    - Se foi no mesmo dia: mantém o streak
+    - Se foi no dia anterior: incrementa o streak
+    - Se foi há 2+ dias: reseta para 1
+    """
+    from datetime import datetime, timedelta
+    
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return None
+    
+    today = datetime.utcnow().date()
+    
+    if user.last_activity_date is None:
+        user.streak_days = 1
+        user.last_activity_date = datetime.utcnow()
+        print(f"   🔥 Primeiro dia de estudo! Streak iniciado em 1 dia")
+    else:
+        last_activity = user.last_activity_date.date()
+        days_diff = (today - last_activity).days
+        
+        if days_diff == 0:
+            print(f"   🔄 Mesma dia - streak mantido em {user.streak_days} dias")
+        elif days_diff == 1:
+            user.streak_days += 1
+            user.last_activity_date = datetime.utcnow()
+            print(f"   🔥 Dia consecutivo! Streak incrementado para {user.streak_days} dias")
+        else:
+            user.streak_days = 1
+            user.last_activity_date = datetime.utcnow()
+            print(f"   ⚠️  Parou por {days_diff} dias. Streak resetado para 1 dia")
+    
+    db.commit()
+    db.refresh(user)
+    return user
+

@@ -62,8 +62,9 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
     print(f"\n📝 [UPDATE] user_id={user_id}, content_id={content_id}, status={status}, progress={progress_percentage}%")
     print(f"   time_spent recebido (segundos): {time_spent}")
     
-    time_spent_minutes = time_spent // 60 if time_spent > 0 else 0
-    print(f"   time_spent convertido (minutos): {time_spent_minutes}")
+    import math
+    time_spent_minutes = math.ceil(time_spent / 60) if time_spent > 0 else 0
+    print(f"   time_spent convertido (minutos): {time_spent_minutes} min (via ceil({time_spent}/60))")
     
     existing_progress = db.query(ActivityProgress).filter(
         ActivityProgress.user_id == user_id,
@@ -72,10 +73,26 @@ def update_activity_progress(db: Session, user_id: int, content_id: int,
     
     if existing_progress:
         print(f"   Atividade já existe: status anterior={existing_progress.status}, time_spent anterior={existing_progress.time_spent}min")
-        existing_progress.status = status
-        existing_progress.progress_percentage = progress_percentage
-        existing_progress.time_spent = time_spent_minutes
-        print(f"   time_spent atualizado para: {existing_progress.time_spent}min")
+        
+        if existing_progress.status == "completed" and status != "completed":
+            print(f"   [PROTEÇÃO] ⚠️  Tentativa de alterar conteúdo concluído bloqueada!")
+            print(f"            Status atual: {existing_progress.status} → Tentativa: {status} (REJEITADO)")
+            print(f"            💡 Dica: Conteúdo em revisão pode ter tempo adicionado, mas status permanece concluído")
+            return existing_progress
+        
+        if existing_progress.status == "completed" and status == "completed":
+            print(f"   👁️ [REVISÃO] Atualizando tempo em conteúdo já concluído")
+            old_time = existing_progress.time_spent
+            existing_progress.time_spent = max(existing_progress.time_spent, time_spent_minutes)
+            print(f"   Tempo revisão: anterior={old_time}min, novo={time_spent_minutes}min → total={existing_progress.time_spent}min")
+        else:
+            old_time = existing_progress.time_spent
+            new_total_time = existing_progress.time_spent + time_spent_minutes
+            existing_progress.status = status
+            existing_progress.progress_percentage = progress_percentage
+            existing_progress.time_spent = new_total_time
+            print(f"   time_spent: anterior={old_time}min + novo={time_spent_minutes}min = total {new_total_time}min")
+        
         if status == "completed":
             from datetime import datetime
             existing_progress.completed_at = datetime.utcnow()
