@@ -116,6 +116,19 @@ class ActivityProgress(BaseModel):
     time_spent: int  # em minutos
     completed_at: Optional[datetime] = None
 
+class ActivityProgressWithContent(BaseModel):
+    id: int
+    content_id: int
+    user_id: int
+    status: str
+    progress_percentage: int
+    time_spent: int
+    completed_at: Optional[datetime] = None
+    content: ContentItem
+    
+    class Config:
+        from_attributes = True
+
 class UserProgress(BaseModel):
     total_activities: int
     completed_activities: int

@@ -90,10 +90,16 @@ async def get_user_activities(
     user_id: int,
     db: Session = Depends(get_db)
 ):
-    """Lista todas as atividades do usuário com progresso"""
+    """Lista todas as atividades do usuário com progresso (incluindo dados do conteúdo)"""
+    from app.schemas.user_schema import ActivityProgressWithContent
+    
     print(f"\n🔍 [GET_ACTIVITIES] Requisitado para user_id={user_id}")
     activities = get_user_activity_progress(db, user_id)
     print(f"✅ [GET_ACTIVITIES] Retornando {len(activities)} atividades")
+    
+    activities_with_content = []
     for a in activities:
-        print(f"   - Content {a.content_id}: {a.status}")
-    return activities
+        print(f"   - Content {a.content_id} ({a.content.title if a.content else 'SEM TÍTULO'}): {a.status}")
+        activities_with_content.append(ActivityProgressWithContent.from_orm(a))
+    
+    return activities_with_content
