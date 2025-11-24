@@ -52,7 +52,7 @@ export default function LoginTypePage() {
                 <div class="mt-8 text-center text-sm text-gray-500">
                     <p>
                         <i class="fas fa-info-circle mr-1"></i>
-                        Escolha o tipo de acesso de acordo com seu perfil. Você pode alterar depois.
+                        Escolha o tipo de acesso de acordo com seu perfil.
                     </p>
                 </div>
             </div>

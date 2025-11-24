@@ -176,13 +176,13 @@ export function setup() {
 
     if (btnCadastro) {
         btnCadastro.addEventListener('click', () => {
-            window.router.navigate('/cadastro');
+            window.router.navigate('/login-type');
         });
     }
 
     if (btnCadastro2) {
         btnCadastro2.addEventListener('click', () => {
-            window.router.navigate('/cadastro');
+            window.router.navigate('/login-type');
         });
     }
 }

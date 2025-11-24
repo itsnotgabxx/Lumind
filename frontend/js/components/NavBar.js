@@ -191,13 +191,13 @@ export class NavBar {
                 <i class="fas fa-home w-6"></i>
                 <span>Início</span>
             </a>
-            <a href="/login" 
+            <a href="/login-type" 
                class="mobile-nav-link" 
                data-link>
                 <i class="fas fa-sign-in-alt w-6"></i>
                 <span>Entrar</span>
             </a>
-            <a href="/cadastro" 
+            <a href="/login-type" 
                class="mobile-nav-link" 
                data-link>
                 <i class="fas fa-user-plus w-6"></i>
@@ -208,10 +208,10 @@ export class NavBar {
 
     authButtons() {
         return `
-            <a href="/login" class="btn-subtle" data-link>
+            <a href="/login-type" class="btn-subtle" data-link>
                 Entrar
             </a>
-            <a href="/cadastro" class="btn-primary" data-link>
+            <a href="/login-type" class="btn-primary" data-link>
                 Começar Grátis
             </a>
         `;
