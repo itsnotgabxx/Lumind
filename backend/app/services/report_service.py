@@ -76,21 +76,23 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
     elements.append(Paragraph("INFORMAÇÕES DO ESTUDANTE", heading_style))
     
     student_data = [
-        ["<b>Nome:</b>", student.full_name],
-        ["<b>Email:</b>", student.email],
-        ["<b>Data de Nascimento:</b>", student.birth_date.strftime("%d/%m/%Y") if student.birth_date else "Não informada"],
+        ["Nome:", student.full_name],
+        ["Email:", student.email],
+        ["Data de Nascimento:", student.birth_date.strftime("%d/%m/%Y") if student.birth_date else "Não informada"],
     ]
     
     if guardian_name:
-        student_data.append(["<b>Responsável:</b>", guardian_name])
+        student_data.append(["Responsável:", guardian_name])
     
     student_table = Table(student_data, colWidths=[2*inch, 3.5*inch])
     student_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, -1), 10),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
         ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#0D9488')),
     ]))
     elements.append(student_table)
     elements.append(Spacer(1, 0.3*inch))
@@ -120,16 +122,18 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
             break
     
     stats_data = [
-        ["<b>Interações Totais:</b>", f"{total_interactions}"],
-        ["<b>Conteúdos Concluídos:</b>", f"{completed_count}"],
-        ["<b>Conteúdos Visualizados:</b>", f"{view_count}"],
-        ["<b>Sequência Atual:</b>", f"{streak} dias consecutivos"],
+        ["Interações Totais:", f"{total_interactions}"],
+        ["Conteúdos Concluídos:", f"{completed_count}"],
+        ["Conteúdos Visualizados:", f"{view_count}"],
+        ["Sequência Atual:", f"{streak} dias consecutivos"],
     ]
     
     stats_table = Table(stats_data, colWidths=[2.5*inch, 3*inch])
     stats_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#0D9488')),
         ('FONTSIZE', (0, 0), (-1, -1), 10),
         ('ROWBACKGROUNDS', (0, 0), (-1, -1), [HexColor('#F0FDFA'), white]),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
@@ -148,7 +152,7 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
     ).order_by(UserInteraction.created_at.desc()).limit(10).all()
     
     if recent_interactions:
-        activities_data = [["<b>Conteúdo</b>", "<b>Tipo</b>", "<b>Data</b>"]]
+        activities_data = [["Conteúdo", "Tipo", "Data"]]
         
         for interaction in recent_interactions:
             content = db.query(Content).filter(Content.id == interaction.content_id).first()
@@ -172,7 +176,9 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
         activities_table = Table(activities_data, colWidths=[2.5*inch, 1.5*inch, 2*inch])
         activities_table.setStyle(TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('TEXTCOLOR', (0, 0), (-1, 0), HexColor('#0D9488')),
             ('FONTSIZE', (0, 0), (-1, -1), 9),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [HexColor('#F0FDFA'), white]),
             ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#D1FAE5')),
@@ -191,13 +197,26 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
     interests_text = "Não informados"
     if student.interests:
         try:
-            import json
             interests_list = json.loads(student.interests)
             interests_text = ", ".join(interests_list)
         except:
             interests_text = student.interests
     
-    elements.append(Paragraph(f"<b>Temas de Interesse:</b> {interests_text}", normal_style))
+    # Criar uma tabela simples para interesses
+    interests_data = [
+        ["Temas de Interesse:", interests_text]
+    ]
+    interests_table = Table(interests_data, colWidths=[2*inch, 3.5*inch])
+    interests_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),
+        ('TEXTCOLOR', (0, 0), (0, 0), HexColor('#0D9488')),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    elements.append(interests_table)
     elements.append(Spacer(1, 0.2*inch))
     
     # ===== RODAPÉ =====
@@ -212,7 +231,17 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
         spaceAfter=6,
     )
     elements.append(Paragraph(footer_text, footer_style))
-    elements.append(Paragraph(f"<i>Gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}</i>", footer_style))
+    
+    # Data de geração (usando estilo itálico)
+    generated_date_style = ParagraphStyle(
+        'GeneratedDate',
+        parent=styles['Normal'],
+        fontSize=8,
+        textColor=HexColor('#999999'),
+        alignment=TA_CENTER,
+        fontName='Helvetica-Oblique'
+    )
+    elements.append(Paragraph(f"Gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}", generated_date_style))
     
     # Constrói o PDF
     doc.build(elements)
