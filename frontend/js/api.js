@@ -190,6 +190,54 @@ class LumindAPI {
         return await this.request(`/messages/guardian/${this.user.id}/student/${studentId}`);
     }
 
+    // Relatórios
+    async downloadStudentReportPDF(studentId) {
+        if (!this.user) throw new Error("Usuário não logado.");
+        
+        try {
+            const url = `${API_BASE_URL}/reports/student/${studentId}/pdf`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Erro ao gerar relatório');
+            }
+
+            // Obtém o blob do PDF
+            const blob = await response.blob();
+            
+            // Extrai o nome do arquivo dos headers
+            const contentDisposition = response.headers.get('content-disposition');
+            let filename = 'relatorio.pdf';
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename=([^;]+)/);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = filenameMatch[1].replace(/"/g, '');
+                }
+            }
+
+            // Cria um link temporário para download
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+
+            return { success: true, filename };
+        } catch (error) {
+            console.error('Erro ao baixar relatório:', error);
+            throw error;
+        }
+    }
+
     async googleLogin(token) {
     const data = await this.request('/users/google', {
         method: 'POST',

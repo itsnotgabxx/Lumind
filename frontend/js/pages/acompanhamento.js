@@ -608,12 +608,38 @@ export function setup() {
     });
 
     // Botão de relatório
-    document.getElementById('btn-ver-relatorio')?.addEventListener('click', () => {
-        showCustomAlert(
-            'Em breve você poderá baixar relatórios completos em PDF com todo o histórico de atividades e progresso!',
-            'Funcionalidade em Desenvolvimento',
-            'info'
-        );
+    document.getElementById('btn-ver-relatorio')?.addEventListener('click', async () => {
+        try {
+            const loading = document.getElementById('loading-overlay');
+            if (loading) loading.style.display = 'flex';
+
+            // Determina qual ID usar (estudante vinculado ou próprio)
+            let studentId;
+            if (userState.user.user_type === 'guardian' && userState.user.student_id) {
+                studentId = userState.user.student_id;
+            } else {
+                studentId = userState.user.id;
+            }
+
+            // Faz o download do PDF
+            await api.downloadStudentReportPDF(studentId);
+
+            showCustomAlert(
+                'Seu relatório em PDF foi baixado com sucesso!',
+                'Relatório Gerado! 📄',
+                'success'
+            );
+        } catch (error) {
+            console.error('Erro ao gerar relatório:', error);
+            showCustomAlert(
+                error.message || 'Erro ao gerar o relatório. Tente novamente em breve.',
+                'Erro ao Gerar Relatório',
+                'error'
+            );
+        } finally {
+            const loading = document.getElementById('loading-overlay');
+            if (loading) loading.style.display = 'none';
+        }
     });
 
     // Carrega dados
