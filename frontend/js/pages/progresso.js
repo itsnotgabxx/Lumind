@@ -8,11 +8,17 @@ export default function ProgressoPage() {
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
                     <h1 id="progresso-header" class="text-3xl font-bold text-gray-800 mb-2">
-                        Seu Progresso! 📊
+                        ${userState.user.user_type === 'guardian' 
+                            ? `Progresso de <span id="student-progresso-name">...</span>` 
+                            : 'Seu Progresso'} 📊
                     </h1>
-                    <p class="text-gray-600">Acompanhe sua evolução e conquistas</p>
+                    <p class="text-gray-600">
+                        ${userState.user.user_type === 'guardian' 
+                            ? `Acompanhe a evolução e desempenho do aluno` 
+                            : 'Acompanhe sua evolução e conquistas'}
+                    </p>
                 </div>
-                <button data-route="/recomendacao" class="btn-subtle">
+                <button data-route="${userState.user.user_type === 'guardian' ? '/acompanhamento' : '/recomendacao'}" class="btn-subtle">
                     <i class="fas fa-arrow-left mr-2"></i>Voltar
                 </button>
             </div>
@@ -277,7 +283,10 @@ export function setup() {
     // Atualiza cabeçalho
     const header = document.getElementById('progresso-header');
     if (header) {
-        header.innerHTML = `Seu Progresso, ${user.full_name.split(' ')[0]}! 📊`;
+        if (userState.user.user_type === 'guardian') {
+        } else {
+            header.innerHTML = `Seu Progresso, ${user.full_name.split(' ')[0]}! 📊`;
+        }
     }
 
     // Navegação
@@ -291,10 +300,31 @@ export function setup() {
     // Carrega dados
     const loadProgress = async () => {
         try {
-            const progress = await api.getUserProgress();
-            renderUserProgress(progress);
+            let progress, activities;
             
-            const activities = await api.getUserActivities();
+            if (userState.user.user_type === 'guardian' && userState.user.student_id) {
+                const studentId = userState.user.student_id;
+                
+                const student = await api.request(`/users/${studentId}`);
+                
+                const studentNameElement = document.getElementById('student-progresso-name');
+                if (studentNameElement) {
+                    studentNameElement.textContent = student.full_name;
+                }
+                
+                const headerElement = document.getElementById('progresso-header');
+                if (headerElement) {
+                    headerElement.innerHTML = `Progresso de <span id="student-progresso-name">${student.full_name}</span> 📊`;
+                }
+                
+                progress = await api.getStudentProgress(studentId);
+                activities = await api.getStudentActivities(studentId);
+            } else {
+                progress = await api.getUserProgress();
+                activities = await api.getUserActivities();
+            }
+            
+            renderUserProgress(progress);
             renderUserActivities(activities);
         } catch (error) {
             console.error('Erro:', error);

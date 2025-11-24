@@ -619,15 +619,41 @@ export function setup() {
     // Carrega dados
     const loadData = async () => {
         try {
-            const [progress, activities, dailyActivity] = await Promise.all([
-                api.getUserProgress(),
-                api.getUserActivities(),
-                api.getDailyActivity(7)
-            ]);
+            // Se for responsável, busca dados do estudante vinculado
+            if (userState.user.user_type === 'guardian' && userState.user.student_id) {
+                const studentId = userState.user.student_id;
+                
+                // Busca dados do estudante vinculado
+                const student = await api.request(`/users/${studentId}`);
+                
+                // Atualiza o nome do estudante no header
+                const studentNameElement = document.getElementById('student-name');
+                if (studentNameElement) {
+                    studentNameElement.textContent = student.full_name;
+                }
+                
+                // Busca progresso do estudante
+                const [progress, activities, dailyActivity] = await Promise.all([
+                    api.getStudentProgress(studentId),
+                    api.getStudentActivities(studentId),
+                    api.getStudentDailyActivity(studentId, 7)
+                ]);
 
-            renderStatistics(progress, activities);
-            renderWeeklyActivityChart(dailyActivity);
-            await renderSentMessages();
+                renderStatistics(progress, activities);
+                renderWeeklyActivityChart(dailyActivity);
+                await renderSentMessages();
+            } else {
+                // Para estudantes, busca dados próprios
+                const [progress, activities, dailyActivity] = await Promise.all([
+                    api.getUserProgress(),
+                    api.getUserActivities(),
+                    api.getDailyActivity(7)
+                ]);
+
+                renderStatistics(progress, activities);
+                renderWeeklyActivityChart(dailyActivity);
+                await renderSentMessages();
+            }
         } catch (error) {
             console.error('Erro ao carregar dados:', error);
             showCustomAlert('Erro ao carregar dados de acompanhamento', 'Erro', 'error');

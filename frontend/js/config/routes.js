@@ -1,11 +1,17 @@
 // frontend/js/config/routes.js (O CÓDIGO CORRETO)
-import { authMiddleware, guestMiddleware } from '../middleware/auth.js';
+import { authMiddleware, guestMiddleware, studentOnlyMiddleware, guardianOnlyMiddleware } from '../middleware/auth.js';
 
 export const routes = [
     {
         path: '/',
         component: () => import('../pages/home.js'),
         title: 'Início',
+        middleware: [guestMiddleware]
+    },
+    {
+        path: '/login-type',
+        component: () => import('../pages/loginType.js'),
+        title: 'Tipo de Acesso',
         middleware: [guestMiddleware]
     },
     {
@@ -26,58 +32,61 @@ export const routes = [
         title: 'Recuperar Senha',
         middleware: [guestMiddleware]
     },
+    // 📚 ROTAS EXCLUSIVAS PARA ESTUDANTES
     {
         path: '/questionario',
         component: () => import('../pages/questionario.js'),
         title: 'Questionário',
-        middleware: [authMiddleware]
+        middleware: [studentOnlyMiddleware]
     },
     {
         path: '/recomendacao',
         component: () => import('../pages/recomendacao.js'),
         title: 'Recomendações',
-        middleware: [authMiddleware]
+        middleware: [studentOnlyMiddleware]
     },
     {
-        path: '/perfil', // A rota é /perfil
-        component: () => import('../pages/profile.js'), // O arquivo é profile.js
+        path: '/conteudo/:id',
+        component: () => import('../pages/conteudo.js'),
+        title: 'Conteúdo',
+        middleware: [studentOnlyMiddleware]
+    },
+    // 👥 ROTAS EXCLUSIVAS PARA RESPONSÁVEIS
+    {
+        path: '/acompanhamento',
+        component: () => import('../pages/acompanhamento.js'),
+        title: 'Acompanhamento',
+        middleware: [guardianOnlyMiddleware]
+    },
+    {
+        path: '/enviarIncentivo',
+        component: () => import('../pages/enviarIncentivo.js'),
+        title: 'Enviar Incentivo',
+        middleware: [guardianOnlyMiddleware]
+    },
+    {
+        path: '/falarComEspecialista',
+        component: () => import('../pages/falarComEspecialista.js'),
+        title: 'Falar com Especialista',
+        middleware: [guardianOnlyMiddleware]
+    },
+    {
+        path: '/historico',
+        component: () => import('../pages/historicoCompleto.js'),
+        title: 'Histórico Completo',
+        middleware: [guardianOnlyMiddleware]
+    },
+    // 🔄 ROTAS COMPARTILHADAS (acessíveis para ambos)
+    {
+        path: '/perfil',
+        component: () => import('../pages/profile.js'),
         title: 'Meu Perfil',
         middleware: [authMiddleware]
     },
     {
         path: '/progresso',
         component: () => import('../pages/progresso.js'),
-        title: 'Meu Progresso',
-        middleware: [authMiddleware]
-    },
-    {
-        path: '/conteudo/:id',
-        component: () => import('../pages/conteudo.js'),
-        title: 'Conteúdo',
-        middleware: [authMiddleware]
-    },
-    {
-        path: '/acompanhamento',
-        component: () => import('../pages/acompanhamento.js'),
-        title: 'Acompanhamento',
-        middleware: [authMiddleware]
-    },
-    {
-        path: '/enviarIncentivo',
-        component: () => import('../pages/enviarIncentivo.js'),
-        title: 'Enviar Incentivo',
-        middleware: [authMiddleware]
-    },
-    {
-        path: '/falarComEspecialista',
-        component: () => import('../pages/falarComEspecialista.js'),
-        title: 'Falar com Especialista',
-        middleware: [authMiddleware]
-    },
-    {
-        path: '/historico',
-        component: () => import('../pages/historicoCompleto.js'),
-        title: 'Histórico Completo',
+        title: 'Progresso',
         middleware: [authMiddleware]
     }
 ];

@@ -3,13 +3,44 @@ import { userState } from '../utils/userState.js';
 export const authMiddleware = async () => {
     const user = userState.user;
     
-    // Se a rota requer autenticação e não há usuário
     if (!user) {
-        // Salva a rota pretendida para redirecionamento após login
         localStorage.setItem('intendedRoute', window.location.pathname);
         
-        // Redireciona para login
-        window.router.navigate('/login');
+        window.router.navigate('/login-type');
+        return false;
+    }
+    
+    return true;
+};
+
+export const studentOnlyMiddleware = async () => {
+    const user = userState.user;
+    
+    if (!user) {
+        localStorage.setItem('intendedRoute', window.location.pathname);
+        window.router.navigate('/login-type');
+        return false;
+    }
+    
+    if (user.user_type !== 'student') {
+        window.router.navigate('/acompanhamento');
+        return false;
+    }
+    
+    return true;
+};
+
+export const guardianOnlyMiddleware = async () => {
+    const user = userState.user;
+    
+    if (!user) {
+        localStorage.setItem('intendedRoute', window.location.pathname);
+        window.router.navigate('/login-type');
+        return false;
+    }
+    
+    if (user.user_type !== 'guardian') {
+        window.router.navigate('/recomendacao');
         return false;
     }
     
@@ -19,9 +50,12 @@ export const authMiddleware = async () => {
 export const guestMiddleware = async () => {
     const user = userState.user;
     
-    // Se já está autenticado, redireciona para a página inicial
     if (user) {
-        window.router.navigate('/recomendacao');
+        if (user.user_type === 'guardian') {
+            window.router.navigate('/acompanhamento');
+        } else {
+            window.router.navigate('/recomendacao');
+        }
         return false;
     }
     

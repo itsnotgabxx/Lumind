@@ -12,9 +12,11 @@ class AccessibilitySettings(BaseModel):
 class UserBase(BaseModel):
     full_name: str
     email: EmailStr
+    user_type: str = "student"
     birth_date: Optional[datetime] = None
     guardian_name: Optional[str] = None
     guardian_email: Optional[EmailStr] = None
+    student_id: Optional[int] = None
     learning_preferences: Optional[List[str]] = []
     interests: Optional[List[str]] = []
     distractions: Optional[str] = None
@@ -42,9 +44,18 @@ class UserBase(BaseModel):
                 return None
         return v
 
+# Schema para criar novo estudante (usado por responsáveis)
+class StudentCreate(BaseModel):
+    full_name: str
+    email: EmailStr
+    password: str
+    birth_date: Optional[datetime] = None
+
 class UserCreate(UserBase):
     password: str
-    firebase_uid: Optional[str] = None  # 👈 ADICIONAR ESTA LINHA
+    firebase_uid: Optional[str] = None
+    student_email: Optional[str] = None  # 👈 NOVO CAMPO: Email do estudante (para responsáveis)
+    create_student: Optional[StudentCreate] = None  # 👈 NOVO CAMPO: Dados para criar estudante
 
 
 class UserResponse(UserBase):

@@ -110,6 +110,11 @@ class LumindAPI {
         return await this.request(`/users/${this.user.id}/progress`);
     }
 
+    async getStudentProgress(studentId) {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/users/${studentId}/progress`);
+    }
+
     async updateProgress(contentId, status, progressPercentage = 0, timeSpent = 0) {
         if (!this.user) throw new Error("Usuário não logado.");
         const userId = this.user.id;
@@ -135,6 +140,18 @@ class LumindAPI {
     async getDailyActivity(days = 7) {
         if (!this.user) throw new Error("Usuário não logado.");
         return await this.request(`/users/${this.user.id}/daily-activity?days=${days}`);
+    }
+
+    // Busca atividades diárias do estudante vinculado (para responsáveis)
+    async getStudentDailyActivity(studentId, days = 7) {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/users/${studentId}/daily-activity?days=${days}`);
+    }
+
+    // Busca atividades do estudante vinculado (para responsáveis)
+    async getStudentActivities(studentId) {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/users/${studentId}/activities`);
     }
 
     // Mensagens

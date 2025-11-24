@@ -35,7 +35,15 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
             status_code=400,
             detail="Email already registered"
         )
-    return create_user(db=db, user=user)
+    
+    try:
+        return create_user(db=db, user=user)
+    except ValueError as e:
+        # Captura erros de vinculação de estudante
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
 
 @router.get("/{user_id}", response_model=UserResponse)
 async def read_user(user_id: int, db: Session = Depends(get_db)):

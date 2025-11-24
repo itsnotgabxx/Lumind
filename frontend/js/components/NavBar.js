@@ -83,6 +83,31 @@ export class NavBar {
     }
 
     authenticatedLinks() {
+        if (!this.user) return '';
+        
+        if (this.user.user_type === 'guardian') {
+            return `
+                <a href="/acompanhamento" 
+                   class="desktop-nav-link ${this.isActive('/acompanhamento')}" 
+                   data-link>
+                    <i class="fas fa-chart-line"></i>
+                    <span>Acompanhamento</span>
+                </a>
+                <a href="/progresso" 
+                   class="desktop-nav-link ${this.isActive('/progresso')}" 
+                   data-link>
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Progresso do Aluno</span>
+                </a>
+                <a href="/enviarIncentivo" 
+                   class="desktop-nav-link ${this.isActive('/enviarIncentivo')}" 
+                   data-link>
+                    <i class="fas fa-heart"></i>
+                    <span>Enviar Incentivo</span>
+                </a>
+            `;
+        }
+        
         return `
             <a href="/recomendacao" 
                class="desktop-nav-link ${this.isActive('/recomendacao')}" 
@@ -94,13 +119,7 @@ export class NavBar {
                class="desktop-nav-link ${this.isActive('/progresso')}" 
                data-link>
                 <i class="fas fa-chart-line"></i>
-                <span>Progresso</span>
-            </a>
-            <a href="/acompanhamento" 
-               class="desktop-nav-link ${this.isActive('/acompanhamento')}" 
-               data-link>
-                <i class="fas fa-user-friends"></i>
-                <span>Responsável</span>
+                <span>Meu Progresso</span>
             </a>
         `;
     }
@@ -117,6 +136,37 @@ export class NavBar {
     }
 
     mobileAuthenticatedLinks() {
+        if (!this.user) return '';
+        
+        if (this.user.user_type === 'guardian') {
+            return `
+                <a href="/acompanhamento" 
+                   class="mobile-nav-link ${this.isActive('/acompanhamento')}" 
+                   data-link>
+                    <i class="fas fa-chart-line w-6"></i>
+                    <span>Acompanhamento</span>
+                </a>
+                <a href="/progresso" 
+                   class="mobile-nav-link ${this.isActive('/progresso')}" 
+                   data-link>
+                    <i class="fas fa-user-graduate w-6"></i>
+                    <span>Progresso do Aluno</span>
+                </a>
+                <a href="/enviarIncentivo" 
+                   class="mobile-nav-link ${this.isActive('/enviarIncentivo')}" 
+                   data-link>
+                    <i class="fas fa-heart w-6"></i>
+                    <span>Enviar Incentivo</span>
+                </a>
+                <a href="/falarComEspecialista" 
+                   class="mobile-nav-link ${this.isActive('/falarComEspecialista')}" 
+                   data-link>
+                    <i class="fas fa-comments w-6"></i>
+                    <span>Falar com Especialista</span>
+                </a>
+            `;
+        }
+    
         return `
             <a href="/recomendacao" 
                class="mobile-nav-link ${this.isActive('/recomendacao')}" 
@@ -129,12 +179,6 @@ export class NavBar {
                data-link>
                 <i class="fas fa-chart-line w-6"></i>
                 <span>Meu Progresso</span>
-            </a>
-            <a href="/acompanhamento" 
-               class="mobile-nav-link ${this.isActive('/acompanhamento')}" 
-               data-link>
-                <i class="fas fa-user-friends w-6"></i>
-                <span>Área do Responsável</span>
             </a>
         `;
     }
@@ -242,7 +286,6 @@ export class NavBar {
     }
 
     setupEventListeners() {
-        // Desktop user menu toggle
         const menuButton = document.getElementById('user-menu-button');
         const menu = document.querySelector('.user-menu');
         
@@ -274,7 +317,6 @@ export class NavBar {
                 icon.classList.toggle('fa-times');
             });
 
-            // Fecha menu ao clicar em um link
             mobileMenu.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', () => {
                     mobileMenu.classList.add('hidden');
@@ -285,7 +327,6 @@ export class NavBar {
             });
         }
 
-        // Desktop logout
         const logoutButton = document.getElementById('logout-button');
         if (logoutButton) {
             logoutButton.addEventListener('click', (e) => {
@@ -294,7 +335,6 @@ export class NavBar {
             });
         }
 
-        // Mobile logout
         const mobileLogoutButton = document.getElementById('mobile-logout-button');
         if (mobileLogoutButton) {
             mobileLogoutButton.addEventListener('click', (e) => {

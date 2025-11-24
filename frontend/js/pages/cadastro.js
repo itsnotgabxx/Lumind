@@ -2,19 +2,25 @@ import { showCustomAlert } from '../utils/alert.js';
 import { userState } from '../utils/userState.js';
 
 function formDataToUserCreate(formData, googleData = null) {
+    const userType = sessionStorage.getItem('selected_user_type') || 'student';
+    const isGuardian = userType === 'guardian';
+    
     const learningPreferences = [];
     const interests = formData.get('interesses') ? formData.get('interesses').split(',').map(i => i.trim()) : [];
     const distractions = formData.get('distracoes') || '';
 
-    const checkboxes = document.querySelectorAll('input[name="aprender_pref"]:checked');
-    checkboxes.forEach(checkbox => {
-        learningPreferences.push(checkbox.value);
-    });
+    if (!isGuardian) {
+        const checkboxes = document.querySelectorAll('input[name="aprender_pref"]:checked');
+        checkboxes.forEach(checkbox => {
+            learningPreferences.push(checkbox.value);
+        });
+    }
 
     const userData = {
         full_name: formData.get('nome-completo'),
         email: formData.get('email-cadastro'),
         password: formData.get('senha-cadastro') || '-',
+        user_type: userType,
         birth_date: formData.get('data-nascimento') ? new Date(formData.get('data-nascimento')).toISOString() : null,
         guardian_name: formData.get('nome-responsavel') || null,
         guardian_email: formData.get('email-responsavel') || null,
@@ -22,6 +28,21 @@ function formDataToUserCreate(formData, googleData = null) {
         interests: interests,
         distractions: distractions
     };
+
+    if (isGuardian) {
+        const studentOption = document.querySelector('input[name="student-option"]:checked')?.value;
+        
+        if (studentOption === 'create') {
+            userData.create_student = {
+                full_name: formData.get('nome-estudante'),
+                email: formData.get('email-novo-estudante'),
+                password: formData.get('senha-estudante'),
+                birth_date: formData.get('data-nascimento-estudante') ? new Date(formData.get('data-nascimento-estudante')).toISOString() : null,
+            };
+        } else {
+            userData.student_email = formData.get('email-estudante');
+        }
+    }
 
     if (googleData) {
         userData.firebase_uid = googleData.firebase_uid;
@@ -33,18 +54,31 @@ function formDataToUserCreate(formData, googleData = null) {
 export default function CadastroPage() {
     const googleData = sessionStorage.getItem('google_registration_data');
     const isGoogleSignup = !!googleData;
+    const userType = sessionStorage.getItem('selected_user_type') || 'student';
+    const isGuardian = userType === 'guardian';
     
     return `
         <div class="min-h-screen py-12 px-4">
             <div class="w-full max-w-2xl mx-auto">
                 <!-- Cabeçalho -->
                 <div class="text-center mb-8">
+                    <!-- Indicador do tipo de cadastro -->
+                    <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-4 ${
+                        isGuardian ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                    }">
+                        <i class="fas ${isGuardian ? 'fa-user-shield' : 'fa-graduation-cap'} mr-1"></i>
+                        ${isGuardian ? 'Cadastro de Responsável' : 'Cadastro de Estudante'}
+                    </div>
+                    
                     <div class="lumind-logo-placeholder mb-4 mx-auto">L</div>
                     <h1 class="text-3xl font-bold text-gray-800 mb-2">
-                        ${isGoogleSignup ? 'Complete seu Cadastro' : 'Criar Conta'}
+                        ${isGoogleSignup ? 'Complete seu Cadastro' : 
+                          isGuardian ? 'Criar Conta de Responsável' : 'Criar Conta'}
                     </h1>
                     <p class="text-gray-600">
-                        ${isGoogleSignup ? 'Só mais algumas informações e você estará pronto!' : 'Junte-se a centenas de alunos que já estão aprendendo!'}
+                        ${isGoogleSignup ? 'Só mais algumas informações e você estará pronto!' : 
+                          isGuardian ? 'Cadastre-se para acompanhar o desenvolvimento do seu estudante' :
+                          'Junte-se a centenas de alunos que já estão aprendendo!'}
                     </p>
                 </div>
 
@@ -145,44 +179,170 @@ export default function CadastroPage() {
                             </div>
                         </div>
 
-                        <!-- Responsável (Opcional) -->
-                        <div class="border-t pt-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                <i class="fas fa-user-shield mr-2 text-teal-500"></i>
-                                Responsável (Opcional)
-                            </h3>
-                            <p class="text-sm text-gray-600 mb-4">
-                                Caso você seja menor de idade ou queira que um responsável acompanhe seu progresso
-                            </p>
-                            
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="nome-responsavel" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Nome do Responsável
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        id="nome-responsavel" 
-                                        name="nome-responsavel" 
-                                        class="input-field"
-                                        placeholder="Maria Silva"
-                                    >
-                                </div>
+                        ${isGuardian ? `
+                            <!-- Opções para Responsáveis -->
+                            <div class="border-t pt-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-link mr-2 text-purple-500"></i>
+                                    Configurar Estudante
+                                </h3>
+                                
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-3">
+                                            Como você quer configurar o estudante? *
+                                        </label>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                                <input 
+                                                    type="radio" 
+                                                    name="student-option" 
+                                                    value="existing" 
+                                                    class="mr-3"
+                                                    onchange="toggleStudentOptions()"
+                                                    checked
+                                                >
+                                                <div>
+                                                    <div class="font-medium">Vincular a um estudante existente</div>
+                                                    <div class="text-sm text-gray-500">O estudante já possui uma conta</div>
+                                                </div>
+                                            </label>
+                                            <label class="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                                <input 
+                                                    type="radio" 
+                                                    name="student-option" 
+                                                    value="create" 
+                                                    class="mr-3"
+                                                    onchange="toggleStudentOptions()"
+                                                >
+                                                <div>
+                                                    <div class="font-medium">Criar uma nova conta de estudante</div>
+                                                    <div class="text-sm text-gray-500">Criar conta e vincular automaticamente</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
 
-                                <div>
-                                    <label for="email-responsavel" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Email do Responsável
-                                    </label>
-                                    <input 
-                                        type="email" 
-                                        id="email-responsavel" 
-                                        name="email-responsavel" 
-                                        class="input-field"
-                                        placeholder="maria@exemplo.com"
-                                    >
+                                    <!-- Opção 1: Vincular estudante existente -->
+                                    <div id="existing-student-fields">
+                                        <div>
+                                            <label for="email-estudante" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Email do Estudante *
+                                            </label>
+                                            <input 
+                                                type="email" 
+                                                id="email-estudante" 
+                                                name="email-estudante" 
+                                                class="input-field"
+                                                placeholder="estudante@exemplo.com"
+                                            >
+                                            <p class="text-sm text-gray-500 mt-1">
+                                                <i class="fas fa-info-circle mr-1"></i>
+                                                Informe o email do estudante existente que você deseja acompanhar
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Opção 2: Criar novo estudante -->
+                                    <div id="new-student-fields" style="display: none;" class="space-y-4 p-4 bg-blue-50 rounded-lg border">
+                                        <h4 class="font-medium text-gray-800 flex items-center">
+                                            <i class="fas fa-user-plus mr-2 text-blue-500"></i>
+                                            Dados do novo estudante
+                                        </h4>
+                                        
+                                        <div>
+                                            <label for="nome-estudante" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Nome completo do estudante *
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                id="nome-estudante" 
+                                                name="nome-estudante" 
+                                                class="input-field"
+                                                placeholder="Maria Silva"
+                                            >
+                                        </div>
+
+                                        <div>
+                                            <label for="email-novo-estudante" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Email do estudante *
+                                            </label>
+                                            <input 
+                                                type="email" 
+                                                id="email-novo-estudante" 
+                                                name="email-novo-estudante" 
+                                                class="input-field"
+                                                placeholder="maria@exemplo.com"
+                                            >
+                                        </div>
+
+                                        <div>
+                                            <label for="senha-estudante" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Senha do estudante *
+                                            </label>
+                                            <input 
+                                                type="password" 
+                                                id="senha-estudante" 
+                                                name="senha-estudante" 
+                                                class="input-field"
+                                                placeholder="Senha do estudante"
+                                            >
+                                        </div>
+
+                                        <div>
+                                            <label for="data-nascimento-estudante" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Data de nascimento do estudante *
+                                            </label>
+                                            <input 
+                                                type="date" 
+                                                id="data-nascimento-estudante" 
+                                                name="data-nascimento-estudante" 
+                                                class="input-field"
+                                            >
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        ` : `
+                            <!-- Responsável (Opcional - Para Estudantes) -->
+                            <div class="border-t pt-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-user-shield mr-2 text-teal-500"></i>
+                                    Responsável (Opcional)
+                                </h3>
+                                <p class="text-sm text-gray-600 mb-4">
+                                    Caso você seja menor de idade ou queira que um responsável acompanhe seu progresso
+                                </p>
+                                
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="nome-responsavel" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Nome do Responsável
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            id="nome-responsavel" 
+                                            name="nome-responsavel" 
+                                            class="input-field"
+                                            placeholder="Maria Silva"
+                                        >
+                                    </div>
+
+                                    <div>
+                                        <label for="email-responsavel" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Email do Responsável
+                                        </label>
+                                        <input 
+                                            type="email" 
+                                            id="email-responsavel" 
+                                            name="email-responsavel" 
+                                            class="input-field"
+                                            placeholder="maria@exemplo.com"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        `}
 
                         <!-- Termos -->
                         <div class="border-t pt-6">
@@ -294,13 +454,17 @@ export function setup() {
                 userState.user = api.user;
 
                 showCustomAlert(
-                    `Cadastro realizado com sucesso! Agora vamos personalizar sua experiência.`, 
-                    "Bem-vindo(a) ao Lumind! 🎉", 
+                    `Cadastro realizado com sucesso! Bem-vindo(a) ao Lumind!`, 
+                    "Cadastro Concluído! 🎉", 
                     "success"
                 );
                 
                 setTimeout(() => {
-                    window.router.navigate('/questionario');
+                    if (userState.user.user_type === 'guardian') {
+                        window.router.navigate('/acompanhamento');
+                    } else {
+                        window.router.navigate('/questionario');
+                    }
                 }, 1500);
             } catch (error) {
                 showCustomAlert(error.message || 'Erro ao criar conta', "Erro no Cadastro", "error");
@@ -308,5 +472,30 @@ export function setup() {
                 loading.style.display = 'none';
             }
         });
+    }
+
+    window.toggleStudentOptions = function() {
+        const existingOption = document.querySelector('input[name="student-option"][value="existing"]');
+        const createOption = document.querySelector('input[name="student-option"][value="create"]');
+        const existingFields = document.getElementById('existing-student-fields');
+        const newFields = document.getElementById('new-student-fields');
+        
+        if (createOption && createOption.checked) {
+            existingFields.style.display = 'none';
+            newFields.style.display = 'block';
+            document.getElementById('email-estudante').removeAttribute('required');
+            document.getElementById('nome-estudante').setAttribute('required', '');
+            document.getElementById('email-novo-estudante').setAttribute('required', '');
+            document.getElementById('senha-estudante').setAttribute('required', '');
+            document.getElementById('data-nascimento-estudante').setAttribute('required', '');
+        } else {
+            existingFields.style.display = 'block';
+            newFields.style.display = 'none';
+            document.getElementById('email-estudante').setAttribute('required', '');
+            document.getElementById('nome-estudante').removeAttribute('required');
+            document.getElementById('email-novo-estudante').removeAttribute('required');
+            document.getElementById('senha-estudante').removeAttribute('required');
+            document.getElementById('data-nascimento-estudante').removeAttribute('required');
+        }
     }
 }

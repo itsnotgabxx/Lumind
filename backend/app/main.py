@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routers import auth_router, content_router, message_router, ml_router
+from app.api.routers import auth_router, content_router, message_router  # , ml_router
 from app.core.config import settings
 from app.db.database import engine
 from app.models import user_model, content_model
@@ -35,7 +35,7 @@ content_model.Base.metadata.create_all(bind=engine)
 app.include_router(auth_router.router, prefix="/api/users", tags=["users"])
 app.include_router(content_router.router, prefix="/api", tags=["content"])
 app.include_router(message_router.router, prefix="/api/messages", tags=["messages"])
-app.include_router(ml_router.router, prefix="/api/ml", tags=["machine-learning"])
+# app.include_router(ml_router.router, prefix="/api/ml", tags=["machine-learning"])
 
 @app.get("/")
 async def root():

@@ -170,7 +170,7 @@ export function setup() {
     
     if (btnLogin) {
         btnLogin.addEventListener('click', () => {
-            window.router.navigate('/login');
+            window.router.navigate('/login-type');
         });
     }
 
