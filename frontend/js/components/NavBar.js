@@ -256,13 +256,6 @@ export class NavBar {
                             <i class="fas fa-chart-bar w-5"></i>
                             <span>Estatísticas</span>
                         </a>
-                        <a href="/acompanhamento" 
-                           class="dropdown-menu-item" 
-                           role="menuitem" 
-                           data-link>
-                            <i class="fas fa-user-shield w-5"></i>
-                            <span>Área do Responsável</span>
-                        </a>
                     </div>
                     <div class="border-t">
                         <button id="logout-button" 
