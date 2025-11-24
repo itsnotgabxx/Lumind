@@ -57,9 +57,58 @@ def create_user(db: Session, user: UserCreate) -> User:
             if student.user_type != "student":
                 raise ValueError(f"O email informado não pertence a um estudante")
             student_id = student.id
-            print(f"� [GUARDIAN_LINK] Responsável será vinculado ao estudante ID {student_id} ({student.full_name})")
+            print(f"🔗 [GUARDIAN_LINK] Responsável será vinculado ao estudante ID {student_id} ({student.full_name})")
         else:
             raise ValueError("Para responsáveis, deve ser informado um email de estudante existente ou dados para criar novo estudante")
+    
+    elif user.user_type == "student":
+
+        if user.create_guardian:
+            print(f"👨‍👩‍👧 [CREATE_GUARDIAN] Criando nova conta de responsável: {user.create_guardian.full_name}")
+            
+            existing_guardian = get_user_by_email(db, user.create_guardian.email)
+            if existing_guardian:
+                raise ValueError(f"Já existe um usuário com o email '{user.create_guardian.email}'")
+            
+            temp_student = User(
+                full_name=user.full_name,
+                email=user.email,
+                password=user.password,
+                user_type="student",
+                birth_date=user.birth_date,
+                guardian_name=user.guardian_name,
+                guardian_email=user.guardian_email,
+                student_id=None,
+                learning_preferences=learning_preferences_json,
+                interests=interests_json,
+                distractions=user.distractions,
+                firebase_uid=getattr(user, 'firebase_uid', None)
+            )
+            db.add(temp_student)
+            db.commit()
+            db.refresh(temp_student)
+            student_id = temp_student.id
+            
+            guardian = User(
+                full_name=user.create_guardian.full_name,
+                email=user.create_guardian.email,
+                password=user.create_guardian.password,
+                user_type="guardian",
+                birth_date=user.create_guardian.birth_date,
+                guardian_name=None,
+                guardian_email=None,
+                student_id=student_id,
+                learning_preferences=None,
+                interests=None,
+                distractions=None,
+                firebase_uid=None
+            )
+            db.add(guardian)
+            db.commit()
+            db.refresh(guardian)
+            print(f"✅ [GUARDIAN_CREATED] Responsável criado: {guardian.full_name} (ID: {guardian.id}) para estudante ID {student_id}")
+            
+            return temp_student
     
     db_user = User(
         full_name=user.full_name,

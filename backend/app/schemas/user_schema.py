@@ -51,11 +51,18 @@ class StudentCreate(BaseModel):
     password: str
     birth_date: Optional[datetime] = None
 
+class GuardianCreate(BaseModel):
+    full_name: str
+    email: EmailStr
+    password: str
+    birth_date: Optional[datetime] = None
+
 class UserCreate(UserBase):
     password: str
     firebase_uid: Optional[str] = None
-    student_email: Optional[str] = None  # 👈 NOVO CAMPO: Email do estudante (para responsáveis)
-    create_student: Optional[StudentCreate] = None  # 👈 NOVO CAMPO: Dados para criar estudante
+    student_email: Optional[str] = None
+    create_student: Optional[StudentCreate] = None
+    create_guardian: Optional[GuardianCreate] = None
 
 
 class UserResponse(UserBase):

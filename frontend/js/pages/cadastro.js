@@ -42,6 +42,20 @@ function formDataToUserCreate(formData, googleData = null) {
         } else {
             userData.student_email = formData.get('email-estudante');
         }
+    } else {
+        const nomeResponsavel = formData.get('nome-responsavel')?.trim();
+        const emailResponsavel = formData.get('email-responsavel')?.trim();
+        const senhaResponsavel = formData.get('senha-responsavel')?.trim();
+        const dataNascimentoResponsavel = formData.get('data-nascimento-responsavel')?.trim();
+        
+        if (nomeResponsavel && emailResponsavel && senhaResponsavel && dataNascimentoResponsavel) {
+            userData.create_guardian = {
+                full_name: nomeResponsavel,
+                email: emailResponsavel,
+                password: senhaResponsavel,
+                birth_date: new Date(dataNascimentoResponsavel).toISOString(),
+            };
+        }
     }
 
     if (googleData) {
@@ -308,13 +322,14 @@ export default function CadastroPage() {
                             <div class="border-t pt-6">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                     <i class="fas fa-user-shield mr-2 text-teal-500"></i>
-                                    Responsável (Opcional)
+                                    Dados do Responsável (Opcional)
                                 </h3>
-                                <p class="text-sm text-gray-600 mb-4">
-                                    Caso você seja menor de idade ou queira que um responsável acompanhe seu progresso
+                                <p class="text-sm text-gray-600 mb-6">
+                                    <i class="fas fa-info-circle mr-2 text-teal-600"></i>
+                                    Preencha todos os campos abaixo para criar uma conta de responsável que poderá acompanhar seu progresso. Deixe em branco se não desejar.
                                 </p>
                                 
-                                <div class="space-y-4">
+                                <div class="space-y-4 p-4 bg-teal-50 rounded-lg border border-teal-200">
                                     <div>
                                         <label for="nome-responsavel" class="block text-sm font-medium text-gray-700 mb-2">
                                             Nome do Responsável
@@ -324,7 +339,7 @@ export default function CadastroPage() {
                                             id="nome-responsavel" 
                                             name="nome-responsavel" 
                                             class="input-field"
-                                            placeholder="Maria Silva"
+                                            placeholder="Ex: Maria Silva"
                                         >
                                     </div>
 
@@ -338,6 +353,34 @@ export default function CadastroPage() {
                                             name="email-responsavel" 
                                             class="input-field"
                                             placeholder="maria@exemplo.com"
+                                        >
+                                    </div>
+
+                                    <div>
+                                        <label for="senha-responsavel" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Senha do Responsável
+                                        </label>
+                                        <input 
+                                            type="password" 
+                                            id="senha-responsavel" 
+                                            name="senha-responsavel" 
+                                            class="input-field"
+                                            placeholder="Crie uma senha segura"
+                                        >
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            O responsável usará este email e senha para fazer login
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <label for="data-nascimento-responsavel" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Data de Nascimento do Responsável
+                                        </label>
+                                        <input 
+                                            type="date" 
+                                            id="data-nascimento-responsavel" 
+                                            name="data-nascimento-responsavel" 
+                                            class="input-field"
                                         >
                                     </div>
                                 </div>
