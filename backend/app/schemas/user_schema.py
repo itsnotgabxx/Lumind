@@ -64,7 +64,6 @@ class UserCreate(UserBase):
     create_student: Optional[StudentCreate] = None
     create_guardian: Optional[GuardianCreate] = None
 
-
 class UserResponse(UserBase):
     id: int
     is_active: bool

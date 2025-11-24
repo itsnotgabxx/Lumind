@@ -16,15 +16,6 @@ export default function RecomendacaoPage() {
                             Continue de onde parou ou explore novos conteúdos personalizados para você
                         </p>
                     </div>
-                    
-                    <div class="flex flex-wrap gap-2">
-                        <button data-route="/progresso" class="btn-subtle text-sm px-4 py-2 border-green-300 text-green-700 hover:bg-green-50">
-                            <i class="fas fa-chart-line mr-2"></i>Progresso
-                        </button>
-                        <button data-route="/acompanhamento" class="btn-subtle text-sm px-4 py-2 border-teal-300 text-teal-700 hover:bg-teal-50">
-                            <i class="fas fa-user-shield mr-2"></i>Responsável
-                        </button>
-                    </div>
                 </div>
             </div>
 
