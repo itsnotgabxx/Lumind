@@ -4,13 +4,14 @@ from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.colors import HexColor, white
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from sqlalchemy.orm import Session
 from app.models.user_model import User
-from app.models.interaction_model import Interaction
+from app.models.interaction_model import UserInteraction
 from app.models.content_model import Content
 from sqlalchemy import func
+import json
 
 def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str = None) -> BytesIO:
     """
@@ -97,15 +98,14 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
     # ===== ESTATÍSTICAS GERAIS =====
     elements.append(Paragraph("ESTATÍSTICAS GERAIS", heading_style))
     
-    # Calcula estatísticas
-    interactions = db.query(Interaction).filter(Interaction.user_id == student_id).all()
+    # Calcula estatísticas baseadas nas interações do usuário
+    interactions = db.query(UserInteraction).filter(UserInteraction.user_id == student_id).all()
     
-    total_time_spent = sum([i.time_spent for i in interactions if i.time_spent]) or 0
-    completed_interactions = len([i for i in interactions if i.completed])
+    # Conta interações por tipo
+    completed_count = len([i for i in interactions if i.interaction_type == 'complete'])
+    view_count = len([i for i in interactions if i.interaction_type == 'view'])
+    click_count = len([i for i in interactions if i.interaction_type == 'click'])
     total_interactions = len(interactions)
-    
-    hours = total_time_spent // 60
-    minutes = total_time_spent % 60
     
     # Calcula sequência de dias
     today = datetime.now().date()
@@ -120,9 +120,9 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
             break
     
     stats_data = [
-        ["<b>Tempo Total de Estudo:</b>", f"{hours}h {minutes}min"],
-        ["<b>Atividades Concluídas:</b>", f"{completed_interactions} de {total_interactions}"],
-        ["<b>Taxa de Conclusão:</b>", f"{int((completed_interactions / total_interactions * 100) if total_interactions > 0 else 0)}%"],
+        ["<b>Interações Totais:</b>", f"{total_interactions}"],
+        ["<b>Conteúdos Concluídos:</b>", f"{completed_count}"],
+        ["<b>Conteúdos Visualizados:</b>", f"{view_count}"],
         ["<b>Sequência Atual:</b>", f"{streak} dias consecutivos"],
     ]
     
@@ -142,30 +142,34 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
     # ===== ÚLTIMAS ATIVIDADES =====
     elements.append(Paragraph("ÚLTIMAS ATIVIDADES", heading_style))
     
-    # Busca últimas atividades (últimas 10)
-    recent_interactions = db.query(Interaction).filter(
-        Interaction.user_id == student_id
-    ).order_by(Interaction.created_at.desc()).limit(10).all()
+    # Busca últimas interações (últimas 10)
+    recent_interactions = db.query(UserInteraction).filter(
+        UserInteraction.user_id == student_id
+    ).order_by(UserInteraction.created_at.desc()).limit(10).all()
     
     if recent_interactions:
-        activities_data = [["<b>Atividade</b>", "<b>Status</b>", "<b>Tempo (min)</b>", "<b>Data</b>"]]
+        activities_data = [["<b>Conteúdo</b>", "<b>Tipo</b>", "<b>Data</b>"]]
         
         for interaction in recent_interactions:
             content = db.query(Content).filter(Content.id == interaction.content_id).first()
-            content_title = content.title if content else "Atividade"
+            content_title = content.title if content else "Conteúdo"
             
-            status = "✓ Concluída" if interaction.completed else "Em Andamento"
-            time_spent = f"{interaction.time_spent}" if interaction.time_spent else "-"
-            date = interaction.created_at.strftime("%d/%m/%Y")
+            interaction_type_label = {
+                'complete': '✓ Concluído',
+                'view': '👁️ Visualizado',
+                'click': '🖱️ Clicado',
+                'error': '⚠️ Erro'
+            }.get(interaction.interaction_type, interaction.interaction_type)
+            
+            date = interaction.created_at.strftime("%d/%m/%Y %H:%M")
             
             activities_data.append([
                 content_title[:40] + "..." if len(content_title) > 40 else content_title,
-                status,
-                time_spent,
+                interaction_type_label,
                 date
             ])
         
-        activities_table = Table(activities_data, colWidths=[2.5*inch, 1.5*inch, 1*inch, 1.5*inch])
+        activities_table = Table(activities_data, colWidths=[2.5*inch, 1.5*inch, 2*inch])
         activities_table.setStyle(TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
