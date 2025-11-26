@@ -130,7 +130,9 @@ export class NavBar {
             <a href="/mensagens" 
                class="desktop-nav-link relative ${this.isActive('/mensagens')}" 
                data-link>
-                <i class="fas fa-envelope"></i>
+                <i class="fas fa-envelope relative">
+                    <span id="unread-badge" class="hidden absolute -top-2 -right-2 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full w-2.5 h-2.5 border-2 border-white shadow-lg"></span>
+                </i>
                 <span>Mensagens</span>
             </a>
         `;
@@ -199,9 +201,11 @@ export class NavBar {
                 <span>Companheiros</span>
             </a>
             <a href="/mensagens" 
-               class="mobile-nav-link ${this.isActive('/mensagens')}" 
+               class="mobile-nav-link relative ${this.isActive('/mensagens')}" 
                data-link>
-                <i class="fas fa-envelope w-6"></i>
+                <i class="fas fa-envelope w-6 relative">
+                    <span id="unread-badge-mobile" class="hidden absolute -top-1 -right-1 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full w-2.5 h-2.5 border-2 border-white shadow-lg"></span>
+                </i>
                 <span>Mensagens</span>
             </a>
         `;

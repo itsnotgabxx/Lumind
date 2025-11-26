@@ -1,5 +1,6 @@
 import { showCustomAlert } from '../utils/alert.js';
 import { userState } from '../utils/userState.js';
+import { resetUnreadCount, updateNotificationBadges } from '../utils/notifications.js';
 
 export default function MensagensPage() {
     return `
@@ -52,7 +53,7 @@ export default function MensagensPage() {
     `;
 }
 
-export function setup() {
+export async function setup() {
     const user = userState.user;
     if (!user) {
         window.router.navigate('/login');
@@ -64,6 +65,10 @@ export function setup() {
         window.router.navigate('/acompanhamento');
         return;
     }
+
+    // Reset contador de mensagens não lidas e atualiza badges
+    resetUnreadCount();
+    await updateNotificationBadges();
 
     document.querySelector('[data-route="/recomendacao"]').addEventListener('click', () => {
         window.router.navigate('/recomendacao');
@@ -91,9 +96,31 @@ export function setup() {
                 </div>
             `;
 
-            const messages = await api.getReceivedMessages('incentive');
+            // Buscar todas as mensagens (sem filtro de tipo)
+            let allMessages = [];
+            
+            try {
+                // Buscar mensagens de incentivo
+                const incentiveMessages = await api.getReceivedMessages('incentive');
+                allMessages = [...incentiveMessages];
+            } catch (e) {
+                console.log('Erro ao buscar mensagens de incentivo:', e);
+            }
 
-            if (!messages || messages.length === 0) {
+            try {
+                // Buscar mensagens de chat
+                const chatMessages = await api.getReceivedMessages('general');
+                allMessages = [...allMessages, ...chatMessages];
+            } catch (e) {
+                console.log('Erro ao buscar mensagens de chat:', e);
+            }
+
+            // Ordenar por data
+            allMessages.sort((a, b) => {
+                return new Date(b.created_at) - new Date(a.created_at);
+            });
+
+            if (!allMessages || allMessages.length === 0) {
                 container.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
@@ -101,9 +128,9 @@ export function setup() {
 
             emptyState.classList.add('hidden');
 
-            let filtered = messages;
+            let filtered = allMessages;
             if (currentFilter === 'unread') {
-                filtered = messages.filter(m => !m.is_read);
+                filtered = allMessages.filter(m => !m.is_read);
             }
 
             if (filtered.length === 0) {
@@ -128,16 +155,25 @@ export function setup() {
                     minute: '2-digit'
                 });
 
-                // Extrai emoji se houver
-                const emojiMatch = msg.message.match(/[\p{Emoji}]/u);
-                const emoji = emojiMatch ? emojiMatch[0] : '💬';
+                // Determina o tipo de mensagem
+                const isFromFriend = msg.message_type === 'general';
+                const messageTypeLabel = isFromFriend 
+                    ? '<span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">💜 Amigo</span>'
+                    : '<span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">👥 Responsável</span>';
+
+                // Define emoji baseado no tipo
+                const emoji = isFromFriend ? '👤' : '💜';
+
+                const borderColor = isFromFriend ? 'border-blue-400' : 'border-purple-400';
+                const gradientColor = isFromFriend ? 'from-blue-500 to-cyan-500' : 'from-purple-500 to-pink-500';
 
                 return `
-                    <div class="message-card card bg-white border-l-4 border-purple-400 hover:shadow-lg transition-all group cursor-pointer" data-msg-id="${msg.id}" data-read="${msg.is_read}">
+                    <div class="message-card card bg-white border-l-4 ${borderColor} hover:shadow-lg transition-all group cursor-pointer relative" data-msg-id="${msg.id}" data-read="${msg.is_read}">
+                        ${!msg.is_read ? '<div class="absolute top-3 right-3 w-3 h-3 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full shadow-lg"></div>' : ''}
                         <div class="flex gap-4">
                             <!-- Avatar -->
                             <div class="flex-shrink-0">
-                                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                <div class="w-12 h-12 bg-gradient-to-br ${gradientColor} rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                                     <span class="text-2xl">${emoji}</span>
                                 </div>
                             </div>
@@ -145,15 +181,16 @@ export function setup() {
                             <!-- Conteúdo -->
                             <div class="flex-grow min-w-0">
                                 <div class="flex items-start justify-between gap-2 mb-2">
-                                    <div>
-                                        <h3 class="font-semibold text-gray-800">
-                                            ${msg.sender?.full_name || 'Amigo'}
-                                            ${!msg.is_read ? '<span class="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full"></span>' : ''}
-                                        </h3>
-                                        <p class="text-xs text-gray-500">${formattedDate} às ${formattedTime}</p>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <h3 class="font-semibold text-gray-800">
+                                                ${msg.sender?.full_name || 'Amigo'}
+                                            </h3>
+                                            ${messageTypeLabel}
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">${formattedDate} às ${formattedTime}</p>
                                     </div>
                                     <div class="flex-shrink-0 flex gap-1">
-                                        ${!msg.is_read ? '<i class="fas fa-star text-blue-500"></i>' : ''}
                                     </div>
                                 </div>
 
@@ -167,6 +204,11 @@ export function setup() {
                                             <i class="fas fa-check mr-1"></i>Marcar como lida
                                         </button>
                                     ` : ''}
+                                    ${isFromFriend ? `
+                                        <button class="reply-btn text-xs btn-primary py-1 px-3" data-peer-id="${msg.sender?.id || msg.sender_id || ''}">
+                                            <i class="fas fa-reply mr-1"></i>Responder
+                                        </button>
+                                    ` : ''}
                                 </div>
                             </div>
                         </div>
@@ -178,16 +220,27 @@ export function setup() {
             document.querySelectorAll('.mark-read-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     e.stopPropagation();
-                    const card = e.closest('.message-card');
+                    const card = e.currentTarget.closest('.message-card');
                     const msgId = card.dataset.msgId;
 
                     try {
                         await api.markMessageAsRead(msgId);
                         card.dataset.read = 'true';
+                        await updateNotificationBadges();
                         loadMessages();
                     } catch (error) {
-                        showCustomAlert('Erro ao marcar como lida', 'Erro', 'error');
+                        console.error('Erro ao marcar como lida:', error);
+                        showCustomAlert('Erro ao marcar como lida', 'error');
                     }
+                });
+            });
+
+            // Event listeners para responder
+            document.querySelectorAll('.reply-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const peerId = btn.getAttribute('data-peer-id');
+                    window.router.navigate(`/chat/${peerId}`);
                 });
             });
 
@@ -198,6 +251,7 @@ export function setup() {
                         try {
                             await api.markMessageAsRead(msgId);
                             card.dataset.read = 'true';
+                            await updateNotificationBadges();
                             loadMessages();
                         } catch (error) {
                             console.error('Erro:', error);

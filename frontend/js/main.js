@@ -3,6 +3,7 @@ import { routes } from './config/routes.js';
 import { api } from './api.js';
 import { userState } from './utils/userState.js';
 import { setupAlertCloseListener } from './utils/alert.js';
+import { startNotifications, stopNotifications } from './utils/notifications.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Inicializa o listener do modal de alerta
@@ -19,4 +20,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Inicializa o roteador
     router.init();
+
+    // Monitora mudanças de usuário e controla notificações
+    userState.subscribe((user) => {
+        if (user && user.user_type === 'student') {
+            startNotifications();
+        } else {
+            stopNotifications();
+        }
+    });
+
+    // Para notificações ao sair
+    window.addEventListener('beforeunload', () => {
+        stopNotifications();
+    });
 });

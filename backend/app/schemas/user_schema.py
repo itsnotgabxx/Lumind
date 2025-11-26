@@ -164,6 +164,13 @@ class MessageCreate(BaseModel):
     message: str
     message_type: str = "incentive"  # incentive, support, general
 
+class UserMinimal(BaseModel):
+    id: int
+    full_name: str
+    
+    class Config:
+        from_attributes = True
+
 class MessageResponse(BaseModel):
     id: int
     sender_id: int
@@ -172,3 +179,7 @@ class MessageResponse(BaseModel):
     message_type: str
     created_at: datetime
     is_read: bool = False
+    sender: UserMinimal = None
+    
+    class Config:
+        from_attributes = True

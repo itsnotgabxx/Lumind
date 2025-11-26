@@ -179,6 +179,11 @@ class LumindAPI {
         return await this.request(`/users/${userId}`);
     }
 
+    async getUnreadMessagesCount() {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/messages/users/${this.user.id}/unread-count`);
+    }
+
     // Busca atividades do estudante vinculado (para responsáveis)
     async getStudentActivities(studentId) {
         if (!this.user) throw new Error("Usuário não logado.");
