@@ -80,20 +80,23 @@ async function loadPeers() {
             return;
         }
 
-        // Buscar peers de cada conteúdo
-        const allPeers = new Map(); // Usar Map para evitar duplicatas
+        // Buscar informações de conteúdo para pegar títulos
+        const allContent = await api.getContent();
+        const contentMap = new Map();
+        allContent.forEach(c => contentMap.set(c.id, c));
+
+        // Buscar peers de cada conteúdo e agrupar por atividade
+        const peersGroupedByContent = new Map();
 
         for (const contentId of activeContents) {
             try {
                 const peersData = await api.getContentPeers(contentId);
-                if (peersData.peers) {
-                    peersData.peers.forEach(peer => {
-                        if (!allPeers.has(peer.id)) {
-                            allPeers.set(peer.id, {
-                                ...peer,
-                                contentId: contentId
-                            });
-                        }
+                const contentTitle = contentMap.get(contentId)?.title || `Conteúdo ${contentId}`;
+                
+                if (peersData.peers && peersData.peers.length > 0) {
+                    peersGroupedByContent.set(contentId, {
+                        title: contentTitle,
+                        peers: peersData.peers
                     });
                 }
             } catch (e) {
@@ -101,9 +104,7 @@ async function loadPeers() {
             }
         }
 
-        const peers = Array.from(allPeers.values());
-
-        if (peers.length === 0) {
+        if (peersGroupedByContent.size === 0) {
             container.innerHTML = '';
             emptyState.classList.remove('hidden');
             return;
@@ -117,47 +118,69 @@ async function loadPeers() {
             'not_started': { emoji: '⭕', label: 'Iniciando', color: 'gray' }
         };
 
-        container.innerHTML = peers.map(peer => {
-            const status = statusEmoji[peer.status] || statusEmoji['not_started'];
-            const progressColor = peer.progress >= 75 ? 'bg-green-500' : 
-                                peer.progress >= 50 ? 'bg-yellow-500' : 
-                                peer.progress >= 25 ? 'bg-orange-500' : 'bg-gray-300';
-
-            return `
-                <div class="card bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 hover:shadow-xl transition-all">
-                    <!-- Avatar e Nome -->
+        // Renderizar agrupado por conteúdo
+        let html = '';
+        
+        peersGroupedByContent.forEach((group, contentId) => {
+            html += `
+                <div class="col-span-full mb-8">
+                    <!-- Título do Conteúdo -->
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                            ${peer.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-bold text-gray-800 truncate">${peer.name}</h3>
-                            <p class="text-xs text-gray-600 flex items-center gap-1">
-                                <span>${status.emoji}</span>
-                                <span>${status.label}</span>
-                            </p>
-                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800">${group.title}</h2>
+                        <span class="bg-purple-100 text-purple-800 text-sm font-semibold px-3 py-1 rounded-full">
+                            ${group.peers.length} ${group.peers.length === 1 ? 'estudante' : 'estudantes'}
+                        </span>
                     </div>
 
-                    <!-- Barra de Progresso -->
-                    <div class="mb-4">
-                        <div class="flex justify-between text-xs text-gray-600 mb-1">
-                            <span>Progresso</span>
-                            <span class="font-bold">${peer.progress}%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                            <div class="${progressColor} h-full transition-all duration-300" style="width: ${peer.progress}%"></div>
-                        </div>
-                    </div>
+                    <!-- Grid de Peers para este Conteúdo -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${group.peers.map(peer => {
+                            const status = statusEmoji[peer.status] || statusEmoji['not_started'];
+                            const progressColor = peer.progress >= 75 ? 'bg-green-500' : 
+                                                peer.progress >= 50 ? 'bg-yellow-500' : 
+                                                peer.progress >= 25 ? 'bg-orange-500' : 'bg-gray-300';
 
-                    <!-- Botão de Chat -->
-                    <button class="peer-chat-btn w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-3 rounded-lg transition-all hover:shadow-lg flex items-center justify-center gap-2" data-peer-id="${peer.id}">
-                        <i class="fas fa-comment-dots"></i>
-                        <span>Iniciar Conversa</span>
-                    </button>
+                            return `
+                                <div class="card bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 hover:shadow-xl transition-all">
+                                    <!-- Avatar e Nome -->
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                                            ${peer.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div class="flex-1">
+                                            <h3 class="font-bold text-gray-800 truncate">${peer.name}</h3>
+                                            <p class="text-xs text-gray-600 flex items-center gap-1">
+                                                <span>${status.emoji}</span>
+                                                <span>${status.label}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Barra de Progresso -->
+                                    <div class="mb-4">
+                                        <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                            <span>Progresso</span>
+                                            <span class="font-bold">${peer.progress}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                            <div class="${progressColor} h-full transition-all duration-300" style="width: ${peer.progress}%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botão de Chat -->
+                                    <button class="peer-chat-btn w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-3 rounded-lg transition-all hover:shadow-lg flex items-center justify-center gap-2" data-peer-id="${peer.id}">
+                                        <i class="fas fa-comment-dots"></i>
+                                        <span>Iniciar Conversa</span>
+                                    </button>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
                 </div>
             `;
-        }).join('');
+        });
+
+        container.innerHTML = html;
 
         // Event listeners para botões
         document.querySelectorAll('.peer-chat-btn').forEach(btn => {
