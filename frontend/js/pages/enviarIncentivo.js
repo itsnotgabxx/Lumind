@@ -3,28 +3,107 @@ import { userState } from '../utils/userState.js';
 
 export default function EnviarIncentivoPage() {
     return `
-        <div class="items-start pt-8 w-full">
-            <div class="container mx-auto px-4 max-w-lg w-full">
-                <div class="flex flex-col text-center sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
-                    <h1 class="screen-title sm:text-left order-2 sm:order-1 flex-grow"><i class="fas fa-gift mr-2 text-purple-500"></i>Enviar Incentivo</h1>
-                    <button data-route="/acompanhamento" class="btn-subtle text-sm order-1 sm:order-2 w-full sm:w-auto"><i class="fas fa-arrow-left mr-2"></i> Voltar</button>
+        <div class="w-full min-h-screen py-8">
+            <div class="container mx-auto px-4 max-w-2xl">
+                <!-- Header -->
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">
+                            Enviar Incentivo
+                        </h1>
+                        <p id="enviar-incentivo-intro" class="text-gray-600 mt-2">Envie uma mensagem positiva para motivar!</p>
+                    </div>
+                    <button data-route="/acompanhamento" class="btn-subtle whitespace-nowrap">
+                        <i class="fas fa-arrow-left mr-2"></i>Voltar
+                    </button>
                 </div>
-                <p id="enviar-incentivo-intro" class="screen-subtitle mb-8 text-center sm:text-left">Envie uma mensagem positiva!</p>
 
-                <div class="card">
-                    <form id="form-enviar-incentivo" action="#" method="POST" class="space-y-4">
-                        <div>
-                            <label for="mensagem-incentivo" class="block text-sm font-medium text-gray-700">Sua mensagem:</label>
-                            <textarea id="mensagem-incentivo" name="mensagem-incentivo" rows="4" class="input-field mt-1" placeholder="Ex: Parabéns pelo seu esforço! Continue assim!"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Envie um sticker:</label>
-                            <div class="mt-2 flex space-x-3 flex-wrap gap-2">
-                                <button type="button" class="text-3xl p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400" title="Estrela"><i class="fas fa-star text-yellow-400"></i></button>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Formulário Principal -->
+                    <div class="lg:col-span-2">
+                        <div class="card">
+                            <form id="form-enviar-incentivo" class="space-y-6">
+                                <!-- Mensagem -->
+                                <div>
+                                    <label for="mensagem-incentivo" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Sua Mensagem
+                                    </label>
+                                    <textarea 
+                                        id="mensagem-incentivo" 
+                                        name="mensagem-incentivo" 
+                                        rows="5" 
+                                        class="input-field w-full resize-none"
+                                        placeholder="Ex: Você está fazendo um ótimo trabalho! Continue com essa dedicação! 🌟"
+                                    ></textarea>
+                                    <p class="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        Máximo 500 caracteres
+                                    </p>
+                                    <div class="mt-2 flex justify-between items-center">
+                                        <div class="text-xs text-gray-600">
+                                            <span id="char-count">0</span>/500 caracteres
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <!-- Emojis/Stickers -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                        Adicione um Emoji
+                                    </label>
+                                    <div class="grid grid-cols-6 sm:grid-cols-8 gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="🌟" title="Estrela">🌟</button>
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="🎉" title="Celebração">🎉</button>
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="👏" title="Palmas">👏</button>
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="💪" title="Força">💪</button>
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="🔥" title="Fogo">🔥</button>
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="❤️" title="Coração">❤️</button>
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="😊" title="Feliz">😊</button>
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="🚀" title="Foguete">🚀</button>
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="✨" title="Brilho">✨</button>
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="🎯" title="Alvo">🎯</button>
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="📚" title="Livros">📚</button>
+                                        <button type="button" class="emoji-btn text-2xl p-2 hover:bg-white rounded-lg transition-all hover:scale-110" data-emoji="🏆" title="Troféu">🏆</button>
+                                    </div>
+                                </div>
+
+                                <!-- Botões -->
+                                <div class="flex gap-3 pt-4">
+                                    <button type="submit" class="flex-1 btn-primary py-3 text-lg font-semibold">
+                                        <i class="fas fa-paper-plane mr-2"></i>Enviar Mensagem
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <button type="submit" class="w-full btn-primary mt-6"><i class="fas fa-paper-plane mr-2"></i>Enviar Mensagem</button>
-                    </form>
+                    </div>
+
+                    <!-- Dicas -->
+                    <div>
+                        <div class="card bg-gradient-to-br from-blue-50 to-teal-50 border-2 border-blue-200">
+                            <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                <i class="fas fa-lightbulb text-amber-500"></i>
+                                Dicas de Incentivo
+                            </h3>
+                            <ul class="space-y-2 text-sm text-gray-700">
+                                <li class="flex items-start gap-2">
+                                    <span class="text-green-500 font-bold mt-1">✓</span>
+                                    <span>Seja específico - mencione o que o estudante fez bem</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-green-500 font-bold mt-1">✓</span>
+                                    <span>Mantenha um tom positivo e motivador</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-green-500 font-bold mt-1">✓</span>
+                                    <span>Use emojis para tornar mais divertido</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-green-500 font-bold mt-1">✓</span>
+                                    <span>Reconheça o esforço, não apenas os resultados</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -38,8 +117,30 @@ export function setup() {
         return;
     }
 
-    // Atualiza texto dinâmico
-    document.getElementById('enviar-incentivo-intro').innerHTML = `Envie uma mensagem positiva para ${user.full_name}!`;
+    // Counter de caracteres
+    const textarea = document.getElementById('mensagem-incentivo');
+    const charCount = document.getElementById('char-count');
+    
+    textarea.addEventListener('input', () => {
+        charCount.textContent = textarea.value.length;
+
+        if (textarea.value.length > 500) {
+            textarea.value = textarea.value.substring(0, 500);
+            charCount.textContent = '500';
+            showCustomAlert("Mensagem atingiu o limite de 500 caracteres", "warning");
+        }
+    });
+
+    // Emojis
+    document.querySelectorAll('.emoji-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const emoji = btn.dataset.emoji;
+            textarea.value += emoji;
+            charCount.textContent = textarea.value.length;
+            textarea.focus();
+        });
+    });
 
     // Botão Voltar
     document.querySelector('[data-route="/acompanhamento"]').addEventListener('click', () => {
@@ -50,19 +151,34 @@ export function setup() {
     document.getElementById('form-enviar-incentivo').addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = document.getElementById('mensagem-incentivo').value;
+        
         if (!msg.trim()) {
-            showCustomAlert("Por favor, escreva uma mensagem.", "Campo Obrigatório", "warning");
+            showCustomAlert("Por favor, escreva uma mensagem.", "warning");
             return;
         }
 
         try {
-            // Envia mensagem para o próprio usuário (simulando responsável enviando)
-            await api.sendMessage(user.id, msg, 'incentive');
-            showCustomAlert(`Mensagem de incentivo enviada para ${user.full_name}!`, "Mensagem Enviada!", "success");
+            let recipient_id;
+            
+            if (user.user_type === 'guardian' && user.student_id) {
+                // Responsável enviando para estudante
+                recipient_id = user.student_id;
+            } else {
+                // Estudante enviando para si mesmo (será visto por responsáveis)
+                recipient_id = user.id;
+            }
+
+            await api.sendMessage(recipient_id, msg, 'incentive');
+            showCustomAlert(`Mensagem de incentivo enviada com sucesso! 🎉`, "success");
             document.getElementById('mensagem-incentivo').value = '';
-            window.router.navigate('/acompanhamento');
+            charCount.textContent = '0';
+            
+            setTimeout(() => {
+                window.router.navigate('/acompanhamento');
+            }, 1500);
         } catch (error) {
-            showCustomAlert("Erro ao enviar mensagem. Tente novamente.", "Erro", "error");
+            console.error('Erro:', error);
+            showCustomAlert(error.message || "Erro ao enviar mensagem. Tente novamente.", "error");
         }
     });
 }

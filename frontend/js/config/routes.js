@@ -1,4 +1,4 @@
-// frontend/js/config/routes.js (O CÓDIGO CORRETO)
+// frontend/js/config/routes.js
 import { authMiddleware, guestMiddleware, studentOnlyMiddleware, guardianOnlyMiddleware } from '../middleware/auth.js';
 
 export const routes = [
@@ -51,7 +51,13 @@ export const routes = [
         title: 'Conteúdo',
         middleware: [studentOnlyMiddleware]
     },
-    // 👥 ROTAS EXCLUSIVAS PARA RESPONSÁVEIS
+    {
+        path: '/mensagens',
+        component: () => import('../pages/mensagens.js'),
+        title: 'Mensagens',
+        middleware: [studentOnlyMiddleware]
+    },
+    // ROTAS PARA RESPONSÁVEIS
     {
         path: '/acompanhamento',
         component: () => import('../pages/acompanhamento.js'),

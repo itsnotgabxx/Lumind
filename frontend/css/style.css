@@ -2090,3 +2090,50 @@ html {
 *:not(.progress-bar-smooth) {
     transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
 }
+
+/* Estilos para Filtros de Mensagens */
+.filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #F3F4F6;
+    color: #6B7280;
+    border: 2px solid transparent;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.filter-btn:hover {
+    background-color: #E5E7EB;
+    color: #374151;
+}
+
+.filter-btn.active {
+    background-color: #8B5CF6;
+    color: white;
+    border-color: #7C3AED;
+}
+
+/* Card de Mensagem */
+.message-card {
+    border: 2px solid #E5E7EB;
+    transition: all 200ms ease;
+}
+
+.message-card:hover {
+    border-color: #C4B5FD;
+    background-color: #FAFAF9;
+}
+
+.message-card[data-read="true"] {
+    opacity: 0.85;
+}
+
+.message-card[data-read="false"] {
+    background-color: #F5F3FF;
+    border-left-color: #8B5CF6 !important;
+}

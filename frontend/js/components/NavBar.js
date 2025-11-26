@@ -121,6 +121,12 @@ export class NavBar {
                 <i class="fas fa-chart-line"></i>
                 <span>Meu Progresso</span>
             </a>
+            <a href="/mensagens" 
+               class="desktop-nav-link relative ${this.isActive('/mensagens')}" 
+               data-link>
+                <i class="fas fa-envelope"></i>
+                <span>Mensagens</span>
+            </a>
         `;
     }
 
@@ -179,6 +185,12 @@ export class NavBar {
                data-link>
                 <i class="fas fa-chart-line w-6"></i>
                 <span>Meu Progresso</span>
+            </a>
+            <a href="/mensagens" 
+               class="mobile-nav-link ${this.isActive('/mensagens')}" 
+               data-link>
+                <i class="fas fa-envelope w-6"></i>
+                <span>Mensagens</span>
             </a>
         `;
     }
