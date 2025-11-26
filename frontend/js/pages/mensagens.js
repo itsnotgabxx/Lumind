@@ -162,10 +162,10 @@ export async function setup() {
                     : '<span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">👥 Responsável</span>';
 
                 // Define emoji baseado no tipo
-                const emoji = isFromFriend ? '👤' : '💜';
+                const emoji = isFromFriend ? '💜' : '👤';
 
-                const borderColor = isFromFriend ? 'border-blue-400' : 'border-purple-400';
-                const gradientColor = isFromFriend ? 'from-blue-500 to-cyan-500' : 'from-purple-500 to-pink-500';
+                const borderColor = isFromFriend ? 'border-purple-400' : 'border-blue-400';
+                const gradientColor = isFromFriend ? 'from-purple-500 to-pink-500' : 'from-blue-500 to-cyan-500';
 
                 return `
                     <div class="message-card card bg-white border-l-4 ${borderColor} hover:shadow-lg transition-all group cursor-pointer relative" data-msg-id="${msg.id}" data-read="${msg.is_read}">
