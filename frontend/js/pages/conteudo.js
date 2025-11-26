@@ -57,6 +57,19 @@ export default async function ConteudoPage({ params }) {
                     </div>
                 </div>
 
+                <div id="peers-section" class="hidden bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-users text-purple-600"></i>
+                        Você não está sozinho!
+                    </h2>
+                    <div id="peers-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="flex items-center justify-center py-8">
+                            <div class="loading-spinner"></div>
+                            <span class="ml-2 text-gray-600">Carregando companheiros...</span>
+                        </div>
+                    </div>
+                </div>
+
                 ${!isCompleted ? `
                     <div class="flex justify-center py-8">
                         <button 
@@ -160,6 +173,16 @@ export async function setup({ params }) {
             setTimeout(() => {
                 initializeGames();
             }, 100);
+        }
+
+        // Carregar companheiros
+        try {
+            const peersData = await api.getContentPeers(contentId);
+            if (peersData.peers && peersData.peers.length > 0) {
+                loadPeers(peersData.peers);
+            }
+        } catch (e) {
+            console.log('Erro ao carregar companheiros:', e);
         }
     } catch (error) {
         console.error('Erro ao carregar conteúdo:', error);
@@ -320,3 +343,53 @@ export async function setup({ params }) {
         clearInterval(autoSaveInterval);
     });
 }
+
+function loadPeers(peers) {
+    const peersSection = document.getElementById('peers-section');
+    const peersContainer = document.getElementById('peers-container');
+
+    if (!peers || peers.length === 0) {
+        peersSection.classList.add('hidden');
+        return;
+    }
+
+    peersSection.classList.remove('hidden');
+
+    const statusEmoji = {
+        'completed': { emoji: '✅', label: 'Concluído', color: 'green' },
+        'in_progress': { emoji: '⏳', label: 'Em Andamento', color: 'blue' },
+        'not_started': { emoji: '⭕', label: 'Não Iniciado', color: 'gray' }
+    };
+
+    peersContainer.innerHTML = peers.map(peer => {
+        const status = statusEmoji[peer.status] || statusEmoji['not_started'];
+        const progressColor = peer.progress >= 75 ? 'bg-green-500' : 
+                            peer.progress >= 50 ? 'bg-yellow-500' : 
+                            peer.progress >= 25 ? 'bg-orange-500' : 'bg-gray-300';
+
+        return `
+            <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border-2 border-purple-200 p-4 hover:shadow-lg transition-all hover:scale-105 flex flex-col">
+                <div class="flex items-start justify-between mb-3 flex-1">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800 truncate">${peer.name}</h4>
+                        <div class="flex items-center gap-1 mt-1">
+                            <span class="text-lg">${status.emoji}</span>
+                            <span class="text-xs font-medium text-gray-600">${status.label}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barra de Progresso -->
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden mb-2">
+                    <div class="${progressColor} h-full transition-all duration-300" style="width: ${peer.progress}%"></div>
+                </div>
+
+                <!-- Percentual -->
+                <div class="text-right">
+                    <span class="text-xs font-bold text-gray-700">${peer.progress}%</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+

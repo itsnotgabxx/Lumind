@@ -120,3 +120,39 @@ async def get_user_daily_activity(
         print(f"   - {day['weekday']} ({day['date']}): {day['time_spent']}min, {day['completed_activities']} completas")
     
     return daily_stats
+
+@router.get("/content/{content_id}/peers")
+async def get_content_peers(
+    content_id: int,
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """Obtém outros alunos que estão acompanhando o mesmo conteúdo"""
+    from app.models.interaction_model import UserInteraction
+    from app.models.user_model import User
+    from app.models.content_model import ActivityProgress
+    
+    # Busca alunos que estão fazendo o mesmo conteúdo
+    peers = db.query(
+        User.id,
+        User.full_name,
+        ActivityProgress.status,
+        ActivityProgress.progress_percentage
+    ).join(
+        ActivityProgress, User.id == ActivityProgress.user_id
+    ).filter(
+        ActivityProgress.content_id == content_id,
+        User.id != user_id,
+        User.user_type == 'student'
+    ).all()
+    
+    result = []
+    for peer in peers:
+        result.append({
+            "id": peer.id,
+            "name": peer.full_name,
+            "status": peer.status,
+            "progress": peer.progress_percentage
+        })
+    
+    return {"peers": result}

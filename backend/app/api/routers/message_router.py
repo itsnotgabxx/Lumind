@@ -96,3 +96,73 @@ async def get_guardian_messages(
     
     messages = get_guardian_messages_for_student(db, student_id)
     return messages
+
+@router.get("/users/{user_id}/conversations/{peer_id}")
+async def get_conversation(
+    user_id: int,
+    peer_id: int,
+    db: Session = Depends(get_db)
+):
+    """Obtém conversa entre dois usuários (mensagens diretas)"""
+    from app.models.content_model import Message
+    
+    # Busca todas as mensagens entre os dois usuários
+    messages = db.query(Message).filter(
+        ((Message.sender_id == user_id) & (Message.recipient_id == peer_id)) |
+        ((Message.sender_id == peer_id) & (Message.recipient_id == user_id)),
+        Message.message_type == 'general'
+    ).order_by(Message.created_at.asc()).all()
+    
+    result = []
+    for msg in messages:
+        result.append({
+            "id": msg.id,
+            "sender_id": msg.sender_id,
+            "sender_name": msg.sender.full_name,
+            "recipient_id": msg.recipient_id,
+            "message": msg.message,
+            "is_read": msg.is_read,
+            "created_at": msg.created_at
+        })
+    
+    return result
+
+@router.get("/users/{user_id}/peers-conversations")
+async def get_peers_conversations(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """Obtém lista de conversas com companheiros (resumo)"""
+    from app.models.content_model import Message, ActivityProgress
+    from app.models.user_model import User
+    
+    # Busca peers que o usuário conversou
+    conversations = db.query(
+        User.id,
+        User.full_name,
+        Message.created_at,
+        Message.message
+    ).join(
+        Message, 
+        (Message.sender_id == User.id) | (Message.recipient_id == User.id)
+    ).filter(
+        Message.message_type == 'general',
+        ((Message.sender_id == user_id) | (Message.recipient_id == user_id))
+    ).filter(
+        User.id != user_id,
+        User.user_type == 'student'
+    ).distinct(User.id).order_by(User.id, Message.created_at.desc()).all()
+    
+    # Remove duplicatas e pega última mensagem
+    seen = {}
+    for conv in conversations:
+        if conv.id not in seen:
+            seen[conv.id] = {
+                "peer_id": conv.id,
+                "peer_name": conv.full_name,
+                "last_message": conv.message[:50] + "..." if len(conv.message) > 50 else conv.message,
+                "last_message_time": conv.created_at
+            }
+    
+    return {"conversations": list(seen.values())}
+

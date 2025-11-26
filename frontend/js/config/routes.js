@@ -57,6 +57,18 @@ export const routes = [
         title: 'Mensagens',
         middleware: [studentOnlyMiddleware]
     },
+    {
+        path: '/companheiros',
+        component: () => import('../pages/companheiros.js'),
+        title: 'Companheiros',
+        middleware: [studentOnlyMiddleware]
+    },
+    {
+        path: '/chat/:peer_id',
+        component: () => import('../pages/chat.js'),
+        title: 'Chat',
+        middleware: [studentOnlyMiddleware]
+    },
     // ROTAS PARA RESPONSÁVEIS
     {
         path: '/acompanhamento',

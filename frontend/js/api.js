@@ -148,6 +148,37 @@ class LumindAPI {
         return await this.request(`/users/${studentId}/daily-activity?days=${days}`);
     }
 
+    async getContentPeers(contentId) {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/content/${contentId}/peers?user_id=${this.user.id}`);
+    }
+
+    async getConversation(peerId) {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/messages/users/${this.user.id}/conversations/${peerId}`);
+    }
+
+    async getPeersConversations() {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/messages/users/${this.user.id}/peers-conversations`);
+    }
+
+    async sendDirectMessage(recipientId, message) {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/messages/users/${this.user.id}/send`, {
+            method: 'POST',
+            body: JSON.stringify({
+                recipient_id: recipientId,
+                message: message,
+                message_type: 'general'
+            })
+        });
+    }
+
+    async getUserById(userId) {
+        return await this.request(`/users/${userId}`);
+    }
+
     // Busca atividades do estudante vinculado (para responsáveis)
     async getStudentActivities(studentId) {
         if (!this.user) throw new Error("Usuário não logado.");
