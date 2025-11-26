@@ -230,7 +230,7 @@ export class NavBar {
                          alt="${this.user.full_name}">
                     <div class="hidden lg:block text-left">
                         <p class="text-sm font-semibold text-gray-800">${this.user.full_name.split(' ')[0]}</p>
-                        <p class="text-xs text-gray-500">Estudante</p>
+                        <p class="text-xs text-gray-500">${this.user.user_type === 'guardian' ? 'Responsável' : 'Estudante'}</p>
                     </div>
                     <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
                 </button>
