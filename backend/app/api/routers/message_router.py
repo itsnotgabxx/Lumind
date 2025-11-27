@@ -5,7 +5,7 @@ from app.db.database import get_db
 from app.schemas.user_schema import MessageCreate, MessageResponse
 from app.services.message_service import (
     create_message, get_user_messages, get_unread_messages_count,
-    mark_message_as_read, get_guardian_messages_for_student
+    mark_message_as_read, mark_conversation_as_read, get_guardian_messages_for_student
 )
 from app.services.user_service import get_user_by_id
 
@@ -66,6 +66,16 @@ async def mark_as_read(
             detail="Mensagem não encontrada"
         )
     return {"message": "Mensagem marcada como lida"}
+
+@router.post("/users/{user_id}/mark-conversation-read/{sender_id}")
+async def mark_conversation_as_read_endpoint(
+    user_id: int,
+    sender_id: int,
+    db: Session = Depends(get_db)
+):
+    """Marca todas as mensagens de uma conversa como lidas"""
+    count = mark_conversation_as_read(db, user_id, sender_id)
+    return {"message": "Conversa marcada como lida", "messages_marked": count}
 
 @router.get("/guardian/{guardian_id}/student/{student_id}", response_model=List[MessageResponse])
 async def get_guardian_messages(

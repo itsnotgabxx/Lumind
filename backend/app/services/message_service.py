@@ -41,6 +41,20 @@ def mark_message_as_read(db: Session, message_id: int, user_id: int) -> Optional
     
     return message
 
+def mark_conversation_as_read(db: Session, user_id: int, sender_id: int) -> int:
+    """Marca todas as mensagens de uma conversa como lidas"""
+    messages = db.query(Message).filter(
+        Message.recipient_id == user_id,
+        Message.sender_id == sender_id,
+        Message.is_read == False
+    ).all()
+    
+    for message in messages:
+        message.is_read = True
+    
+    db.commit()
+    return len(messages)
+
 def get_guardian_messages_for_student(db: Session, student_id: int) -> List[Message]:
     """Busca mensagens enviadas por responsáveis para um estudante específico"""
     return db.query(Message).filter(

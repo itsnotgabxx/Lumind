@@ -115,12 +115,34 @@ export async function setup() {
                 console.log('Erro ao buscar mensagens de chat:', e);
             }
 
-            // Ordenar por data
-            allMessages.sort((a, b) => {
-                return new Date(b.created_at) - new Date(a.created_at);
+            // Agrupar mensagens por sender (conversas)
+            const conversasMap = new Map();
+            
+            allMessages.forEach(msg => {
+                const senderId = msg.sender?.id || msg.sender_id;
+                if (!conversasMap.has(senderId)) {
+                    conversasMap.set(senderId, {
+                        sender: msg.sender || { id: senderId, full_name: 'Desconhecido' },
+                        messages: [],
+                        messageType: msg.message_type
+                    });
+                }
+                conversasMap.get(senderId).messages.push(msg);
             });
 
-            if (!allMessages || allMessages.length === 0) {
+            // Converter para array e ordenar por mensagem mais recente
+            let conversas = Array.from(conversasMap.values());
+            conversas.forEach(conversa => {
+                conversa.messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                conversa.lastMessage = conversa.messages[0];
+                conversa.unreadCount = conversa.messages.filter(m => !m.is_read).length;
+            });
+
+            conversas.sort((a, b) => {
+                return new Date(b.lastMessage.created_at) - new Date(a.lastMessage.created_at);
+            });
+
+            if (!conversas || conversas.length === 0) {
                 container.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
@@ -128,9 +150,9 @@ export async function setup() {
 
             emptyState.classList.add('hidden');
 
-            let filtered = allMessages;
+            let filtered = conversas;
             if (currentFilter === 'unread') {
-                filtered = allMessages.filter(m => !m.is_read);
+                filtered = conversas.filter(c => c.unreadCount > 0);
             }
 
             if (filtered.length === 0) {
@@ -142,8 +164,9 @@ export async function setup() {
                 return;
             }
 
-            // Renderiza mensagens
-            container.innerHTML = filtered.map((msg, index) => {
+            // Renderiza conversas
+            container.innerHTML = filtered.map((conversa) => {
+                const msg = conversa.lastMessage;
                 const date = new Date(msg.created_at);
                 const formattedDate = date.toLocaleDateString('pt-BR', {
                     day: '2-digit',
@@ -162,18 +185,22 @@ export async function setup() {
                     : '<span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">👥 Responsável</span>';
 
                 // Define emoji baseado no tipo
-                const emoji = isFromFriend ? '💜' : '👤';
+                const emoji = isFromFriend ? '👤' : '💜';
 
-                const borderColor = isFromFriend ? 'border-purple-400' : 'border-blue-400';
-                const gradientColor = isFromFriend ? 'from-purple-500 to-pink-500' : 'from-blue-500 to-cyan-500';
+                const borderColor = isFromFriend ? 'border-blue-400' : 'border-purple-400';
+                const gradientColor = isFromFriend ? 'from-blue-500 to-cyan-500' : 'from-purple-500 to-pink-500';
+
+                // Preview da última mensagem (truncado)
+                const previewText = msg.message.length > 60 ? msg.message.substring(0, 60) + '...' : msg.message;
+                const previewClass = msg.is_read ? 'text-gray-600' : 'text-gray-800 font-semibold';
 
                 return `
-                    <div class="message-card card bg-white border-l-4 ${borderColor} hover:shadow-lg transition-all group cursor-pointer relative" data-msg-id="${msg.id}" data-read="${msg.is_read}">
-                        ${!msg.is_read ? '<div class="absolute top-3 right-3 w-3 h-3 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full shadow-lg"></div>' : ''}
+                    <div class="conversa-card card bg-white border-l-4 ${borderColor} hover:shadow-lg transition-all group cursor-pointer relative" data-sender-id="${conversa.sender.id}">
+                        ${conversa.unreadCount > 0 ? `<div class="absolute top-3 right-3 bg-gradient-to-br from-green-400 to-emerald-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg">${conversa.unreadCount}</div>` : ''}
                         <div class="flex gap-4">
                             <!-- Avatar -->
-                            <div class="flex-shrink-0">
-                                <div class="w-12 h-12 bg-gradient-to-br ${gradientColor} rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                            <div class="flex-shrink-0 relative">
+                                <div class="w-14 h-14 bg-gradient-to-br ${gradientColor} rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                                     <span class="text-2xl">${emoji}</span>
                                 </div>
                             </div>
@@ -184,28 +211,26 @@ export async function setup() {
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2 flex-wrap">
                                             <h3 class="font-semibold text-gray-800">
-                                                ${msg.sender?.full_name || 'Amigo'}
+                                                ${conversa.sender.full_name}
                                             </h3>
                                             ${messageTypeLabel}
                                         </div>
-                                        <p class="text-xs text-gray-500 mt-1">${formattedDate} às ${formattedTime}</p>
-                                    </div>
-                                    <div class="flex-shrink-0 flex gap-1">
+                                        <p class="text-xs text-gray-500 mt-1">${formattedTime}</p>
                                     </div>
                                 </div>
 
-                                <!-- Mensagem -->
-                                <p class="text-gray-700 leading-relaxed break-words">${escapeHtml(msg.message)}</p>
+                                <!-- Preview da mensagem -->
+                                <p class="${previewClass} leading-relaxed break-words text-sm">${escapeHtml(previewText)}</p>
 
                                 <!-- Ação -->
                                 <div class="mt-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    ${!msg.is_read ? `
+                                    ${conversa.unreadCount > 0 ? `
                                         <button class="mark-read-btn text-xs btn-subtle py-1 px-3">
                                             <i class="fas fa-check mr-1"></i>Marcar como lida
                                         </button>
                                     ` : ''}
                                     ${isFromFriend ? `
-                                        <button class="reply-btn text-xs btn-primary py-1 px-3" data-peer-id="${msg.sender?.id || msg.sender_id || ''}">
+                                        <button class="reply-btn text-xs btn-primary py-1 px-3" data-peer-id="${conversa.sender.id}">
                                             <i class="fas fa-reply mr-1"></i>Responder
                                         </button>
                                     ` : ''}
@@ -216,16 +241,15 @@ export async function setup() {
                 `;
             }).join('');
 
-            // Event listeners para marcar como lida
+            // Event listeners para marcar conversa como lida
             document.querySelectorAll('.mark-read-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     e.stopPropagation();
-                    const card = e.currentTarget.closest('.message-card');
-                    const msgId = card.dataset.msgId;
+                    const card = e.currentTarget.closest('.conversa-card');
+                    const senderId = card.dataset.senderId;
 
                     try {
-                        await api.markMessageAsRead(msgId);
-                        card.dataset.read = 'true';
+                        await api.markConversationAsRead(senderId);
                         await updateNotificationBadges();
                         loadMessages();
                     } catch (error) {
@@ -235,7 +259,7 @@ export async function setup() {
                 });
             });
 
-            // Event listeners para responder
+            // Event listeners para responder (abrir chat)
             document.querySelectorAll('.reply-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -244,19 +268,11 @@ export async function setup() {
                 });
             });
 
-            document.querySelectorAll('.message-card').forEach(card => {
+            // Event listeners para abrir conversa completa ao clicar no card
+            document.querySelectorAll('.conversa-card').forEach(card => {
                 card.addEventListener('click', async () => {
-                    const msgId = card.dataset.msgId;
-                    if (card.dataset.read === 'false') {
-                        try {
-                            await api.markMessageAsRead(msgId);
-                            card.dataset.read = 'true';
-                            await updateNotificationBadges();
-                            loadMessages();
-                        } catch (error) {
-                            console.error('Erro:', error);
-                        }
-                    }
+                    const senderId = card.dataset.senderId;
+                    window.router.navigate(`/chat/${senderId}`);
                 });
             });
 

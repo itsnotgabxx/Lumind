@@ -131,7 +131,6 @@ export function setup() {
         }
     });
 
-    // Emojis
     document.querySelectorAll('.emoji-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -142,7 +141,6 @@ export function setup() {
         });
     });
 
-    // Botão Voltar
     document.querySelector('[data-route="/acompanhamento"]').addEventListener('click', () => {
         window.router.navigate('/acompanhamento');
     });
@@ -161,10 +159,8 @@ export function setup() {
             let recipient_id;
             
             if (user.user_type === 'guardian' && user.student_id) {
-                // Responsável enviando para estudante
                 recipient_id = user.student_id;
             } else {
-                // Estudante enviando para si mesmo (será visto por responsáveis)
                 recipient_id = user.id;
             }
 

@@ -221,6 +221,13 @@ class LumindAPI {
         });
     }
 
+    async markConversationAsRead(senderId) {
+        if (!this.user) throw new Error("Usuário não logado.");
+        return await this.request(`/messages/users/${this.user.id}/mark-conversation-read/${senderId}`, {
+            method: 'POST'
+        });
+    }
+
     async getGuardianMessages(studentId) {
         if (!this.user) throw new Error("Usuário não logado.");
         return await this.request(`/messages/guardian/${this.user.id}/student/${studentId}`);
