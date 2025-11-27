@@ -476,12 +476,16 @@ function renderStatistics(progress, activities) {
 
     // Progresso geral
     const percentage = progress.progress_percentage || 0;
-    document.getElementById('overall-progress').textContent = `${percentage}%`;
-    document.getElementById('overall-progress-bar').style.width = `${percentage}%`;
+    const overallProgress = document.getElementById('overall-progress');
+    if (overallProgress) overallProgress.textContent = `${percentage}%`;
+    
+    const overallProgressBar = document.getElementById('overall-progress-bar');
+    if (overallProgressBar) overallProgressBar.style.width = `${percentage}%`;
 
     // Atividades concluídas
     const completedCount = progress.completed_activities || 0;
-    document.getElementById('completed-count').textContent = completedCount;
+    const completedCountEl = document.getElementById('completed-count');
+    if (completedCountEl) completedCountEl.textContent = completedCount;
 
     // Tempo de estudo (usando dados reais da API em minutos)
     const totalMinutes = progress.total_time_spent || 0;
@@ -497,11 +501,13 @@ function renderStatistics(progress, activities) {
         timeText = `${minutes}min`;
     }
     
-    document.getElementById('study-time').textContent = timeText;
+    const studyTimeEl = document.getElementById('study-time');
+    if (studyTimeEl) studyTimeEl.textContent = timeText;
 
     // Sequência
     const streakDays = progress.streak_days || 0;
-    document.getElementById('streak-days').textContent = streakDays;
+    const streakDaysEl = document.getElementById('streak-days');
+    if (streakDaysEl) streakDaysEl.textContent = streakDays;
 
     // Conquistas
     if (progress.achievements && progress.achievements.length > 0) {
@@ -591,7 +597,16 @@ export function setup() {
 
     // Atualiza tópicos favoritos
     try {
-        const interests = user.interests ? JSON.parse(user.interests) : [];
+        let interests = [];
+        if (user.interests) {
+            // Tenta fazer parse como JSON primeiro
+            try {
+                interests = JSON.parse(user.interests);
+            } catch {
+                // Se não for JSON válido, trata como string simples separada por vírgula
+                interests = user.interests.split(',').map(i => i.trim()).filter(i => i);
+            }
+        }
         if (interests.length > 0) {
             document.getElementById('favorite-topics').textContent = interests.join(', ');
         }

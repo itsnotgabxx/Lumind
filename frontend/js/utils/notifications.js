@@ -41,23 +41,43 @@ export function stopNotifications() {
 async function checkForNewMessages() {
     try {
         const user = userState.user;
-        if (!user || user.user_type !== 'student') {
+        if (!user) {
             return;
         }
 
-        const data = await api.getUnreadMessagesCount();
-        const currentCount = data.unread_count || 0;
+        let unreadCount = 0;
 
-        // Atualiza badges na navbar
-        updateBadges(currentCount);
+        // Para estudantes: conta mensagens gerais e de incentivo não lidas
+        if (user.user_type === 'student') {
+            const data = await api.getUnreadMessagesCount();
+            unreadCount = data.unread_count || 0;
+            updateBadges(unreadCount, 'student');
 
-        // Se aumentou o número de não lidas, mostra notificação
-        if (currentCount > lastUnreadCount) {
-            const newMessages = currentCount - lastUnreadCount;
-            showNewMessageNotification(newMessages);
+            // Se aumentou o número de não lidas, mostra notificação
+            if (unreadCount > lastUnreadCount) {
+                const newMessages = unreadCount - lastUnreadCount;
+                showNewMessageNotification(newMessages, user);
+            }
+            lastUnreadCount = unreadCount;
         }
+        
+        // Para responsáveis: conta mensagens não lidas que recebeu
+        else if (user.user_type === 'guardian') {
+            try {
+                const receivedMessages = await api.getReceivedMessages('general');
+                const unreadReceived = receivedMessages.filter(msg => !msg.is_read && msg.sender_id == user.student_id).length;
+                updateBadges(unreadReceived, 'guardian');
 
-        lastUnreadCount = currentCount;
+                // Se aumentou o número de não lidas, mostra notificação
+                if (unreadReceived > lastUnreadCount) {
+                    const newMessages = unreadReceived - lastUnreadCount;
+                    showNewMessageNotification(newMessages, user);
+                }
+                lastUnreadCount = unreadReceived;
+            } catch (e) {
+                console.log('Erro ao buscar mensagens para responsável:', e);
+            }
+        }
     } catch (error) {
         console.error('Erro ao verificar mensagens:', error);
     }
@@ -69,13 +89,19 @@ async function checkForNewMessages() {
 export async function updateNotificationBadges() {
     try {
         const user = userState.user;
-        if (!user || user.user_type !== 'student') {
+        if (!user) {
             return;
         }
 
-        const data = await api.getUnreadMessagesCount();
-        const count = data.unread_count || 0;
-        updateBadges(count);
+        if (user.user_type === 'student') {
+            const data = await api.getUnreadMessagesCount();
+            const count = data.unread_count || 0;
+            updateBadges(count, 'student');
+        } else if (user.user_type === 'guardian') {
+            const receivedMessages = await api.getReceivedMessages('general');
+            const unreadCount = receivedMessages.filter(msg => !msg.is_read && msg.sender_id == user.student_id).length;
+            updateBadges(unreadCount, 'guardian');
+        }
     } catch (error) {
         console.error('Erro ao atualizar badges:', error);
     }
@@ -84,23 +110,44 @@ export async function updateNotificationBadges() {
 /**
  * Atualiza os badges de notificação (interno)
  */
-function updateBadges(count) {
-    const badge = document.getElementById('unread-badge');
-    const badgeMobile = document.getElementById('unread-badge-mobile');
+function updateBadges(count, userType = 'student') {
+    if (userType === 'student') {
+        const badge = document.getElementById('unread-badge');
+        const badgeMobile = document.getElementById('unread-badge-mobile');
 
-    if (badge) {
-        if (count > 0) {
-            badge.classList.remove('hidden');
-        } else {
-            badge.classList.add('hidden');
+        if (badge) {
+            if (count > 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
         }
-    }
 
-    if (badgeMobile) {
-        if (count > 0) {
-            badgeMobile.classList.remove('hidden');
-        } else {
-            badgeMobile.classList.add('hidden');
+        if (badgeMobile) {
+            if (count > 0) {
+                badgeMobile.classList.remove('hidden');
+            } else {
+                badgeMobile.classList.add('hidden');
+            }
+        }
+    } else if (userType === 'guardian') {
+        const badgeGuardian = document.getElementById('unread-badge-guardian');
+        const badgeGuardianMobile = document.getElementById('unread-badge-guardian-mobile');
+
+        if (badgeGuardian) {
+            if (count > 0) {
+                badgeGuardian.classList.remove('hidden');
+            } else {
+                badgeGuardian.classList.add('hidden');
+            }
+        }
+
+        if (badgeGuardianMobile) {
+            if (count > 0) {
+                badgeGuardianMobile.classList.remove('hidden');
+            } else {
+                badgeGuardianMobile.classList.add('hidden');
+            }
         }
     }
 }
@@ -108,15 +155,29 @@ function updateBadges(count) {
 /**
  * Mostra notificação de nova mensagem
  */
-function showNewMessageNotification(count) {
+function showNewMessageNotification(count, user) {
     // Tentar usar notificação do navegador se permitido
     if ('Notification' in window && Notification.permission === 'granted') {
-        const message = count === 1 
-            ? 'Você recebeu uma nova mensagem! 💬'
-            : `Você recebeu ${count} novas mensagens! 💬`;
+        let title = '';
+        let body = '';
+
+        if (user.user_type === 'student') {
+            // Para estudantes, mostra genérico
+            title = 'Lumind - Nova Mensagem';
+            body = count === 1 
+                ? 'Você recebeu uma nova mensagem! 💬'
+                : `Você recebeu ${count} novas mensagens! 💬`;
+        } else if (user.user_type === 'guardian') {
+            // Para responsáveis, mostra nome do aluno
+            const studentName = user.full_name ? user.full_name.split(' ')[0] : 'Seu aluno';
+            title = `Nova mensagem de ${studentName}`;
+            body = count === 1 
+                ? `${studentName} enviou uma mensagem! 💬`
+                : `${studentName} enviou ${count} mensagens! 💬`;
+        }
             
-        new Notification('Lumind - Nova Mensagem', {
-            body: message,
+        new Notification(title, {
+            body: body,
             icon: '/images/logo.png',
             badge: '/images/logo.png'
         });

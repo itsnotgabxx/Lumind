@@ -229,11 +229,9 @@ export async function setup() {
                                             <i class="fas fa-check mr-1"></i>Marcar como lida
                                         </button>
                                     ` : ''}
-                                    ${isFromFriend ? `
-                                        <button class="reply-btn text-xs btn-primary py-1 px-3" data-peer-id="${conversa.sender.id}">
-                                            <i class="fas fa-reply mr-1"></i>Responder
-                                        </button>
-                                    ` : ''}
+                                    <button class="reply-btn text-xs btn-primary py-1 px-3" data-peer-id="${conversa.sender.id}">
+                                        <i class="fas fa-reply mr-1"></i>Responder
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -261,9 +259,19 @@ export async function setup() {
 
             // Event listeners para responder (abrir chat)
             document.querySelectorAll('.reply-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
+                btn.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     const peerId = btn.getAttribute('data-peer-id');
+                    
+                    // Marca a conversa como lida antes de abrir o chat
+                    try {
+                        await api.markConversationAsRead(peerId);
+                        await updateNotificationBadges();
+                    } catch (error) {
+                        console.log('Nota: Erro ao marcar como lido ao abrir chat:', error);
+                        // Continua mesmo se falhar
+                    }
+                    
                     window.router.navigate(`/chat/${peerId}`);
                 });
             });

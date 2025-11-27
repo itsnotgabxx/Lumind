@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Monitora mudanças de usuário e controla notificações
     userState.subscribe((user) => {
-        if (user && user.user_type === 'student') {
+        if (user && (user.user_type === 'student' || user.user_type === 'guardian')) {
             startNotifications();
         } else {
             stopNotifications();

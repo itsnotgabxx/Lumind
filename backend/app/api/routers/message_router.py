@@ -96,9 +96,16 @@ async def get_guardian_messages(
             detail="Estudante não encontrado"
         )
     
-    # Verifica se o usuário é de fato responsável pelo estudante
-    if (student.guardian_email != guardian.email and 
-        student.guardian_name != guardian.full_name):
+    # Verifica se o responsável é de fato responsável pelo estudante
+    # Duas formas de vinculação:
+    # 1. guardian.student_id == student_id (responsável aponta para o aluno)
+    # 2. student.guardian_email == guardian.email (aluno sabe quem é seu responsável)
+    is_linked = (
+        guardian.student_id == student_id or
+        (student.guardian_email == guardian.email and student.guardian_name == guardian.full_name)
+    )
+    
+    if not is_linked:
         raise HTTPException(
             status_code=403,
             detail="Você não tem permissão para ver as mensagens deste estudante"
@@ -116,11 +123,10 @@ async def get_conversation(
     """Obtém conversa entre dois usuários (mensagens diretas)"""
     from app.models.content_model import Message
     
-    # Busca todas as mensagens entre os dois usuários
+    # Busca todas as mensagens entre os dois usuários (qualquer tipo)
     messages = db.query(Message).filter(
         ((Message.sender_id == user_id) & (Message.recipient_id == peer_id)) |
-        ((Message.sender_id == peer_id) & (Message.recipient_id == user_id)),
-        Message.message_type == 'general'
+        ((Message.sender_id == peer_id) & (Message.recipient_id == user_id))
     ).order_by(Message.created_at.asc()).all()
     
     result = []

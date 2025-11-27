@@ -99,6 +99,14 @@ export class NavBar {
                     <i class="fas fa-user-graduate"></i>
                     <span>Progresso do Aluno</span>
                 </a>
+                <a href="/mensagens-responsavel" 
+                   class="desktop-nav-link relative ${this.isActive('/mensagens-responsavel')}" 
+                   data-link>
+                    <i class="fas fa-envelope relative">
+                        <span id="unread-badge-guardian" class="hidden absolute -top-2 -right-2 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full w-2.5 h-2.5 border-2 border-white shadow-lg"></span>
+                    </i>
+                    <span>Mensagens</span>
+                </a>
                 <a href="/enviarIncentivo" 
                    class="desktop-nav-link ${this.isActive('/enviarIncentivo')}" 
                    data-link>
@@ -165,6 +173,14 @@ export class NavBar {
                    data-link>
                     <i class="fas fa-user-graduate w-6"></i>
                     <span>Progresso do Aluno</span>
+                </a>
+                <a href="/mensagens-responsavel" 
+                   class="mobile-nav-link relative ${this.isActive('/mensagens-responsavel')}" 
+                   data-link>
+                    <i class="fas fa-envelope w-6 relative">
+                        <span id="unread-badge-guardian-mobile" class="hidden absolute -top-1 -right-1 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full w-2.5 h-2.5 border-2 border-white shadow-lg"></span>
+                    </i>
+                    <span>Mensagens</span>
                 </a>
                 <a href="/enviarIncentivo" 
                    class="mobile-nav-link ${this.isActive('/enviarIncentivo')}" 

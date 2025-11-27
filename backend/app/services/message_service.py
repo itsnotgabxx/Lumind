@@ -30,16 +30,19 @@ def get_unread_messages_count(db: Session, user_id: int) -> int:
 
 def mark_message_as_read(db: Session, message_id: int, user_id: int) -> Optional[Message]:
     message = db.query(Message).filter(
-        Message.id == message_id,
-        Message.recipient_id == user_id
+        Message.id == message_id
     ).first()
     
     if message:
-        message.is_read = True
-        db.commit()
-        db.refresh(message)
+        # Verifica se o usuário é o recipient (recebeu a mensagem)
+        # OU é o sender (enviou a mensagem - caso do responsável)
+        if message.recipient_id == user_id or message.sender_id == user_id:
+            message.is_read = True
+            db.commit()
+            db.refresh(message)
+            return message
     
-    return message
+    return None
 
 def mark_conversation_as_read(db: Session, user_id: int, sender_id: int) -> int:
     """Marca todas as mensagens de uma conversa como lidas"""

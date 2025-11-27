@@ -58,11 +58,8 @@ export async function setup({ params }) {
         return;
     }
 
-    // Apenas estudantes podem usar chat
-    if (user.user_type !== 'student') {
-        window.router.navigate('/recomendacao');
-        return;
-    }
+    // Qualquer usuário autenticado pode usar chat (estudantes e responsáveis)
+    // Se precisar restringir no futuro, remova esta verificação
 
     const peerId = params?.peer_id;
     if (!peerId) {
