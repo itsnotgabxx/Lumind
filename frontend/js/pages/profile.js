@@ -137,15 +137,6 @@ export default function PerfilPage() {
                                 <p class="text-sm text-gray-600">Desativa transições e animações</p>
                             </div>
                         </label>
-
-                        <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                            <input id="acess-tts-global" name="acess-tts-global" type="checkbox" 
-                                   class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
-                            <div>
-                                <p class="font-medium text-gray-800">Suporte a Leitor de Tela</p>
-                                <p class="text-sm text-gray-600">Otimiza para NVDA e JAWS</p>
-                            </div>
-                        </label>
                     </div>
 
                     <button type="submit" class="btn-primary">
@@ -190,23 +181,38 @@ export function setup() {
     document.getElementById('perfil-email-display').textContent = user.email;
     document.getElementById('perfil-foto').src = `https://placehold.co/120x120/A78BFA/FFFFFF?text=${user.full_name.substring(0,1)}`;
     
-    // Preferências
-    try {
-        const prefs = user.learning_preferences ? JSON.parse(user.learning_preferences) : ["Não definido"];
-        const interests = user.interests ? JSON.parse(user.interests) : ["Não definido"];
-        document.getElementById('perfil-estilos').textContent = prefs.join(', ');
-        document.getElementById('perfil-interesses').textContent = interests.join(', ');
-    } catch (e) {
-        document.getElementById('perfil-estilos').textContent = user.learning_preferences || "Não definido";
-        document.getElementById('perfil-interesses').textContent = user.interests || "Não definido";
-    }
+    // Preferências (exibir dados reais com rótulos amigáveis)
+    const toArray = (val) => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        try { return JSON.parse(val); } catch { return []; }
+    };
+    const learningLabelMap = {
+        video: 'Vídeos',
+        imagem: 'Imagens',
+        leitura: 'Textos',
+        audio: 'Áudio',
+        interativo: 'Jogos',
+        pratico: 'Prático'
+    };
+
+    const prefsArr = toArray(user.learning_preferences);
+    const interestsArr = toArray(user.interests);
+
+    const prefsLabeled = prefsArr.map(p => learningLabelMap[p] || p);
+    document.getElementById('perfil-estilos').textContent = prefsLabeled.length ? prefsLabeled.join(', ') : 'Não definido';
+    document.getElementById('perfil-interesses').textContent = interestsArr.length ? interestsArr.join(', ') : 'Não definido';
 
     // Acessibilidade
     const settings = user.accessibility_settings || {};
-    document.getElementById('acess-font-size').value = settings.font_size || 'Padrão';
-    document.getElementById('acess-contrast').value = settings.contrast || 'Padrão Lumind';
-    document.getElementById('acess-animations').checked = settings.reduce_animations || false;
-    document.getElementById('acess-tts-global').checked = settings.text_to_speech || false;
+    // Mapear valores do backend -> UI
+    const fontSizeUI = (settings.font_size || 'padrão').toLowerCase();
+    const contrastUI = (settings.contrast || 'padrão').toLowerCase();
+    const fontMapToUI = { 'padrão': 'Padrão', 'medio': 'Médio', 'grande': 'Grande' };
+    const contrastMapToUI = { 'padrão': 'Padrão Lumind', 'alto_contraste': 'Alto Contraste' };
+    document.getElementById('acess-font-size').value = fontMapToUI[fontSizeUI] || 'Padrão';
+    document.getElementById('acess-contrast').value = contrastMapToUI[contrastUI] || 'Padrão Lumind';
+    document.getElementById('acess-animations').checked = !!settings.reduce_animations;
     
     // Navegação
     document.querySelectorAll('[data-route]').forEach(el => {
@@ -223,6 +229,10 @@ export function setup() {
 
     document.getElementById('btn-alterar-senha')?.addEventListener('click', () => {
         showCustomAlert('Função em desenvolvimento', 'Aviso', 'info');
+    });
+    // Alterar foto – placeholder
+    document.querySelector('button.link')?.addEventListener('click', () => {
+        showCustomAlert('Alterar foto ainda não está disponível', 'Aviso', 'info');
     });
 
     // Salvar perfil
@@ -245,11 +255,15 @@ export function setup() {
     // Salvar acessibilidade
     document.getElementById('form-perfil-acessibilidade')?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        // Mapear valores da UI -> backend
+        const fontSizeUIVal = document.getElementById('acess-font-size').value;
+        const contrastUIVal = document.getElementById('acess-contrast').value;
+        const fontMapToBackend = { 'Padrão': 'padrão', 'Médio': 'medio', 'Grande': 'grande' };
+        const contrastMapToBackend = { 'Padrão Lumind': 'padrão', 'Alto Contraste': 'alto_contraste' };
         const accessibilityData = {
-            font_size: document.getElementById('acess-font-size').value,
-            contrast: document.getElementById('acess-contrast').value,
-            reduce_animations: document.getElementById('acess-animations').checked,
-            text_to_speech: document.getElementById('acess-tts-global').checked
+            font_size: fontMapToBackend[fontSizeUIVal] || 'padrão',
+            contrast: contrastMapToBackend[contrastUIVal] || 'padrão',
+            reduce_animations: document.getElementById('acess-animations').checked
         };
         
         try {
@@ -276,5 +290,9 @@ export function setup() {
                 window.location.reload();
             }
         );
+    });
+    // Excluir conta – placeholder
+    document.querySelector('.card.border-2 .fa-trash')?.closest('button')?.addEventListener('click', () => {
+        showCustomAlert('Exclusão de conta ainda não está disponível', 'Aviso', 'info');
     });
 }

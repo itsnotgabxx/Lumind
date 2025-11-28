@@ -21,6 +21,7 @@ export function applyAccessibilitySettings(settings) {
         'Médio': 'font-size-medio',
         'Grande': 'font-size-grande',
         'padrao': 'font-size-padrao',
+        'padrão': 'font-size-padrao',
         'medio': 'font-size-medio',
         'grande': 'font-size-grande'
     };

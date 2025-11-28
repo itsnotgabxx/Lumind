@@ -65,6 +65,15 @@ body {
 @media (min-width: 640px) {
     .screen-title {
          font-size: 1.8rem;
+
+/* Acessibilidade: reduzir animações/transições globalmente quando ativo */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+}
     }
     .screen-subtitle {
          font-size: 1rem;

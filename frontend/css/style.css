@@ -185,6 +185,16 @@ body {
          font-size: 1rem;
     }
 }
+
+/* ===== Acessibilidade: Reduzir Animações ===== */
+/* Como este arquivo é sempre importado pelo index.html, garantimos que a regra esteja ativa globalmente */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+}
 .choice-label i {
     color: var(--lumind-text-medium); 
     transition: color 0.2s;
@@ -385,6 +395,7 @@ textarea:focus-visible {
 /* ===== TRUNCAR TEXTO ===== */
 .line-clamp-2 {
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -392,6 +403,7 @@ textarea:focus-visible {
 
 .line-clamp-3 {
     display: -webkit-box;
+    line-clamp: 3;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
