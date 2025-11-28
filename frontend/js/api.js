@@ -68,26 +68,38 @@ class LumindAPI {
     // Preferências de aprendizado
     async updatePreferences(preferences) {
         if (!this.user) throw new Error("Usuário não logado.");
-        return await this.request(`/users/${this.user.id}/preferences`, {
+        const updated = await this.request(`/users/${this.user.id}/preferences`, {
             method: 'PUT',
             body: JSON.stringify(preferences)
         });
+        // Sincroniza estado local com o usuário atualizado
+        this.user = updated;
+        localStorage.setItem('lumind_user', JSON.stringify(updated));
+        return updated;
     }
 
     async updateProfile(profileData) {
         if (!this.user) throw new Error("Usuário não logado.");
-        return await this.request(`/users/${this.user.id}/profile`, {
+        const updated = await this.request(`/users/${this.user.id}/profile`, {
             method: 'PUT',
             body: JSON.stringify(profileData)
         });
+        // Sincroniza estado local
+        this.user = updated;
+        localStorage.setItem('lumind_user', JSON.stringify(updated));
+        return updated;
     }
 
     async updateAccessibility(accessibilityData) {
         if (!this.user) throw new Error("Usuário não logado.");
-        return await this.request(`/users/${this.user.id}/accessibility`, {
+        const updated = await this.request(`/users/${this.user.id}/accessibility`, {
             method: 'PUT',
             body: JSON.stringify(accessibilityData)
         });
+        // Sincroniza estado local
+        this.user = updated;
+        localStorage.setItem('lumind_user', JSON.stringify(updated));
+        return updated;
     }
 
     // Conteúdo
