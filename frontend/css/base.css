@@ -27,6 +27,8 @@ body {
     color: var(--lumind-text-dark);
 }
 
+/* (Revertido) Removidos resets globais de altura/margem adicionados anteriormente */
+
 /* Layout de telas */
 .screen {
     min-height: 100vh;

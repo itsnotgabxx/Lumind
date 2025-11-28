@@ -125,7 +125,7 @@ export default function QuestionarioPage() {
                                     </div>
                                     <div class="card-content">
                                         <h4>Prático</h4>
-                                        <p>Aprender fazendo projetos</p>
+                                        <p>Aprender fazendo na prática</p>
                                     </div>
                                 </label>
                             </div>
@@ -136,7 +136,7 @@ export default function QuestionarioPage() {
                     <div id="step-2" class="form-step">
                         <div class="step-header">
                             <div class="step-icon icon-interests">
-                                <i class="fas fa-sparkles"></i>
+                                <i class="fas fa-heart"></i>
                             </div>
                             <div>
                                 <h2 class="step-title">O que você gosta?</h2>
@@ -225,12 +225,62 @@ export default function QuestionarioPage() {
                                     </div>
                                     <span>Xadrez</span>
                                 </label>
-                            </div>
 
-                            <div class="custom-interest">
-                                <label class="custom-label">Adicionar outro interesse:</label>
-                                <input type="text" id="custom-interest" placeholder="Digite um tema que não está na lista..." class="custom-input">
-                                <button type="button" id="add-custom-interest" class="btn-add">+ Adicionar</button>
+                                <label class="interest-card">
+                                    <input type="checkbox" name="interest" value="Matemática">
+                                    <div class="card-icon">
+                                        <i class="fas fa-calculator"></i>
+                                    </div>
+                                    <span>Matemática</span>
+                                </label>
+
+                                <label class="interest-card">
+                                    <input type="checkbox" name="interest" value="Idiomas">
+                                    <div class="card-icon">
+                                        <i class="fas fa-language"></i>
+                                    </div>
+                                    <span>Idiomas</span>
+                                </label>
+
+                                <label class="interest-card">
+                                    <input type="checkbox" name="interest" value="Geografia">
+                                    <div class="card-icon">
+                                        <i class="fas fa-globe-americas"></i>
+                                    </div>
+                                    <span>Geografia</span>
+                                </label>
+
+                                <label class="interest-card">
+                                    <input type="checkbox" name="interest" value="Literatura">
+                                    <div class="card-icon">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <span>Literatura</span>
+                                </label>
+
+                                <label class="interest-card">
+                                    <input type="checkbox" name="interest" value="Animais">
+                                    <div class="card-icon">
+                                        <i class="fas fa-paw"></i>
+                                    </div>
+                                    <span>Animais</span>
+                                </label>
+
+                                <label class="interest-card">
+                                    <input type="checkbox" name="interest" value="Culinária">
+                                    <div class="card-icon">
+                                        <i class="fas fa-utensils"></i>
+                                    </div>
+                                    <span>Culinária</span>
+                                </label>
+
+                                <label class="interest-card">
+                                    <input type="checkbox" name="interest" value="Fotografia">
+                                    <div class="card-icon">
+                                        <i class="fas fa-camera"></i>
+                                    </div>
+                                    <span>Fotografia</span>
+                                </label>
                             </div>
 
                             <div id="selected-interests" class="selected-tags"></div>
@@ -298,11 +348,46 @@ export default function QuestionarioPage() {
                                     </div>
                                     <span>Pressão de tempo</span>
                                 </label>
-                            </div>
 
-                            <div class="custom-challenge">
-                                <label class="custom-label">Outros desafios ou preferências:</label>
-                                <textarea id="other-distractions" placeholder="Descreva qualquer outra coisa que nos ajudaria a conhecê-lo melhor..." rows="4" class="custom-textarea"></textarea>
+                                <label class="challenge-card">
+                                    <input type="checkbox" name="distraction" value="Instruções complexas">
+                                    <div class="card-icon">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <span>Instruções complexas</span>
+                                </label>
+
+                                <label class="challenge-card">
+                                    <input type="checkbox" name="distraction" value="Barulho ambiente">
+                                    <div class="card-icon">
+                                        <i class="fas fa-volume-up"></i>
+                                    </div>
+                                    <span>Barulho ambiente</span>
+                                </label>
+
+                                <label class="challenge-card">
+                                    <input type="checkbox" name="distraction" value="Luz forte">
+                                    <div class="card-icon">
+                                        <i class="fas fa-sun"></i>
+                                    </div>
+                                    <span>Luz forte</span>
+                                </label>
+
+                                <label class="challenge-card">
+                                    <input type="checkbox" name="distraction" value="Distrações visuais">
+                                    <div class="card-icon">
+                                        <i class="fas fa-eye-slash"></i>
+                                    </div>
+                                    <span>Distrações visuais</span>
+                                </label>
+
+                                <label class="challenge-card">
+                                    <input type="checkbox" name="distraction" value="Nenhum desafio específico">
+                                    <div class="card-icon">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <span>Nenhum desafio</span>
+                                </label>
                             </div>
                         </form>
                     </div>
@@ -348,6 +433,8 @@ function initializeQuestionnaireState() {
     if (saved) {
         questionnaireState = JSON.parse(saved);
     }
+    // Sempre resetar para o step 1 ao abrir a página
+    questionnaireState.currentStep = 1;
 }
 
 function saveQuestionnaireState() {
@@ -391,12 +478,8 @@ function validateCurrentStep() {
         questionnaireState.data.learning_preferences = Array.from(selected).map(el => el.value);
     } else if (step === 2) {
         const selected = document.querySelectorAll('input[name="interest"]:checked');
-        const customInterest = document.getElementById('custom-interest').value.trim();
         
         let interests = Array.from(selected).map(el => el.value);
-        if (customInterest) {
-            interests.push(customInterest);
-        }
         
         if (interests.length === 0) {
             showCustomAlert("Selecione pelo menos um interesse", "Validação", "warning");
@@ -406,12 +489,8 @@ function validateCurrentStep() {
         questionnaireState.data.interests = interests;
     } else if (step === 3) {
         const selected = document.querySelectorAll('input[name="distraction"]:checked');
-        const other = document.getElementById('other-distractions').value.trim();
         
         let distractions = Array.from(selected).map(el => el.value);
-        if (other) {
-            distractions.push(other);
-        }
         
         questionnaireState.data.distractions = distractions.join('; ');
     }
@@ -552,8 +631,6 @@ function setupStep1() {
 
 function setupStep2() {
     const interestCheckboxes = document.querySelectorAll('input[name="interest"]');
-    const addBtn = document.getElementById('add-custom-interest');
-    const customInput = document.getElementById('custom-interest');
     const selectedTags = document.getElementById('selected-interests');
 
     interestCheckboxes.forEach(checkbox => {
@@ -564,40 +641,6 @@ function setupStep2() {
         // Pré-selecionar se já estava marcado
         if (questionnaireState.data.interests.includes(checkbox.value)) {
             checkbox.checked = true;
-        }
-    });
-
-    addBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const value = customInput.value.trim();
-        if (value) {
-            // Criar checkbox dinâmico
-            const label = document.createElement('label');
-            label.className = 'interest-card';
-            label.innerHTML = `
-                <input type="checkbox" name="interest" value="${value}" checked>
-                <div class="card-icon">
-                    <i class="fas fa-star"></i>
-                </div>
-                <span>${value}</span>
-            `;
-            
-            const grid = document.querySelector('.interests-grid');
-            grid.appendChild(label);
-
-            label.querySelector('input').addEventListener('change', () => {
-                updateSelectedInterestsTags();
-            });
-
-            customInput.value = '';
-            updateSelectedInterestsTags();
-        }
-    });
-
-    customInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            addBtn.click();
         }
     });
 
@@ -630,7 +673,6 @@ function updateSelectedInterestsTags() {
 
 function setupStep3() {
     const distractionCheckboxes = document.querySelectorAll('input[name="distraction"]');
-    const otherTextarea = document.getElementById('other-distractions');
 
     distractionCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', () => {
