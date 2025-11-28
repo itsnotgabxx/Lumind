@@ -1,0 +1,740 @@
+/* ========================================
+   QUESTIONÁRIO - ESTILOS LUMIND
+   ======================================== */
+
+.questionnaire-container {
+    min-height: 100vh;
+    background-color: var(--lumind-bg-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    font-family: 'Inter', sans-serif;
+}
+
+@media (min-width: 640px) {
+    .questionnaire-container {
+        padding: 2rem;
+    }
+}
+
+.questionnaire-wrapper {
+    width: 100%;
+    max-width: 600px;
+    background: var(--lumind-bg-card);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== PROGRESS SECTION ========== */
+
+.progress-section {
+    background-color: var(--lumind-purple);
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.progress-circle {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+}
+
+.progress-ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.2);
+    stroke-width: 5;
+}
+
+.progress-ring-fill {
+    fill: none;
+    stroke: var(--lumind-white);
+    stroke-width: 5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.4s ease-out;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--lumind-white);
+    font-weight: 600;
+}
+
+.progress-current {
+    display: block;
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.progress-total {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.85;
+}
+
+/* ========== FORM CONTAINER ========== */
+
+.form-container {
+    padding: 2rem;
+    position: relative;
+    min-height: 400px;
+}
+
+.form-step {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 2rem;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    overflow-y: auto;
+}
+
+.form-step.active-step {
+    position: relative;
+    display: block;
+    opacity: 1;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+}
+
+.form-step.slide-out-left {
+    animation: slideOutLeft 0.3s ease-out forwards;
+}
+
+.form-step.slide-out-right {
+    animation: slideOutRight 0.3s ease-out forwards;
+}
+
+.form-step.slide-in-left {
+    animation: slideInLeft 0.3s ease-out forwards;
+}
+
+.form-step.slide-in-right {
+    animation: slideInRight 0.3s ease-out forwards;
+}
+
+@keyframes slideOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ========== STEP HEADER ========== */
+
+.step-header {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.step-icon {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    background-color: var(--lumind-purple);
+}
+
+.step-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--lumind-text-dark);
+    margin: 0 0 0.3rem 0;
+}
+
+.step-subtitle {
+    font-size: 0.9rem;
+    color: var(--lumind-text-light);
+    margin: 0;
+}
+
+/* ========== STEP FORM ========== */
+
+.step-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ========== LEARNING OPTIONS ========== */
+
+.learning-options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.learning-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 2px solid var(--lumind-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--lumind-bg-card);
+}
+
+.learning-card input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--lumind-purple);
+}
+
+.learning-card .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: var(--lumind-bg-main);
+    color: var(--lumind-text-light);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.learning-card .card-content {
+    flex: 1;
+}
+
+.learning-card .card-content h4 {
+    margin: 0 0 0.2rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--lumind-text-dark);
+}
+
+.learning-card .card-content p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--lumind-text-light);
+}
+
+.learning-card:hover {
+    border-color: var(--lumind-purple-light);
+    background: var(--lumind-bg-main);
+}
+
+.learning-card.selected {
+    border-color: var(--lumind-purple);
+    background: var(--lumind-bg-main);
+}
+
+.learning-card.selected .card-icon {
+    background: var(--lumind-purple);
+    color: white;
+}
+
+/* ========== INTERESTS GRID ========== */
+
+.interests-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.interest-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 0.75rem;
+    border: 2px solid var(--lumind-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--lumind-bg-card);
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--lumind-text-dark);
+}
+
+.interest-card input[type="checkbox"] {
+    display: none;
+}
+
+.interest-card .card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    background: var(--lumind-bg-main);
+    color: var(--lumind-text-light);
+    transition: all 0.2s ease;
+}
+
+.interest-card:hover {
+    border-color: var(--lumind-purple-light);
+    background: var(--lumind-bg-main);
+}
+
+.interest-card input[type="checkbox"]:checked + .card-icon {
+    background: var(--lumind-purple);
+    color: white;
+    transform: scale(1.05);
+}
+
+.interest-card input[type="checkbox"]:checked ~ span {
+    color: var(--lumind-purple);
+    font-weight: 600;
+}
+
+/* ========== CHALLENGES GRID ========== */
+
+.challenges-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.challenge-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 0.75rem;
+    border: 2px solid var(--lumind-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--lumind-bg-card);
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--lumind-text-dark);
+}
+
+.challenge-card input[type="checkbox"] {
+    display: none;
+}
+
+.challenge-card .card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    background: var(--lumind-bg-main);
+    color: var(--lumind-text-light);
+    transition: all 0.2s ease;
+}
+
+.challenge-card:hover {
+    border-color: var(--lumind-purple-light);
+    background: var(--lumind-bg-main);
+}
+
+.challenge-card.selected {
+    border-color: var(--lumind-blue);
+    background: var(--lumind-bg-main);
+}
+
+.challenge-card.selected .card-icon {
+    background: var(--lumind-blue);
+    color: white;
+    transform: scale(1.05);
+}
+
+/* ========== CUSTOM INPUTS ========== */
+
+.custom-interest,
+.custom-challenge {
+    background: var(--lumind-bg-main);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.custom-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--lumind-text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.custom-input,
+.custom-textarea {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 2px solid var(--lumind-border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    background: var(--lumind-bg-card);
+    color: var(--lumind-text-dark);
+}
+
+.custom-input:focus,
+.custom-textarea:focus {
+    outline: none;
+    border-color: var(--lumind-purple);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+.custom-input::placeholder,
+.custom-textarea::placeholder {
+    color: var(--lumind-text-light);
+}
+
+.btn-add {
+    margin-top: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: var(--lumind-purple);
+    color: var(--lumind-white);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.btn-add:hover {
+    background: var(--lumind-purple-dark);
+}
+
+.btn-add:active {
+    transform: scale(0.98);
+}
+
+/* ========== SELECTED TAGS ========== */
+
+.selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.selected-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    background: var(--lumind-purple);
+    color: var(--lumind-white);
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    animation: tagAppear 0.2s ease-out;
+}
+
+@keyframes tagAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.tag-remove {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--lumind-white);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.tag-remove:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========== BUTTONS ========== */
+
+.button-container {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.5rem 2rem;
+    justify-content: flex-end;
+    border-top: 1px solid var(--lumind-border);
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-primary {
+    background: var(--lumind-purple);
+    color: var(--lumind-white);
+    flex: 1;
+}
+
+.btn-primary:hover {
+    background: var(--lumind-purple-dark);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-secondary {
+    background: var(--lumind-bg-main);
+    color: var(--lumind-text-dark);
+    border: 1px solid var(--lumind-border);
+    min-width: fit-content;
+}
+
+.btn-secondary:hover {
+    background: var(--lumind-border);
+}
+
+/* ========== TIP SECTION ========== */
+
+.tip-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 2rem;
+    background: var(--lumind-bg-main);
+    color: var(--lumind-blue);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+    justify-content: center;
+    border-top: 1px solid var(--lumind-border);
+}
+
+.tip-section i {
+    font-size: 1rem;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 640px) {
+    .questionnaire-wrapper {
+        border-radius: 10px;
+        max-width: 100%;
+    }
+
+    .form-container {
+        padding: 1.5rem;
+    }
+
+    .progress-section {
+        padding: 1.5rem;
+    }
+
+    .progress-circle {
+        width: 80px;
+        height: 80px;
+    }
+
+    .progress-current {
+        font-size: 1.5rem;
+    }
+
+    .progress-total {
+        font-size: 0.8rem;
+    }
+
+    .step-header {
+        gap: 0.75rem;
+    }
+
+    .step-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .step-title {
+        font-size: 1.2rem;
+    }
+
+    .step-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .button-container {
+        flex-direction: column-reverse;
+        padding: 1rem 1.5rem;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+        padding: 0.7rem 1rem;
+    }
+
+    .interests-grid,
+    .challenges-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .custom-input,
+    .custom-textarea {
+        font-size: 16px;
+    }
+}
+
+/* ========== DARK MODE SUPPORT ========== */
+
+@media (prefers-color-scheme: dark) {
+    .questionnaire-wrapper {
+        background: var(--lumind-bg-card);
+    }
+
+    .learning-card,
+    .interest-card,
+    .challenge-card,
+    .custom-input,
+    .custom-textarea {
+        background: var(--lumind-bg-card);
+        border-color: var(--lumind-border);
+        color: var(--lumind-text-dark);
+    }
+
+    .learning-card:hover,
+    .interest-card:hover,
+    .challenge-card:hover {
+        background: var(--lumind-bg-main);
+    }
+
+    .step-title {
+        color: var(--lumind-text-dark);
+    }
+
+    .step-subtitle,
+    .card-content p,
+    .custom-label {
+        color: var(--lumind-text-light);
+    }
+
+    .card-content h4 {
+        color: var(--lumind-text-dark);
+    }
+
+    .custom-input::placeholder,
+    .custom-textarea::placeholder {
+        color: var(--lumind-text-medium);
+    }
+
+    .custom-interest,
+    .custom-challenge {
+        background: var(--lumind-bg-main);
+    }
+
+    .btn-secondary {
+        background: var(--lumind-bg-main);
+        color: var(--lumind-text-dark);
+        border-color: var(--lumind-border);
+    }
+
+    .btn-secondary:hover {
+        background: var(--lumind-border);
+    }
+
+    .tip-section {
+        background: var(--lumind-bg-main);
+        border-top-color: var(--lumind-border);
+    }
+}
