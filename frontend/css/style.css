@@ -1811,17 +1811,17 @@ select.input-field:focus:valid {
 
 /* Status Cards */
 .status-card-completed {
-    background: linear-gradient(135deg, #10B981 0%, #14B8A6 100%);
+    background: var(--gradient-primary);
     color: white;
 }
 
 .status-card-in-progress {
-    background: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
+    background: var(--gradient-primary);
     color: white;
 }
 
 .status-card-new {
-    background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);
+    background: var(--gradient-primary);
     color: white;
 }
 
