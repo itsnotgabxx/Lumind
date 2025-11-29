@@ -68,12 +68,14 @@ export default async function ConteudoPage({ params }) {
                         </button>
                     </div>
                 ` : `
-                    <div class="flex flex-col items-center py-8 gap-4">
-                        <div class="bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-2xl px-8 py-4 text-center shadow-lg">
-                            <i class="fas fa-check-circle text-4xl mb-2"></i>
-                            <div class="font-bold text-xl">Concluído!</div>
-                            <div class="text-sm opacity-90 mt-1">Parabéns pelo progresso! 🎉</div>
-                        </div>
+                    <div class="flex justify-center items-center py-8 gap-4">
+                        <button 
+                            id="btn-concluido-done"
+                            class="bg-gradient-to-r from-green-500 to-teal-500 text-white font-semibold py-3 px-8 rounded-xl shadow-lg flex items-center gap-2 cursor-default"
+                        >
+                            <i class="fas fa-check-circle text-xl"></i>
+                            Concluído
+                        </button>
                         <button 
                             id="btn-proximo-conteudo"
                             class="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
