@@ -39,6 +39,14 @@ body {
     --lumind-error: #EF4444; 
     --lumind-warning: #F59E0B; 
     --lumind-info: #3B82F6; 
+    /* Gradientes padrão (unificados) */
+    --gradient-primary: linear-gradient(135deg, var(--lumind-purple) 0%, var(--lumind-blue) 100%);
+    --gradient-primary-to-right: linear-gradient(to right, var(--lumind-purple), var(--lumind-blue));
+    /* Cores com transparência para overlays suaves */
+    --lumind-purple-10: rgba(139, 92, 246, 0.10);
+    --lumind-blue-10: rgba(59, 130, 246, 0.10);
+    --lumind-purple-08: rgba(139, 92, 246, 0.08);
+    --lumind-blue-08: rgba(59, 130, 246, 0.08);
 }
 
 body {
@@ -470,11 +478,12 @@ textarea:focus-visible {
 
 /* ===== GRADIENTES ===== */
 .gradient-purple-blue {
-    background: linear-gradient(135deg, #EDE9FE 0%, #DBEAFE 100%);
+    /* Unificado para o gradiente padrão */
+    background: var(--gradient-primary);
 }
 
 .gradient-purple-to-blue {
-    background: linear-gradient(to right, var(--lumind-purple), var(--lumind-blue));
+    background: var(--gradient-primary-to-right);
 }
 
 /* ===== PROGRESSO CIRCULAR ===== */
@@ -1796,7 +1805,7 @@ select.input-field:focus:valid {
 
 /* Barra de Progresso com Gradiente */
 .progress-gradient {
-    background: linear-gradient(90deg, #8B5CF6 0%, #3B82F6 100%);
+    background: linear-gradient(90deg, var(--lumind-purple) 0%, var(--lumind-blue) 100%);
     box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
 }
 
