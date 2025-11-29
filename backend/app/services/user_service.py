@@ -122,7 +122,8 @@ def create_user(db: Session, user: UserCreate) -> User:
         learning_preferences=learning_preferences_json,
         interests=interests_json,
         distractions=user.distractions,
-        firebase_uid=getattr(user, 'firebase_uid', None)
+        firebase_uid=getattr(user, 'firebase_uid', None),
+        avatar_url=getattr(user, 'avatar_url', None)
     )
     db.add(db_user)
     db.commit()
@@ -160,6 +161,8 @@ def update_user_profile(db: Session, user_id: int, profile_update: UserProfileUp
         user.guardian_name = profile_update.guardian_name
     if profile_update.guardian_email is not None:
         user.guardian_email = profile_update.guardian_email
+    if getattr(profile_update, 'avatar_url', None) is not None:
+        user.avatar_url = profile_update.avatar_url
     
     db.commit()
     db.refresh(user)

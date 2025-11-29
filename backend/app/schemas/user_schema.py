@@ -21,6 +21,7 @@ class UserBase(BaseModel):
     interests: Optional[List[str]] = []
     distractions: Optional[str] = None
     accessibility_settings: Optional[AccessibilitySettings] = None
+    avatar_url: Optional[str] = None
 
     @field_validator('learning_preferences', 'interests', mode='before')
     @classmethod
@@ -84,6 +85,7 @@ class UserProfileUpdate(BaseModel):
     birth_date: Optional[datetime] = None
     guardian_name: Optional[str] = None
     guardian_email: Optional[EmailStr] = None
+    avatar_url: Optional[str] = None
 
 class ContentItem(BaseModel):
     id: int

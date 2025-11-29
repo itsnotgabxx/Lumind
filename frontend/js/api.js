@@ -5,6 +5,33 @@ const API_BASE_URL = 'http://localhost:8000/api';
 class LumindAPI {
     constructor() {
         this.user = JSON.parse(localStorage.getItem('lumind_user') || 'null');
+        // Normaliza URLs relativas vindas do backend/localStorage
+        if (this.user) {
+            this.user = this._normalizeUser(this.user);
+        }
+    }
+
+    // Métodos auxiliares internos
+    _getStaticBase() {
+        // Remove o sufixo /api da base
+        return API_BASE_URL.replace(/\/?api$/, '');
+    }
+
+    _toAbsoluteIfStatic(urlOrPath) {
+        if (!urlOrPath) return urlOrPath;
+        if (/^https?:\/\//i.test(urlOrPath)) return urlOrPath;
+        // Caminho relativo vindo do backend (ex: /static/avatars/1.png)
+        const base = this._getStaticBase();
+        return `${base}${urlOrPath}`;
+    }
+
+    _normalizeUser(user) {
+        try {
+            if (user && user.avatar_url) {
+                user.avatar_url = this._toAbsoluteIfStatic(user.avatar_url);
+            }
+        } catch (_) {}
+        return user;
     }
 
     // Método para fazer requisições HTTP
@@ -36,9 +63,10 @@ class LumindAPI {
     // Autenticação
     async login(email) {
         // Usa o novo endpoint que não requer senha
-        const user = await this.request(`/users/login-by-email?user_email=${encodeURIComponent(email)}`, {
+        let user = await this.request(`/users/login-by-email?user_email=${encodeURIComponent(email)}`, {
             method: 'POST'
         });
+        user = this._normalizeUser(user);
         this.user = user;
         localStorage.setItem('lumind_user', JSON.stringify(user));
         return user;
@@ -100,6 +128,31 @@ class LumindAPI {
         this.user = updated;
         localStorage.setItem('lumind_user', JSON.stringify(updated));
         return updated;
+    }
+
+    async uploadAvatar(file) {
+        if (!this.user) throw new Error("Usuário não logado.");
+        const formData = new FormData();
+        formData.append('file', file);
+        const url = `${API_BASE_URL}/users/${this.user.id}/avatar`;
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+        });
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.detail || 'Erro ao enviar avatar');
+        }
+        const data = await response.json();
+        // Converte caminho relativo do backend em URL absoluta do servidor de API
+        const staticBase = API_BASE_URL.replace(/\/api$/, '');
+        const absoluteUrl = data.avatar_url?.startsWith('http')
+            ? data.avatar_url
+            : `${staticBase}${data.avatar_url}`;
+        // Guarda avatar_url no user local (campo extra local)
+        this.user = { ...this.user, avatar_url: absoluteUrl };
+        localStorage.setItem('lumind_user', JSON.stringify(this.user));
+        return { avatar_url: absoluteUrl };
     }
 
     // Conteúdo
@@ -308,7 +361,7 @@ class LumindAPI {
         };
     } else {
         // Usuário existente - faz login normalmente
-        this.user = data.user;
+        this.user = this._normalizeUser(data.user);
         localStorage.setItem('lumind_user', JSON.stringify(this.user));
         return {
             isNewUser: false,
@@ -319,11 +372,11 @@ class LumindAPI {
 
 // 👇 NOVO MÉTODO para completar cadastro com Google
 async completeGoogleRegistration(userData) {
-    const newUser = await this.request('/users/google/complete-registration', {
+    let newUser = await this.request('/users/google/complete-registration', {
         method: 'POST',
         body: JSON.stringify(userData)
     });
-    
+    newUser = this._normalizeUser(newUser);
     this.user = newUser;
     localStorage.setItem('lumind_user', JSON.stringify(newUser));
     return newUser;

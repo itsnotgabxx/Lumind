@@ -1,8 +1,11 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+import os
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routers import auth_router, content_router, message_router, report_router  # , ml_router
 from app.core.config import settings
 from app.db.database import engine
+from sqlalchemy import text
 from app.models import user_model, content_model
 from app.core.firebase_config import initialize_firebase  # 👈 ADICIONAR ESTA LINHA
 
@@ -26,6 +29,17 @@ app.add_middleware(
 async def startup_event():
     initialize_firebase()
     print("🚀 Firebase Admin inicializado!")
+    # Garantir coluna avatar_url no banco (migração simples para SQLite)
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(text("PRAGMA table_info(users)"))
+            cols = [row[1] for row in result]
+            if 'avatar_url' not in cols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN avatar_url TEXT"))
+                conn.commit()
+                print("🛠️  Coluna 'avatar_url' adicionada à tabela users")
+    except Exception as e:
+        print(f"⚠️  Não foi possível garantir a coluna avatar_url: {e}")
 
 # Criar tabelas do banco de dados
 user_model.Base.metadata.create_all(bind=engine)
@@ -37,6 +51,10 @@ app.include_router(content_router.router, prefix="/api", tags=["content"])
 app.include_router(message_router.router, prefix="/api/messages", tags=["messages"])
 app.include_router(report_router.router, prefix="/api", tags=["reports"])
 # app.include_router(ml_router.router, prefix="/api/ml", tags=["machine-learning"])
+
+# Static files (para avatares e outros)
+os.makedirs("static/avatars", exist_ok=True)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 async def root():

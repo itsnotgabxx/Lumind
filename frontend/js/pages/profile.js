@@ -35,9 +35,10 @@ export default function PerfilPage() {
                         <div class="flex-grow text-center sm:text-left">
                             <h3 class="text-xl font-semibold text-gray-800" id="perfil-nome-display">Carregando...</h3>
                             <p class="text-gray-600" id="perfil-email-display">email@exemplo.com</p>
-                            <button type="button" class="mt-2 text-sm link">
+                            <button type="button" id="btn-alterar-foto" class="mt-2 text-sm link">
                                 <i class="fas fa-camera mr-1"></i>Alterar foto
                             </button>
+                            <input type="file" id="input-avatar" accept="image/*" class="hidden" />
                         </div>
                     </div>
 
@@ -179,7 +180,12 @@ export function setup() {
     document.getElementById('perfil-email').value = user.email;
     document.getElementById('perfil-nome-display').textContent = user.full_name;
     document.getElementById('perfil-email-display').textContent = user.email;
-    document.getElementById('perfil-foto').src = `https://placehold.co/120x120/A78BFA/FFFFFF?text=${user.full_name.substring(0,1)}`;
+    const fotoEl = document.getElementById('perfil-foto');
+    if (user.avatar_url) {
+        fotoEl.src = `${user.avatar_url}?t=${Date.now()}`;
+    } else {
+        fotoEl.src = `https://placehold.co/120x120/A78BFA/FFFFFF?text=${user.full_name.substring(0,1)}`;
+    }
     
     // Preferências (exibir dados reais com rótulos amigáveis)
     const toArray = (val) => {
@@ -230,16 +236,39 @@ export function setup() {
     document.getElementById('btn-alterar-senha')?.addEventListener('click', () => {
         showCustomAlert('Função em desenvolvimento', 'Aviso', 'info');
     });
-    // Alterar foto – placeholder
-    document.querySelector('button.link')?.addEventListener('click', () => {
-        showCustomAlert('Alterar foto ainda não está disponível', 'Aviso', 'info');
+    // Alterar foto – upload real
+    const btnAlterarFoto = document.getElementById('btn-alterar-foto');
+    const inputAvatar = document.getElementById('input-avatar');
+    btnAlterarFoto?.addEventListener('click', () => inputAvatar.click());
+    inputAvatar?.addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        try {
+            const { avatar_url } = await api.uploadAvatar(file);
+            const img = document.getElementById('perfil-foto');
+            img.src = `${avatar_url}?t=${Date.now()}`; // força recarregar
+            // Atualiza userState para propagar para a navbar
+            const updated = { ...userState.user, avatar_url };
+            userState.user = updated;
+            showCustomAlert('Foto atualizada!', 'Sucesso', 'success');
+        } catch (err) {
+            showCustomAlert(err.message || 'Falha ao enviar foto', 'Erro', 'error');
+        } finally {
+            e.target.value = '';
+        }
     });
 
     // Salvar perfil
     document.getElementById('form-perfil-info')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const newName = document.getElementById('perfil-nome').value.trim();
-        if (newName === user.full_name) return;
+        const nameChanged = newName !== user.full_name;
+
+        // Se apenas a foto foi alterada, ela já foi salva no envio (uploadAvatar)
+        if (!nameChanged) {
+            showCustomAlert('Nada para salvar. Sua foto já foi atualizada automaticamente ao enviar.', 'Informação', 'info');
+            return;
+        }
 
         try {
             await api.updateProfile({ full_name: newName });

@@ -20,6 +20,7 @@ class User(Base):
     interests = Column(Text, nullable=True)  # JSON string
     distractions = Column(Text, nullable=True)  # JSON string
     accessibility_settings = Column(Text, nullable=True)  # JSON string
+    avatar_url = Column(Text, nullable=True)  # URL pública do avatar
     is_active = Column(Boolean, default=True)
     streak_days = Column(Integer, default=0)  # Dias consecutivos de estudo
     last_activity_date = Column(DateTime, nullable=True)  # Data última atividade

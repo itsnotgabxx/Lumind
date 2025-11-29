@@ -314,7 +314,12 @@ export class NavBar {
     }
 
     getUserAvatar() {
-        const initial = this.user.full_name.substring(0,1).toUpperCase();
+        // Usa avatar enviado se disponível; senão, gera avatar por iniciais
+        if (this.user && this.user.avatar_url) {
+            // Cache-busting simples para garantir atualização após upload
+            const ts = Date.now();
+            return `${this.user.avatar_url}?t=${ts}`;
+        }
         return `https://ui-avatars.com/api/?name=${encodeURIComponent(this.user.full_name)}&background=8B5CF6&color=fff&size=128&bold=true`;
     }
 

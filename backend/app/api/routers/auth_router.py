@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.core.firebase_config import verify_firebase_token  # 👈 ADICIONAR ESTE IMPORT
@@ -11,6 +11,7 @@ from app.services.user_service import (
     create_user, get_user_by_email, get_user_by_id,
     update_user_preferences, update_user_profile
 )
+import os
 
 router = APIRouter()
 
@@ -90,6 +91,42 @@ async def update_profile(
             detail="Usuário não encontrado"
         )
     return updated_user
+
+@router.post("/{user_id}/avatar")
+async def upload_avatar(
+    user_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """Recebe um arquivo de imagem e salva como avatar do usuário.
+    O arquivo é salvo em static/avatars/{user_id}.{ext}, e retornamos a URL pública.
+    """
+    user = get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    content = await file.read()
+    # Determinar extensão
+    filename = file.filename or f"{user_id}.png"
+    _, ext = os.path.splitext(filename)
+    ext = ext.lower() if ext else ".png"
+
+    avatars_dir = os.path.join("static", "avatars")
+    os.makedirs(avatars_dir, exist_ok=True)
+    dest_path = os.path.join(avatars_dir, f"{user_id}{ext}")
+
+    # Salvar arquivo
+    with open(dest_path, "wb") as f:
+        f.write(content)
+
+    avatar_url = f"/static/avatars/{user_id}{ext}"
+
+    # Persistir no banco
+    user.avatar_url = avatar_url
+    db.commit()
+    db.refresh(user)
+
+    return {"avatar_url": avatar_url}
 
 @router.put("/{user_id}/accessibility", response_model=UserResponse)
 async def update_accessibility(
