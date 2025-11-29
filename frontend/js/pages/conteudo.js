@@ -31,8 +31,8 @@ export default async function ConteudoPage({ params }) {
 
     return `
         <div class="w-full min-h-screen mx-auto px-4 py-6 sm:py-8">
-            <nav class="mb-8 flex items-center gap-1 max-w-7xl mx-auto">
-                <button data-route="/recomendacao" class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-300">
+            <nav class="mb-8 flex items-center gap-1 max-w-7xl mx-auto" style="background-color: transparent !important;">
+                <button data-route="/recomendacao" class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-300" style="background-color: transparent !important;">
                     <i class="fas fa-arrow-left"></i>
                     <span class="hidden sm:inline">Voltar</span>
                 </button>
