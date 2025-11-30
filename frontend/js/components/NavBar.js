@@ -15,9 +15,7 @@ export class NavBar {
                         <!-- Logo e Marca -->
                         <div class="flex items-center gap-3">
                             <a href="/" class="flex items-center gap-3 group" data-link>
-                                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-                                    <span class="text-white font-bold text-xl">L</span>
-                                </div>
+                                <img src="/images/Logo_Lumind.png" alt="Lumind Logo" class="h-12 w-auto group-hover:scale-105 transition-transform">
                                 <div class="hidden sm:block">
                                     <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                                         Lumind

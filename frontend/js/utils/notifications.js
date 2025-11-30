@@ -178,8 +178,8 @@ function showNewMessageNotification(count, user) {
             
         new Notification(title, {
             body: body,
-            icon: '/images/logo.png',
-            badge: '/images/logo.png'
+            icon: '/images/Logo_Lumind.png',
+            badge: '/images/Logo_Lumind.png'
         });
     }
 }

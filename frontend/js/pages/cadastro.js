@@ -84,7 +84,7 @@ export default function CadastroPage() {
                         ${isGuardian ? 'Cadastro de Responsável' : 'Cadastro de Estudante'}
                     </div>
                     
-                    <div class="lumind-logo-placeholder mb-4 mx-auto">L</div>
+                    <img src="/images/Logo_Lumind.png" alt="Lumind Logo" class="h-20 w-auto mx-auto mb-4">
                     <h1 class="text-3xl font-bold text-gray-800 mb-2">
                         ${isGoogleSignup ? 'Complete seu Cadastro' : 
                           isGuardian ? 'Criar Conta de Responsável' : 'Criar Conta'}

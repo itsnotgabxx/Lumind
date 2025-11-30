@@ -4,7 +4,7 @@ export default function HomePage() {
             <!-- Hero Section -->
             <div class="bg-gradient-to-br from-purple-50 to-blue-50 py-16 px-4 mb-12 rounded-2xl">
                 <div class="max-w-4xl mx-auto text-center">
-                    <div class="lumind-logo-placeholder mb-6 mx-auto">L</div>
+                    <img src="/images/Logo_Lumind.png" alt="Lumind Logo" class="h-24 w-auto mx-auto mb-6">
                     <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
                         Bem-vindo ao Lumind
                     </h1>

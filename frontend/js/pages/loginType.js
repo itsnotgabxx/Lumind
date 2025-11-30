@@ -6,7 +6,7 @@ export default function LoginTypePage() {
             <div class="w-full max-w-2xl">
                 <!-- Header -->
                 <div class="text-center mb-8">
-                    <div class="lumind-logo-placeholder mx-auto">L</div>
+                    <img src="/images/Logo_Lumind.png" alt="Lumind Logo" class="h-24 w-auto mx-auto mb-4">
                     <h1 class="lumind-brand-header">Lumind</h1>
                     <p class="lumind-subheader">Como você gostaria de acessar?</p>
                 </div>

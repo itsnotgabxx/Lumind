@@ -22,7 +22,7 @@ export default function LoginPage() {
                     </button>
                 </div>
 
-                <div class="lumind-logo-placeholder">L</div>
+                <img src="/images/Logo_Lumind.png" alt="Lumind Logo" class="h-20 w-auto mx-auto mb-4">
                 <h1 class="lumind-brand-header">Lumind</h1>
                 <p class="lumind-subheader">
                     ${isGuardian ? 
