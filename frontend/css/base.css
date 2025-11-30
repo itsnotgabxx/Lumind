@@ -21,9 +21,15 @@
 }
 
 /* Estilos base */
+html {
+    min-height: 100vh;
+}
+
 body {
     font-family: 'Inter', sans-serif;
-    background-color: var(--lumind-bg-main); 
+    background: linear-gradient(135deg, #faf5ff 0%, #eff6ff 50%, #f0fdfa 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
     color: var(--lumind-text-dark);
 }
 

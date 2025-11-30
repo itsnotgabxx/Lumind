@@ -50,8 +50,14 @@ body {
 }
 
 body {
-    background-color: var(--lumind-bg-main); 
+    background: linear-gradient(135deg, #faf5ff 0%, #eff6ff 50%, #f0fdfa 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
     color: var(--lumind-text-dark);
+}
+
+html {
+    min-height: 100vh;
 }
 .btn-primary {
     background-color: var(--lumind-purple);
