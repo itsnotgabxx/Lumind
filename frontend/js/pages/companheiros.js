@@ -3,7 +3,7 @@ import { userState } from '../utils/userState.js';
 
 export default function CompanheirosPage() {
     return `
-        <div class="w-full min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-8">
+        <div class="w-full min-h-screen py-8">
             <div class="container mx-auto px-4 max-w-4xl">
                 <!-- Header -->
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">

@@ -6,7 +6,7 @@ export default function ChatPage({ params }) {
     const peerId = params?.peer_id;
 
     return `
-        <div class="w-full min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-6">
+        <div class="w-full min-h-screen py-6">
             <div class="container mx-auto px-4 max-w-2xl h-screen flex flex-col">
                 <!-- Header -->
                 <div class="bg-white rounded-t-xl shadow-lg border-b-2 border-purple-200 p-4 flex items-center justify-between mb-0">
@@ -22,7 +22,7 @@ export default function ChatPage({ params }) {
                     <i class="fas fa-circle text-green-500 text-sm"></i>
                 </div>
 
-                <!-- Messages Container -->
+                <!-- Messages Container -->onde 
                 <div id="messages-container" class="flex-1 bg-white overflow-y-auto p-4 space-y-3">
                     <div class="text-center py-12">
                         <i class="fas fa-spinner fa-spin text-4xl text-gray-400 mb-4"></i>
@@ -32,7 +32,7 @@ export default function ChatPage({ params }) {
 
                 <!-- Input Area -->
                 <div class="bg-white rounded-b-xl shadow-lg border-t-2 border-purple-200 p-4">
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 items-stretch">
                         <input 
                             id="message-input" 
                             type="text" 
@@ -40,8 +40,8 @@ export default function ChatPage({ params }) {
                             class="input-field flex-1"
                             maxlength="500"
                         >
-                        <button id="send-button" class="btn-primary px-4 py-2">
-                            <i class="fas fa-paper-plane"></i>
+                        <button id="send-button" class="bg-purple-600 hover:bg-purple-700 text-white rounded-md px-3 py-2 h-10 transition-colors flex items-center justify-center">
+                            <i class="fas fa-paper-plane text-base"></i>
                         </button>
                     </div>
                     <p id="char-count" class="text-xs text-gray-500 mt-2">0/500</p>

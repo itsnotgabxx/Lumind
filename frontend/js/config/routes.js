@@ -98,7 +98,7 @@ export const routes = [
         path: '/historico',
         component: () => import('../pages/historicoCompleto.js'),
         title: 'Histórico Completo',
-        middleware: [guardianOnlyMiddleware]
+        middleware: [authMiddleware]
     },
     // 🔄 ROTAS COMPARTILHADAS (acessíveis para ambos)
     {
