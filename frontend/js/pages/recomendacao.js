@@ -148,7 +148,7 @@ export default function RecomendacaoPage() {
             </div>
 
             <!-- Grid de Recomendações -->
-            <div id="recomendacao-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 mb-10">
+            <div id="recomendacao-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-10">
                 <!-- Loading state -->
                 <div class="col-span-full">
                     <div class="flex flex-col items-center justify-center py-16">
