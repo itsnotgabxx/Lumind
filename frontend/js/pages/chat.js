@@ -22,7 +22,7 @@ export default function ChatPage({ params }) {
                     <i class="fas fa-circle text-green-500 text-sm"></i>
                 </div>
 
-                <!-- Messages Container -->onde 
+                <!-- Messages Container -->
                 <div id="messages-container" class="flex-1 bg-white overflow-y-auto p-4 space-y-3">
                     <div class="text-center py-12">
                         <i class="fas fa-spinner fa-spin text-4xl text-gray-400 mb-4"></i>
