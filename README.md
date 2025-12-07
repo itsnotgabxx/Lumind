@@ -62,7 +62,21 @@ Uma plataforma educacional interativa desenvolvida com FastAPI e interface web m
    pip install -r requirements.txt
    ```
 
-3. **Inicie o Backend**
+3. **Configure o PostgreSQL**
+   - Certifique-se que o PostgreSQL está rodando na porta 5433
+   - Crie o banco de dados `lumind_db`
+   - Crie o arquivo `.env` (veja seção de Variáveis de Ambiente abaixo)
+
+4. **Execute as Migrations**
+   ```bash
+   # Criar migration inicial (se necessário)
+   alembic revision --autogenerate -m "Initial migration"
+   
+   # Aplicar migrations
+   alembic upgrade head
+   ```
+
+5. **Inicie o Backend**
    ```bash
    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
@@ -126,11 +140,20 @@ Uma plataforma educacional interativa desenvolvida com FastAPI e interface web m
 ### Variáveis de Ambiente
 Crie um arquivo `.env` na pasta `backend` com:
 ```env
-DATABASE_URL=sqlite:///./lumind.db
+# Database Configuration
+DATABASE_URL=postgresql://postgres:admin@localhost:5433/lumind_db
+
+# Security
 SECRET_KEY=your-secret-key-change-in-production
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# App
+APP_NAME=Lumind
+DEBUG=True
 ```
+
+**Nota**: Ajuste `postgres:admin` para seu usuário e senha do PostgreSQL.
 
 ### Estrutura do Projeto
 ```
@@ -183,9 +206,9 @@ Lumind/
 - Múltiplas telas implementadas
 
 ✅ **Banco de Dados - CONFIGURADO**
-- SQLite para desenvolvimento
-- PostgreSQL para produção
-- Tabelas criadas automaticamente
+- PostgreSQL (porta 5433)
+- Migrations com Alembic
+- Tabelas criadas via migrations
 
 ## 🤝 Contribuição
 

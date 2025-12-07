@@ -3,7 +3,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # Database
-    database_url: str = "sqlite:///./lumind.db"
+    database_url: str = "postgresql://postgres:admin@localhost:5433/lumind_db"
     
     # Security
     secret_key: str = "your-secret-key-change-in-production"

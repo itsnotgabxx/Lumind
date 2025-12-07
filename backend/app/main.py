@@ -24,26 +24,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 👇 ADICIONAR ESTE EVENTO DE STARTUP
 @app.on_event("startup")
 async def startup_event():
     initialize_firebase()
     print("🚀 Firebase Admin inicializado!")
-    # Garantir coluna avatar_url no banco (migração simples para SQLite)
-    try:
-        with engine.connect() as conn:
-            result = conn.execute(text("PRAGMA table_info(users)"))
-            cols = [row[1] for row in result]
-            if 'avatar_url' not in cols:
-                conn.execute(text("ALTER TABLE users ADD COLUMN avatar_url TEXT"))
-                conn.commit()
-                print("🛠️  Coluna 'avatar_url' adicionada à tabela users")
-    except Exception as e:
-        print(f"⚠️  Não foi possível garantir a coluna avatar_url: {e}")
-
-# Criar tabelas do banco de dados
-user_model.Base.metadata.create_all(bind=engine)
-content_model.Base.metadata.create_all(bind=engine)
+    print("✅ Usando PostgreSQL com Alembic para migrations")
 
 # Incluir routers
 app.include_router(auth_router.router, prefix="/api/users", tags=["users"])
