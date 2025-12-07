@@ -96,3 +96,29 @@ async def update_recommender_model(
             status_code=500,
             detail=f"Erro ao atualizar modelo: {str(e)}"
         )
+
+@router.get("/ml/status")
+async def check_ml_status():
+    """Verifica o status do sistema de IA."""
+    try:
+        from app.ml import get_cognitive_profiler, get_content_recommender, get_interaction_analyzer
+        
+        profiler = get_cognitive_profiler()
+        recommender = get_content_recommender()
+        analyzer = get_interaction_analyzer()
+        
+        return {
+            "status": "operational",
+            "message": "Sistema de IA está ATIVO e funcionando! 🤖",
+            "components": {
+                "cognitive_profiler": "✅ Ativo",
+                "content_recommender": "✅ Ativo",
+                "interaction_analyzer": "✅ Ativo"
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao verificar status da IA: {str(e)}"
+        )

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 import os
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routers import auth_router, content_router, message_router, report_router  # , ml_router
+from app.api.routers import auth_router, content_router, message_router, report_router, ml_router
 from app.core.config import settings
 from app.db.database import engine
 from sqlalchemy import text
@@ -29,13 +29,14 @@ async def startup_event():
     initialize_firebase()
     print("🚀 Firebase Admin inicializado!")
     print("✅ Usando PostgreSQL com Alembic para migrations")
+    print("🤖 Motor de IA/ML ATIVADO - Sistema de recomendações e análise cognitiva operacional!")
 
 # Incluir routers
 app.include_router(auth_router.router, prefix="/api/users", tags=["users"])
 app.include_router(content_router.router, prefix="/api", tags=["content"])
 app.include_router(message_router.router, prefix="/api/messages", tags=["messages"])
 app.include_router(report_router.router, prefix="/api", tags=["reports"])
-# app.include_router(ml_router.router, prefix="/api/ml", tags=["machine-learning"])
+app.include_router(ml_router.router, prefix="/api/ml", tags=["machine-learning"])
 
 # Static files (para avatares e outros)
 os.makedirs("static/avatars", exist_ok=True)

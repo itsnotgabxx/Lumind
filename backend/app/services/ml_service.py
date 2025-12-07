@@ -47,12 +47,15 @@ class MLService:
         cognitive_profile = json.loads(user.cognitive_profile)
         
         # Busca conteúdo disponível
-        available_content = get_all_content(self.db)
+        available_content = get_all_content(self.db, limit=100)
+        
+        # Converte ContentItems para dicts
+        content_dicts = [content.dict() if hasattr(content, 'dict') else content for content in available_content]
         
         # Gera recomendações
         recommendations = self.content_recommender.generate_recommendations(
             cognitive_profile,
-            available_content,
+            content_dicts,
             n_recommendations=limit
         )
         
@@ -71,11 +74,14 @@ class MLService:
         
         if not user or not content:
             return {}
+        
+        # Converte content para dict se for um schema
+        content_dict = content.dict() if hasattr(content, 'dict') else content
             
         # Analisa a sessão
         session_analysis = self.interaction_analyzer.analyze_session(
             interaction_data,
-            content.dict()
+            content_dict
         )
         
         # Atualiza perfil cognitivo
