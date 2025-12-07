@@ -2164,3 +2164,130 @@ html {
     background-color: #F5F3FF;
     border-left-color: #8B5CF6 !important;
 }
+
+/* Estilos para conteúdo de texto */
+.text-content-wrapper {
+    padding: 3rem 2rem;
+    background: white;
+    border-radius: 1rem;
+}
+
+@media (max-width: 768px) {
+    .text-content-wrapper {
+        padding: 2rem 1.5rem;
+    }
+}
+
+.text-content-article {
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #374151;
+}
+
+/* Primeiro parágrafo com destaque */
+.first-paragraph {
+    font-size: 1.25rem;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+/* Parágrafos normais */
+.normal-paragraph {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+    color: #4b5563;
+}
+
+/* Cards com emoji */
+.emoji-card {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.5rem;
+    background: #f9fafb;
+    border-radius: 0.75rem;
+    border-left: 3px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.emoji-card:hover {
+    background: #f3f4f6;
+    border-left-color: #9ca3af;
+}
+
+.emoji-icon {
+    font-size: 2.25rem;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 0.125rem;
+}
+
+.emoji-content {
+    flex: 1;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: #374151;
+}
+
+/* Texto em negrito */
+.emoji-content strong,
+.first-paragraph strong,
+.normal-paragraph strong {
+    font-weight: 600;
+    color: #6D28D9;
+}
+
+/* Links */
+.text-content-article a {
+    color: #8B5CF6;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    transition: color 0.2s ease;
+}
+
+.text-content-article a:hover {
+    color: #6D28D9;
+}
+
+/* Imagens */
+.text-content-wrapper img {
+    transition: transform 0.3s ease;
+}
+
+.text-content-wrapper img:hover {
+    transform: scale(1.02);
+}
+/* Responsividade */
+@media (max-width: 640px) {
+    .first-paragraph {
+        font-size: 1.125rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .normal-paragraph {
+        font-size: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .emoji-card {
+        padding: 1.25rem 1rem;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .emoji-icon {
+        font-size: 1.75rem;
+    }
+    
+    .emoji-content {
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+}   }
+}
