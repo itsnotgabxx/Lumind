@@ -3,6 +3,7 @@ from app.models.content_model import Content, ActivityProgress
 from app.schemas.user_schema import ContentItem, ActivityProgress as ActivityProgressSchema
 from typing import List, Optional
 import json
+import random
 
 def get_all_content(db: Session, skip: int = 0, limit: int = 100) -> List[ContentItem]:
     """Retorna todos os conteúdos ativos com content_data parseado"""
@@ -237,47 +238,114 @@ def get_daily_activity_stats(db: Session, user_id: int, days: int = 7) -> List[d
     return daily_stats
 
 def get_recommendations_for_user(db: Session, user_id: int, limit: int = 5) -> List[ContentItem]:
-    
+    """
+    Gera recomendações personalizadas baseadas nos interesses e preferências do usuário.
+    """
     from app.services.user_service import get_user_by_id
+    import random
+    
     user = get_user_by_id(db, user_id)
     
     if not user:
         return []
     
+    # Parse preferências e interesses do usuário
     learning_preferences = []
     interests = []
     
     if user.learning_preferences:
         try:
-            learning_preferences = json.loads(user.learning_preferences)
+            learning_preferences = json.loads(user.learning_preferences) if isinstance(user.learning_preferences, str) else user.learning_preferences
         except:
             learning_preferences = []
     
     if user.interests:
         try:
-            interests = json.loads(user.interests)
+            interests = json.loads(user.interests) if isinstance(user.interests, str) else user.interests
         except:
             interests = []
     
+    # Busca todo o conteúdo disponível
+    all_content = db.query(Content).filter(Content.is_active == True).all()
+    
+    if not all_content:
+        return []
+    
+    # Pontuação de cada conteúdo
+    scored_content = []
+    
+    for content in all_content:
+        score = 0
+        
+        # Parse tags do conteúdo
+        content_tags = []
+        try:
+            content_tags = json.loads(content.tags) if content.tags else []
+        except:
+            content_tags = []
+        
+        # 1. Score por interesse (peso maior)
+        if interests:
+            for interest in interests:
+                interest_lower = interest.lower()
+                # Verifica nas tags
+                for tag in content_tags:
+                    if interest_lower in tag.lower():
+                        score += 10
+                        break
+                # Verifica no título
+                if interest_lower in content.title.lower():
+                    score += 8
+                # Verifica na descrição
+                if content.description and interest_lower in content.description.lower():
+                    score += 5
+        
+        # 2. Score por preferência de aprendizado (peso médio)
+        if learning_preferences:
+            # Mapeia preferências para tipos de conteúdo
+            if "video" in learning_preferences or "imagem" in learning_preferences:
+                if content.type == "video":
+                    score += 5
+            if "leitura" in learning_preferences:
+                if content.type == "text":
+                    score += 5
+            if "audio" in learning_preferences:
+                if content.type == "audio":
+                    score += 5
+            if "interativo" in learning_preferences or "jogos" in learning_preferences:
+                if content.type in ["interactive_game", "game"]:
+                    score += 5
+        
+        # 3. Pequeno fator aleatório para diversificar (peso baixo)
+        score += random.uniform(0, 2)
+        
+        scored_content.append((content, score))
+    
+    # Ordena por score (maior para menor)
+    scored_content.sort(key=lambda x: x[1], reverse=True)
+    
+    # Pega os top conteúdos com maior score
+    top_content = [content for content, score in scored_content[:limit]]
+    
+    # Converte para ContentItem
     recommended_content = []
+    for content in top_content:
+        content_dict = {
+            "id": content.id,
+            "title": content.title,
+            "description": content.description,
+            "type": content.type,
+            "source": content.source,
+            "content": content.content,
+            "image_url": content.image_url,
+            "tags": json.loads(content.tags) if content.tags else [],
+            "content_data": json.loads(content.content_data) if content.content_data else None,
+            "difficulty": content.difficulty,
+            "duration": content.duration
+        }
+        recommended_content.append(ContentItem(**content_dict))
     
-    if "video" in learning_preferences or "imagem" in learning_preferences:
-        videos = get_content_by_type_parsed(db, "video")
-        recommended_content.extend(videos[:2])
-
-    if "leitura" in learning_preferences or "audio" in learning_preferences:
-        texts = get_content_by_type_parsed(db, "text")
-        recommended_content.extend(texts[:2])
-    
-    if "interativo" in learning_preferences:
-        games = get_content_by_type_parsed(db, "interactive_game")
-        recommended_content.extend(games[:2])
-    
-    if not recommended_content:
-        all_content = get_all_content(db, limit=limit)
-        recommended_content = all_content[:limit]
-    
-    return recommended_content[:limit]
+    return recommended_content
 
 def get_content_by_type_parsed(db: Session, content_type: str) -> List[ContentItem]:
     """Retorna conteúdo por tipo com content_data parseado"""
