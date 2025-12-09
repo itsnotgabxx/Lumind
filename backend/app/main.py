@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.db.database import engine
 from sqlalchemy import text
 from app.models import user_model, content_model
-from app.core.firebase_config import initialize_firebase  # 👈 ADICIONAR ESTA LINHA
+from app.core.firebase_config import initialize_firebase
 
 app = FastAPI(
     title="Lumind API",
