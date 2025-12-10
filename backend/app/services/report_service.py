@@ -9,7 +9,7 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from sqlalchemy.orm import Session
 from app.models.user_model import User
 from app.models.interaction_model import UserInteraction
-from app.models.content_model import Content
+from app.models.content_model import Content, ActivityProgress
 from sqlalchemy import func
 import json
 
@@ -41,7 +41,7 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
         'CustomTitle',
         parent=styles['Heading1'],
         fontSize=24,
-        textColor=HexColor('#0D9488'),
+        textColor=HexColor('#8B5CF6'),  # Roxo da plataforma
         spaceAfter=30,
         alignment=TA_CENTER,
         fontName='Helvetica-Bold'
@@ -51,7 +51,7 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
         'CustomHeading',
         parent=styles['Heading2'],
         fontSize=14,
-        textColor=HexColor('#0D9488'),
+        textColor=HexColor('#7C3AED'),  # Roxo escuro
         spaceAfter=12,
         spaceBefore=12,
         fontName='Helvetica-Bold'
@@ -92,7 +92,7 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
         ('FONTSIZE', (0, 0), (-1, -1), 10),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
         ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#0D9488')),
+        ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#8B5CF6')),
     ]))
     elements.append(student_table)
     elements.append(Spacer(1, 0.3*inch))
@@ -100,32 +100,27 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
     # ===== ESTATÍSTICAS GERAIS =====
     elements.append(Paragraph("ESTATÍSTICAS GERAIS", heading_style))
     
-    # Calcula estatísticas baseadas nas interações do usuário
-    interactions = db.query(UserInteraction).filter(UserInteraction.user_id == student_id).all()
+    # Calcula estatísticas baseadas em ActivityProgress (não UserInteraction)
+    activities = db.query(ActivityProgress).filter(ActivityProgress.user_id == student_id).all()
     
-    # Conta interações por tipo
-    completed_count = len([i for i in interactions if i.interaction_type == 'complete'])
-    view_count = len([i for i in interactions if i.interaction_type == 'view'])
-    click_count = len([i for i in interactions if i.interaction_type == 'click'])
-    total_interactions = len(interactions)
+    # Conta atividades por status
+    completed_count = len([a for a in activities if a.status == 'completed'])
+    in_progress_count = len([a for a in activities if a.status == 'in_progress'])
+    total_activities = len(activities)
     
-    # Calcula sequência de dias
-    today = datetime.now().date()
-    streak = 0
-    check_date = today
-    for i in range(365):
-        day_interactions = [inter for inter in interactions if inter.created_at.date() == check_date]
-        if day_interactions:
-            streak += 1
-            check_date -= timedelta(days=1)
-        else:
-            break
+    # Calcula tempo total de estudo (em minutos)
+    total_time_minutes = sum([a.time_spent for a in activities if a.time_spent])
+    total_time_hours = total_time_minutes / 60
+    
+    # Pega o streak do usuário (já calculado no modelo)
+    streak = student.streak_days if student.streak_days else 0
     
     stats_data = [
-        ["Interações Totais:", f"{total_interactions}"],
+        ["Total de Atividades:", f"{total_activities}"],
         ["Conteúdos Concluídos:", f"{completed_count}"],
-        ["Conteúdos Visualizados:", f"{view_count}"],
-        ["Sequência Atual:", f"{streak} dias consecutivos"],
+        ["Conteúdos em Progresso:", f"{in_progress_count}"],
+        ["Tempo Total de Estudo:", f"{total_time_hours:.1f}h ({total_time_minutes} minutos)"],
+        ["Sequência Atual:", f"{streak} dias consecutivos 🔥"],
     ]
     
     stats_table = Table(stats_data, colWidths=[2.5*inch, 3*inch])
@@ -133,12 +128,12 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#0D9488')),
+        ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#8B5CF6')),
         ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('ROWBACKGROUNDS', (0, 0), (-1, -1), [HexColor('#F0FDFA'), white]),
+        ('ROWBACKGROUNDS', (0, 0), (-1, -1), [HexColor('#F3E8FF'), white]),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
         ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#D1FAE5')),
+        ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#E9D5FF')),
     ]))
     elements.append(stats_table)
     elements.append(Spacer(1, 0.3*inch))
@@ -146,44 +141,49 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
     # ===== ÚLTIMAS ATIVIDADES =====
     elements.append(Paragraph("ÚLTIMAS ATIVIDADES", heading_style))
     
-    # Busca últimas interações (últimas 10)
-    recent_interactions = db.query(UserInteraction).filter(
-        UserInteraction.user_id == student_id
-    ).order_by(UserInteraction.created_at.desc()).limit(10).all()
+    # Busca últimas atividades (últimas 10)
+    recent_activities = db.query(ActivityProgress).filter(
+        ActivityProgress.user_id == student_id
+    ).order_by(ActivityProgress.updated_at.desc()).limit(10).all()
     
-    if recent_interactions:
-        activities_data = [["Conteúdo", "Tipo", "Data"]]
+    if recent_activities:
+        activities_data = [["Conteúdo", "Status", "Progresso", "Tempo", "Data"]]
         
-        for interaction in recent_interactions:
-            content = db.query(Content).filter(Content.id == interaction.content_id).first()
+        for activity in recent_activities:
+            content = db.query(Content).filter(Content.id == activity.content_id).first()
             content_title = content.title if content else "Conteúdo"
             
-            interaction_type_label = {
-                'complete': '✓ Concluído',
-                'view': '👁️ Visualizado',
-                'click': '🖱️ Clicado',
-                'error': '⚠️ Erro'
-            }.get(interaction.interaction_type, interaction.interaction_type)
+            status_label = {
+                'completed': '✓ Concluído',
+                'in_progress': '⏳ Em Progresso',
+                'not_started': '🆕 Não Iniciado'
+            }.get(activity.status, activity.status)
             
-            date = interaction.created_at.strftime("%d/%m/%Y %H:%M")
+            progress = f"{activity.progress_percentage}%" if activity.progress_percentage else "0%"
+            time_spent = f"{activity.time_spent}min" if activity.time_spent else "0min"
+            date = activity.updated_at.strftime("%d/%m/%Y") if activity.updated_at else "N/A"
             
             activities_data.append([
-                content_title[:40] + "..." if len(content_title) > 40 else content_title,
-                interaction_type_label,
+                content_title[:30] + "..." if len(content_title) > 30 else content_title,
+                status_label,
+                progress,
+                time_spent,
                 date
             ])
         
-        activities_table = Table(activities_data, colWidths=[2.5*inch, 1.5*inch, 2*inch])
+        activities_table = Table(activities_data, colWidths=[2*inch, 1.2*inch, 0.8*inch, 0.7*inch, 1.3*inch])
         activities_table.setStyle(TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('ALIGN', (2, 0), (2, -1), 'CENTER'),
+            ('ALIGN', (3, 0), (3, -1), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('TEXTCOLOR', (0, 0), (-1, 0), HexColor('#0D9488')),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [HexColor('#F0FDFA'), white]),
-            ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#D1FAE5')),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('TEXTCOLOR', (0, 0), (-1, 0), HexColor('#8B5CF6')),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [HexColor('#F3E8FF'), white]),
+            ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#E9D5FF')),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ('TOPPADDING', (0, 0), (-1, -1), 5),
         ]))
         elements.append(activities_table)
     else:
@@ -211,7 +211,7 @@ def generate_student_report_pdf(db: Session, student_id: int, guardian_name: str
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),
-        ('TEXTCOLOR', (0, 0), (0, 0), HexColor('#0D9488')),
+        ('TEXTCOLOR', (0, 0), (0, 0), HexColor('#8B5CF6')),
         ('FONTSIZE', (0, 0), (-1, -1), 10),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
         ('TOPPADDING', (0, 0), (-1, -1), 8),
