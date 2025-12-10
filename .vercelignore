@@ -1,0 +1,15 @@
+# Vercel - ignora backend
+backend/
+*.pyc
+__pycache__/
+*.log
+.env
+
+# Python
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/

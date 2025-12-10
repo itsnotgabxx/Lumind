@@ -20,7 +20,7 @@ def get_all_content(db: Session, skip: int = 0, limit: int = 100) -> List[Conten
             "content": content.content,
             "image_url": content.image_url,
             "tags": json.loads(content.tags) if content.tags else [],
-            "content_data": json.loads(content.content_data) if content.content_data else None,  # 👈 PARSEADO
+            "content_data": json.loads(content.content_data) if content.content_data else None,
             "difficulty": content.difficulty,
             "duration": content.duration
         }
@@ -44,7 +44,7 @@ def get_content_by_id(db: Session, content_id: int) -> Optional[ContentItem]:
         "content": content.content,
         "image_url": content.image_url,
         "tags": json.loads(content.tags) if content.tags else [],
-        "content_data": json.loads(content.content_data) if content.content_data else None,  # 👈 PARSEADO
+        "content_data": json.loads(content.content_data) if content.content_data else None,
         "difficulty": content.difficulty,
         "duration": content.duration
     }
@@ -140,21 +140,13 @@ def get_user_progress_summary(db: Session, user_id: int) -> dict:
     in_progress_activities = len([a for a in activities if a.status == "in_progress"])
     total_time_spent = sum([a.time_spent for a in activities])
     
-    print(f"📊 [PROGRESS_SUMMARY] user_id={user_id}")
-    print(f"   Total: {total_activities} | Completas: {completed_activities} | Em andamento: {in_progress_activities}")
-    print(f"   Tempo total gasto: {total_time_spent}min ({total_time_spent // 60}h {total_time_spent % 60}min)")
-    print(f"   Detalhes das atividades:")
-    for a in activities:
-        time_display = f"{a.time_spent // 60}h {a.time_spent % 60}min" if a.time_spent >= 60 else f"{a.time_spent}min"
-        print(f"      - Content {a.content_id}: status='{a.status}', progress={a.progress_percentage}%, tempo={time_display}")
+
     
     progress_percentage = 0
     if total_activities > 0:
         progress_percentage = int((completed_activities / total_activities) * 100)
 
     achievements = []
-    
-    # Conquistas por conteúdos completados
     if completed_activities >= 1:
         achievements.append("Explorador Curioso")
     if completed_activities >= 3:
@@ -163,21 +155,16 @@ def get_user_progress_summary(db: Session, user_id: int) -> dict:
         achievements.append("Leitor Voraz")
     if completed_activities >= 10:
         achievements.append("Mestre do Conhecimento")
-    
-    # Conquistas por tempo de estudo (em minutos)
-    if total_time_spent >= 60:  # 1 hora
+    if total_time_spent >= 60:
         achievements.append("Focado")
-    if total_time_spent >= 180:  # 3 horas
+    if total_time_spent >= 180:
         achievements.append("Persistente")
     
-    # Conquistas por streak
     streak_days = user.streak_days if user else 0
     if streak_days >= 3:
         achievements.append("Sequência de 3 dias")
     if streak_days >= 7:
         achievements.append("Sequência de 7 dias")
-    
-    # Conquistas por tipos de conteúdo
     if total_activities >= 5:
         achievements.append("Versátil")
     if completed_activities >= 15:

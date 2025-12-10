@@ -17,6 +17,7 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 from app.db.database import Base
+from app.core.config import get_sqlalchemy_database_url
 from app.models.user_model import User
 from app.models.content_model import Content, ActivityProgress, Message
 from app.models.interaction_model import UserInteraction
@@ -41,7 +42,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = get_sqlalchemy_database_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -60,11 +61,9 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    # Build engine directly from our runtime settings instead of alembic.ini
+    from sqlalchemy import create_engine
+    connectable = create_engine(get_sqlalchemy_database_url())
 
     with connectable.connect() as connection:
         context.configure(
