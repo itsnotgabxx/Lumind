@@ -24,7 +24,8 @@ app.add_middleware(
         "https://lumind.online",
         "https://www.lumind.online",
         "https://lumind.vercel.app",
-        "https://*.vercel.app"
+        "https://*.vercel.app",
+        "https://glowing-taiyaki-f18001.netlify.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
