@@ -153,14 +153,35 @@ def get_user_progress_summary(db: Session, user_id: int) -> dict:
         progress_percentage = int((completed_activities / total_activities) * 100)
 
     achievements = []
+    
+    # Conquistas por conteúdos completados
     if completed_activities >= 1:
         achievements.append("Explorador Curioso")
     if completed_activities >= 3:
-        achievements.append("Mestre dos Vídeos")
+        achievements.append("Aprendiz Dedicado")
     if completed_activities >= 5:
         achievements.append("Leitor Voraz")
+    if completed_activities >= 10:
+        achievements.append("Mestre do Conhecimento")
     
+    # Conquistas por tempo de estudo (em minutos)
+    if total_time_spent >= 60:  # 1 hora
+        achievements.append("Focado")
+    if total_time_spent >= 180:  # 3 horas
+        achievements.append("Persistente")
+    
+    # Conquistas por streak
     streak_days = user.streak_days if user else 0
+    if streak_days >= 3:
+        achievements.append("Sequência de 3 dias")
+    if streak_days >= 7:
+        achievements.append("Sequência de 7 dias")
+    
+    # Conquistas por tipos de conteúdo
+    if total_activities >= 5:
+        achievements.append("Versátil")
+    if completed_activities >= 15:
+        achievements.append("Gênio")
     
     return {
         "total_activities": total_activities,

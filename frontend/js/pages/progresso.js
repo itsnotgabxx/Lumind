@@ -157,10 +157,15 @@ function renderUserProgress(progress) {
         achievementsContainer.innerHTML = '';
         const emojiMap = {
             'Explorador Curioso': '🌍',
-            'Mestre dos Vídeos': '🎬',
+            'Aprendiz Dedicado': '📖',
             'Leitor Voraz': '📚',
-            'Gamer Dedicado': '🎮',
-            'Sequência de 7 dias': '🔥'
+            'Mestre do Conhecimento': '🎓',
+            'Focado': '🎯',
+            'Persistente': '💪',
+            'Sequência de 3 dias': '🔥',
+            'Sequência de 7 dias': '⭐',
+            'Versátil': '🌈',
+            'Gênio': '🧠'
         };
         
         progress.achievements.forEach(ach => {
