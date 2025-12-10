@@ -1,7 +1,7 @@
 // Configuração da API
 const API_BASE_URL = window.location.hostname === 'localhost' 
                        ? 'http://localhost:8000/api' 
-                       : 'https://lumind-backend.onrender.com/api';
+                       : 'https://lumind-backend-d21a.onrender.com/api';
 
 // Classe para gerenciar a API
 class LumindAPI {
