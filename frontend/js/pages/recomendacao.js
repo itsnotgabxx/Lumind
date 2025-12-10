@@ -204,7 +204,11 @@ function createContentCard(item) {
     const colorScheme = typeColors[item.type] || typeColors.video;
     const placeholderColors = ['8B5CF6', '3B82F6', '2DD4BF', 'FBBF24'];
     const randomColor = placeholderColors[Math.floor(Math.random() * placeholderColors.length)];
-    const placeholderImage = `https://placehold.co/400x250/${randomColor}/FFFFFF?text=${encodeURIComponent(item.title.substring(0,1))}`;
+    
+    // Remove emojis e pega primeira letra para o placeholder
+    const titleWithoutEmoji = item.title.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+    const firstLetter = titleWithoutEmoji.substring(0, 1) || '?';
+    const placeholderImage = `https://placehold.co/400x250/${randomColor}/FFFFFF?text=${encodeURIComponent(firstLetter)}`;
 
     card.innerHTML = `
         <!-- Imagem com Overlay -->
