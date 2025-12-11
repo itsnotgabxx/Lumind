@@ -294,7 +294,7 @@ function createContentCard(item) {
             </div>
 
             <!-- Botão de Ação -->
-            <button class="w-full btn-primary text-sm py-2.5 btn-explorar-conteudo group-hover:shadow-lg transition-all"
+            <button class="w-full btn-primary text-sm py-2.5 btn-explorar-conteudo group-hover:shadow-lg transition-all flex-shrink-0 whitespace-nowrap min-h-[42px] flex items-center justify-center"
                     data-content-id="${item.id}"
                     data-content-title="${item.title}">
                 <i class="fas fa-play-circle mr-2"></i>
